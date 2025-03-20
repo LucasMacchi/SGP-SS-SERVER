@@ -16,7 +16,4 @@ export default class registerUser {
     @IsNotEmpty()
     @IsNumber()
     rol: number
-
-    @IsBoolean()
-    activated: boolean
 }

@@ -1,14 +1,17 @@
-import { Controller, Get, Patch, Post, Param } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Param, Body } from '@nestjs/common';
+import pedidoDto from 'src/dto/pedidoDto';
+import { Pedido } from '../pedido';
 
 @Controller('pedido')
 export class PedidoController {
+    constructor(private pedido: Pedido) {}
     @Get('all')
     getAllPedidos () {
 
     }
     @Post('add')
-    addPedido () {
-
+    async addPedido (@Body() body : pedidoDto) {
+        return await this.pedido.postPedido(body.service_id, body.client_id, body.user_id, body.insumos)
     }
     @Patch('delivered/:id')
     deliveredSt (@Param('id') id: string) {

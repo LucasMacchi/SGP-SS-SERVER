@@ -1,27 +1,26 @@
 import { IsNotEmpty, IsNumber, IsString, IsArray } from "class-validator";
 
+export interface IInsumo {
+    insumo_des: string,
+    amount: number,
+    cod_insumo: number
+}
+
 export default class pedidoDto {
-    @IsString()
-    @IsNotEmpty()
-    state: 'Pendiente' | 'Aprobado' | 'Cancelado' | 'Rechazado' | 'Entregado'
 
-    @IsNumber() 
+    @IsNumber()
     @IsNotEmpty()
-    numero: number
+    user_id: number
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    date_requested: string
+    service_id: number
 
-    @IsString()
+    @IsNumber()
     @IsNotEmpty()
-    requester: string
-
-    @IsString()
-    @IsNotEmpty()
-    cco: string
+    client_id: number
 
     @IsArray()
     @IsNotEmpty()
-    insumos: []
+    insumos: IInsumo[]
 }

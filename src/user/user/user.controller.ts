@@ -1,26 +1,63 @@
-import { Controller, Get, Post, Patch, Req, Body } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Body, UnauthorizedException, Req, UseGuards } from '@nestjs/common';
 import registerUser from 'src/dto/userDto';
+import loginDto from 'src/dto/loginDto';
+import { UserService } from '../user';
+import { JwtService } from '@nestjs/jwt';
+import { userGuard } from '../userAuth.guard';
+
+
 @Controller('user')
 export class UserController {
+    constructor(
+        private userService: UserService, 
+        private JwtService: JwtService
+    ) {}
+    @UseGuards(userGuard)
     @Get('all')
-    getAllUsers () {
-
+    async getAllUsers (@Req() rq: Request) {
+        if(rq['user']['rol'] === 1) {
+            return await this.userService.getAll()
+        }
+        else throw new UnauthorizedException()
     }
     @Post('login')
-    loginUser () {
-
+    async loginUser (@Body() body: loginDto) {
+        const user = await this.userService.login(body.username)
+        if(user[0] && user[0]['activated']) {
+            const payload = {user: body.username, rol: user[0]['rol']}
+            const token = this.JwtService.sign(payload)
+            return token
+            
+        }
+        else throw new UnauthorizedException()
     }
+    @UseGuards(userGuard)
     @Post('register')
-    registerUser (@Body() body: registerUser) {
-        return body
-    }
-    @Patch('activar')
-    activarUser () {
+    async registerUser (@Body() body: registerUser, @Req() rq: Request) {
+        if(rq['user']['rol'] === 1){
+            await this.userService.createUser(body.username, body.first_name, body.last_name, body.rol)
+            return 'Usuario ' + body.username + ' creado'
+        }
+        throw new UnauthorizedException()
 
     }
-    @Patch('desactivar')
-    desactivarUser () {
-        
+    @UseGuards(userGuard)
+    @Patch('activar/:user')
+    async activarUser (@Param('user') user: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 1) {
+            await this.userService.activateUser(user)
+            return 'Usuario ' + user + ' activado'
+        }
+        throw new UnauthorizedException()
+    }
+    @UseGuards(userGuard)
+    @Patch('desactivar/:user')
+    async desactivarUser (@Param('user') user: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 1) {
+            await this.userService.deactivateUser(user)
+            return 'Usuario ' + user + ' desactivado'
+        }
+        throw new UnauthorizedException()
     }
 
 }
