@@ -11,6 +11,7 @@ Este es el servidor, tiene como proposito la organizacion y formateo de datos qu
 - NEST JS
 - MYSQL
 - TYPESCRIPT
+- SQL
 
 ## Project setup
 
@@ -30,3 +31,29 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+## ENDPOINTS
+
+### USUARIO
+- AUTH (ADMIN) GET user/all --> Devuelve todos los usuarios
+- AUTH () POST user/login --> body (username: string) Devuelve un JWT
+- AUTH (ADMIN) POST user/register --> body (username: string, first_name: string, last_name: string, rol: number) Crea un usuario desactivado
+- AUTH (ADMIN) PATCH user/activate/:username --> Param (username: string) Activa un usuario
+- AUTH (ADMIN) PATCH user/desactivate/:username --> Param (username: string) Desactiva un usuario
+
+### PEDIDOS
+- AUTH (ANY) GET pedido/all --> Devuelve todos los pedidos
+- AUTH (ANY) POST pedido/add --> body(requester: string, service_id: number, client_id: number, user_id: number, insumos: array) Crea una orden y sus subsecuentes detalles
+- AUTH (ANY) PATCH pedido/delivered/:id
+- AUTH (ANY) PATCH pedido/cancel/:id
+- AUTH (ADMINISTRATIVO) PATCH pedido/aprove/:id
+- AUTH (ADMINISTRATIVO) PATCH pedido/reject/:id
+- AUTH (ADMINISTRATIVO) PATCH pedido/archive/:id
+
+
+### DATA
+- AUTH (ANY) GET data/cco --> Trae todos los servicios
+- AUTH (ANY) GET data/insumos --> Trae todos los insumos
+- AUTH () GET data/ping --> Pingea el server
+
+
