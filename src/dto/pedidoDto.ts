@@ -12,6 +12,10 @@ export default class pedidoDto {
     @IsNotEmpty()
     user_id: number
 
+    @IsString()
+    @IsNotEmpty()
+    requester: string
+
     @IsNumber()
     @IsNotEmpty()
     service_id: number

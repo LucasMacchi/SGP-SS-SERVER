@@ -1,37 +1,49 @@
-import { Controller, Get, Patch, Post, Param, Body } from '@nestjs/common';
+import { Controller, Get, Patch, Post, Param, Body, UnauthorizedException, UseGuards, Req } from '@nestjs/common';
 import pedidoDto from 'src/dto/pedidoDto';
 import { Pedido } from '../pedido';
+import { userGuard } from 'src/user/userAuth.guard';
 
 @Controller('pedido')
 export class PedidoController {
     constructor(private pedido: Pedido) {}
+    @UseGuards(userGuard)
     @Get('all')
-    getAllPedidos () {
-
+    async getAllPedidos () {
+        return await this.pedido.getAllPedidos()
     }
+    @UseGuards(userGuard)
     @Post('add')
     async addPedido (@Body() body : pedidoDto) {
-        return await this.pedido.postPedido(body.service_id, body.client_id, body.user_id, body.insumos)
+        return await this.pedido.postPedido(body.requester, body.service_id, body.client_id, body.user_id, body.insumos)
     }
+    @UseGuards(userGuard)
     @Patch('delivered/:id')
-    deliveredSt (@Param('id') id: string) {
-        
+    async deliveredSt (@Param('id') id: string) {
+        return await this.pedido.delivered(parseInt(id))
     }
+    @UseGuards(userGuard)
     @Patch('cancel/:id')
-    cancelSt (@Param('id') id: string) {
-        return 'res '+ id
+    async cancelSt (@Param('id') id: string) {
+        return await this.pedido.cancel(parseInt(id))
+
     }
+    @UseGuards(userGuard)
     @Patch ('aprove/:id')
-    aproveSt (@Param('id') id: string) {
-
+    async aproveSt (@Param('id') id: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 2) return await this.pedido.aprove(parseInt(id))
+        else throw new UnauthorizedException()
     }
+    @UseGuards(userGuard)
     @Patch ('reject/:id')
-    rejectSt (@Param('id') id: string) {
-
+    async rejectSt (@Param('id') id: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 2) return await this.pedido.reject(parseInt(id))
+        else throw new UnauthorizedException()
     }
+    @UseGuards(userGuard)
     @Patch ('archive/:id') 
-    archive (@Param('id') id: string) {
-
+    async archive (@Param('id') id: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 2) return await this.pedido.archive(parseInt(id))
+            else throw new UnauthorizedException()
     }
 
 }
