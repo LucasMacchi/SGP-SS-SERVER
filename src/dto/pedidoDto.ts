@@ -3,14 +3,14 @@ import { IsNotEmpty, IsNumber, IsString, IsArray } from "class-validator";
 export interface IInsumo {
     insumo_des: string,
     amount: number,
-    cod_insumo: number
+    cod_insumo?: number
 }
 
 export default class pedidoDto {
 
     @IsNumber()
     @IsNotEmpty()
-    user_id: number
+    usuario_id: number
 
     @IsString()
     @IsNotEmpty()

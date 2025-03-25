@@ -23,6 +23,7 @@ export default function poolReturner () {
         queueLimit: 0,
         enableKeepAlive: true,
         keepAliveInitialDelay: 0,
-      });
+    });
+
     return pool      
 }

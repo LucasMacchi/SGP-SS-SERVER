@@ -14,7 +14,7 @@ export class PedidoController {
     @UseGuards(userGuard)
     @Post('add')
     async addPedido (@Body() body : pedidoDto) {
-        return await this.pedido.postPedido(body.requester, body.service_id, body.client_id, body.user_id, body.insumos)
+        return await this.pedido.postPedido(body.requester, body.service_id, body.client_id, body.usuario_id, body.insumos)
     }
     @UseGuards(userGuard)
     @Patch('delivered/:id')
@@ -30,20 +30,20 @@ export class PedidoController {
     @UseGuards(userGuard)
     @Patch ('aprove/:id')
     async aproveSt (@Param('id') id: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 2) return await this.pedido.aprove(parseInt(id))
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.aprove(parseInt(id))
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)
     @Patch ('reject/:id')
     async rejectSt (@Param('id') id: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 2) return await this.pedido.reject(parseInt(id))
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.reject(parseInt(id))
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)
     @Patch ('archive/:id') 
     async archive (@Param('id') id: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 2) return await this.pedido.archive(parseInt(id))
-            else throw new UnauthorizedException()
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.archive(parseInt(id))
+        else throw new UnauthorizedException()
     }
 
 }

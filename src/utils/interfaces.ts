@@ -9,8 +9,7 @@ export interface IPedido {
     insumos: IInsumo[]
 }
 export interface IInsumo {
-    cod: number,
-    name: string,
+    insumo_des: string,
     amount: number
 }
 export interface IUser {

@@ -23,8 +23,10 @@ export class UserController {
     @Post('login')
     async loginUser (@Body() body: loginDto) {
         const user = await this.userService.login(body.username)
+        console.log("Username: ",user)
         if(user[0] && user[0]['activated']) {
-            const payload = {user: body.username, rol: user[0]['rol']}
+            const payload = {user: body.username, rol: user[0]['rol'], first_name: user[0]['first_name'], 
+                last_name: user[0]['last_name'], usuario_id: user[0]['usuario_id'], email: user[0]['email']}
             const token = this.JwtService.sign(payload)
             return token
             
@@ -35,7 +37,7 @@ export class UserController {
     @Post('register')
     async registerUser (@Body() body: registerUser, @Req() rq: Request) {
         if(rq['user']['rol'] === 1){
-            await this.userService.createUser(body.username, body.first_name, body.last_name, body.rol)
+            await this.userService.createUser(body.username, body.first_name, body.last_name, body.rol, body.email)
             return 'Usuario ' + body.username + ' creado'
         }
         throw new UnauthorizedException()
