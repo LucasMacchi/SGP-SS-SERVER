@@ -46,4 +46,11 @@ export class PedidoController {
         else throw new UnauthorizedException()
     }
 
+    @UseGuards(userGuard)
+    @Patch('ready/:id')
+    async readyOrder (@Param('id') id: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 4 || rq['user']['rol'] === 1) return await this.pedido.ready(parseInt(id))
+        else throw new UnauthorizedException()
+    }
+
 }

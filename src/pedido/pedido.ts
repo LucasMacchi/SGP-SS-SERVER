@@ -60,6 +60,13 @@ export class Pedido {
         conn.destroy()
         return "Orden "+orId+ " Rechazado."
     }
+    async ready (orId: number) {
+        const sql = `update glpi_sgp_orders gso set state = "Listo" where order_id = ${orId}`
+        const conn = await poolReturner().getConnection()
+        await conn.query(sql)
+        conn.destroy()
+        return "Orden "+orId+ " lista."
+    }
     async cancel (orId: number) {
         const sql = `update glpi_sgp_orders gso set state = "Cancelado" where order_id = ${orId}`
         const conn = await poolReturner().getConnection()
