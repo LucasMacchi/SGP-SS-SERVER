@@ -2,6 +2,7 @@ import { Controller, Get,
     Req, UseGuards } from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
+
 @Controller('data')
 export class DataController {
     constructor(private DataProvider: DataProvider) {}
@@ -9,6 +10,10 @@ export class DataController {
     @Get('ping')
     ping(): string {
         return "Server pinged at "+ new Date()
+    }
+    @Get('email')
+    async emailTest() {
+        await this.DataProvider.mailerTest()
     }
     @UseGuards(userGuard)
     @Get('cco')

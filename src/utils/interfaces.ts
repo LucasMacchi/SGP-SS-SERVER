@@ -19,3 +19,11 @@ export interface IUser {
     rol: number,
     activated: boolean
 }
+export interface IemailMsg {
+    subject: string,
+    msg: string
+}
+
+export interface IemailSQL {
+    email: string
+}
