@@ -15,23 +15,21 @@ export class Pedido {
             const sql_pedido = `insert glpi_sgp_orders 
             (state, numero, date_requested, service_id, client_id, user_id, requester )
             values ("Pendiente", ${nro} , NOW(), ${service_id}, ${client_id}, ${usuario_id}, "${requester}" );`
-            const sql_data = `select order_id from glpi_sgp_orders where numero = ${nro} and user_id = ${usuario_id};`
+            const sql_data = `select gso.order_id, gso.requester, gso.service_id, gss.service_des, gso.numero from glpi_sgp_orders gso join glpi_sgp_services gss on gso.service_id = gss.service_id where numero = ${nro};`
             const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4 or gsu.username = '${requester}';`
-            const sql_cco = `select gss.service_des from glpi_sgp_services gss where gss.service_id = ${service_id} and gss.client_id = ${client_id};`
             await conn.query(sql_pedido)
             const [rows, fiels] = await conn.query(sql_data)
             const [rows1, fiels1] = await conn.query(sql_emails)
-            const [rows2, fiels2] = await conn.query(sql_cco)
             const orderId = rows[0].order_id
             insumos.forEach(async i => {
                 await conn.query(`insert glpi_sgp_order_detail (amount, order_id, insumo_des)
                     values (${i.amount}, ${orderId}, "${i.insumo_des}");`)
             });
             conn.release()
-            if(rows1.constructor === Array && rows2.constructor === Array) {
+            if(rows1.constructor === Array) {
                 const mail: IemailMsg = {
                     subject: `Nuevo Pedido Solicitado - SGP`,
-                    msg: `Pedido numero "${nro}" solcitado por el usuario "${requester}" al centro de costo ${service_id}-${rows2[0]['service_des']}`
+                    msg: `Pedido numero "${nro}" solcitado por el usuario "${requester}" al centro de costo ${service_id}-${rows[0]['service_des']}`
                 }
                 const adresses: string [] = rows1.map(r => r['email']) 
                 console.log(adresses)
@@ -76,7 +74,7 @@ export class Pedido {
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
-                subject: `Nuevo Pedido Solicitado - SGP`,
+                subject: `Pedido numero ${order['numero']} Aprobado - SGP`,
                 msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Aprobado.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
@@ -98,7 +96,7 @@ export class Pedido {
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
-                subject: `Nuevo Pedido Solicitado - SGP`,
+                subject: `Pedido numero ${order['numero']} Rechazado - SGP`,
                 msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Rechazado.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
@@ -120,7 +118,7 @@ export class Pedido {
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
-                subject: `Nuevo Pedido Solicitado - SGP`,
+                subject: `Pedido numero ${order['numero']} Listo - SGP`,
                 msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} esta Listo.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
@@ -142,7 +140,7 @@ export class Pedido {
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
-                subject: `Nuevo Pedido Solicitado - SGP`,
+                subject: `Pedido numero ${order['numero']} Cancelado - SGP`,
                 msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Cancelado.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
@@ -165,7 +163,7 @@ export class Pedido {
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
-                subject: `Nuevo Pedido Solicitado - SGP`,
+                subject: `Pedido numero ${order['numero']} Entregado - SGP`,
                 msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Entregado.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
