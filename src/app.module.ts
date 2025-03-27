@@ -11,7 +11,6 @@ dotenv.config();
 @Module({
   imports: [DataModule, UserModule, PedidoModule, MailerModule.forRoot({
     transport: {
-      service: 'Zoho',
       host: process.env.EMAIL_HOST ?? 'NaN',
       port: 465,
       secure: true,
