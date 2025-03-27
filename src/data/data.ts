@@ -10,7 +10,7 @@ export class DataProvider {
     async mailerTest () {
         const msg = "Este correo es de prueba!!"
         await this.mailer.sendMail({
-            from: `Lucas Macchi <lucasmacchi2506@zohomail.com>`,
+            from: `Lucas Macchi <gestionpedidos@solucionesyservicios.online>`,
             to: 'lucasmacchi25@gmail.com',
             subject: 'Test Mail from SGP S&S',
             text: msg
