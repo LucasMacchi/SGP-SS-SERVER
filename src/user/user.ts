@@ -3,6 +3,7 @@ import poolReturner from 'src/utils/connectionPool';
 import { MailerService } from '@nestjs-modules/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import mailer from 'src/utils/mailer';
+import clientReturner from 'src/utils/clientReturner';
 
 @Injectable()
 export class UserService {
@@ -11,11 +12,12 @@ export class UserService {
     //Crea un usuario con sql
     async createUser(username: string, first_name: string, last_name: string, 
         rol: number, email:string){
-        const conn = await poolReturner().getConnection()
+        const conn = clientReturner()
+        await conn.connect()
         const slq = `insert into glpi_sgp_users (username, first_name, last_name , rol, date_creation, activated, email ) 
-        value ('${username}', '${first_name}', '${last_name}', ${rol}, NOW(), false, '${email}' );`
+        values ('${username}', '${first_name}', '${last_name}', ${rol}, NOW(), false, '${email}' );`
         await conn.query(slq)
-        conn.destroy()
+        conn.end()
         const mail: IemailMsg = {
             subject: `Usuario ${username} Creado - SGP`,
             msg: `Creacion de usuario '${username}' a nombre de ${last_name} ${first_name} en el dia de la fecha.
@@ -25,12 +27,13 @@ export class UserService {
     }
     //Activa un usuario con sql
     async activateUser (usr: string) {
-        const conn = await poolReturner().getConnection()
-        const slq = `UPDATE glpi_sgp_users gsu set activated = true , date_activation = NOW() where username = "${usr}";`
+        const conn = clientReturner()
+        await conn.connect()
+        const slq = `UPDATE glpi_sgp_users gsu set activated = true , date_activation = NOW() where username = '${usr}';`
         const sql_data = `select * from glpi_sgp_users where username = '${usr}'`
         await conn.query(slq)
-        const [rows, fiels] = await conn.query(sql_data)
-        conn.destroy()
+        const rows = (await conn.query(sql_data)).rows
+        await conn.end()
         const email = rows[0]['email']
         const mail: IemailMsg = {
             subject: `Usuario ${usr} Alta - SGP`,
@@ -40,12 +43,13 @@ export class UserService {
     }
     //Desactivar un Usuario con sql
     async deactivateUser (usr: string) {
-        const conn = await poolReturner().getConnection()
-        const slq = `UPDATE glpi_sgp_users gsu set activated = false , date_deactivation = NOW() where username = "${usr}";`
+        const conn = clientReturner()
+        await conn.connect()
+        const slq = `UPDATE glpi_sgp_users gsu set activated = false , date_deactivation = NOW() where username = '${usr}';`
         const sql_data = `select * from glpi_sgp_users where username = '${usr}'`
-        const [rows, fiels] = await conn.query(sql_data)
+        const rows = (await conn.query(sql_data)).rows
         await conn.query(slq)
-        conn.destroy()
+        await conn.end()
         const email = rows[0]['email']
         const mail: IemailMsg = {
             subject: `Baja de Usuario ${usr} - SGP`,
@@ -55,18 +59,20 @@ export class UserService {
     }
     //Traer todos los usuarios por sql
     async getAll () {
-        const conn = await poolReturner().getConnection()
+        const conn = clientReturner()
+        await conn.connect()
         const sql = `select username, first_name, last_name, rol, activated from glpi_sgp_users gsu ;`
-        const [rows, fiels] = await conn.query(sql)
-        conn.destroy()
+        const rows = (await conn.query(sql)).rows
+        await conn.end()
         return rows
     }
     //Login
     async login (usr: string) {
-        const conn = await poolReturner().getConnection()
+        const conn = clientReturner()
+        await conn.connect()
         const sql = `select username, rol, first_name, last_name, activated, usuario_id, email from glpi_sgp_users gsu where gsu.username = '${usr}'; ;`
-        const [rows, fiels] = await conn.query(sql)
-        conn.destroy()
+        const rows = (await conn.query(sql)).rows
+        await conn.end()
         return rows
     }
 }
