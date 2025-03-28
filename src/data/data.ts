@@ -20,7 +20,7 @@ export class DataProvider {
         const conn = clientReturner()
         await conn.connect()
         const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3, gsi.descripcion) insumo from glpi_sgp_insumos gsi ;`
-        const rows = await conn.query(sql)
+        const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
     }
@@ -29,7 +29,7 @@ export class DataProvider {
         const conn = clientReturner()
         await conn.connect()
         const sql = `select * from glpi_sgp_services gss;`
-        const rows = await conn.query(sql)
+        const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
     }
