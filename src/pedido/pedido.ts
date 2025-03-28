@@ -55,6 +55,7 @@ export class Pedido {
                 o['insumos'] = insumos
                 return o
             })
+            await conn.end()
             return completeData
         }
         await conn.end()
