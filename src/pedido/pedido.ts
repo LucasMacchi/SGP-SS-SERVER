@@ -61,7 +61,8 @@ export class Pedido {
         await conn.end()
         throw new Error('Error getting data')
     }
-    async aprove (orId: number) {
+    async aprove (orId: number, details: number[]) {
+        console.log('DETAILS = ',details)
         const sql = `update glpi_sgp_orders gso set state = 'Aprobado' ,date_aproved = NOW() where order_id = ${orId}`
         const conn = clientReturner()
         await conn.connect()
@@ -70,13 +71,17 @@ export class Pedido {
         const rows = (await conn.query(sql_order)).rows
         const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4;`
         const rows1 = (await conn.query(sql_emails)).rows
+        details.forEach( async (de) => {
+            const slq_delete = `delete from glpi_sgp_order_detail where glpi_sgp_order_detail.detail_id  = ${de};`
+            await conn.query(slq_delete)
+        });
         if(rows.constructor === Array && rows1.constructor === Array){
             const order = rows[0]
             const adresses: string [] = rows1.map(r => r['email'])
             adresses.push(order['email'])
             const mail: IemailMsg = {
                 subject: `Pedido numero ${order['numero']} Aprobado - SGP`,
-                msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Aprobado.`
+                msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Aprobado. Algunos productos pudieron no ser aprobados.`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
         }
