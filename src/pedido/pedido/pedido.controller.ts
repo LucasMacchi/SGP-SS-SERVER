@@ -2,6 +2,7 @@ import { Controller, Get, Patch, Post, Param, Body, UnauthorizedException, UseGu
 import pedidoDto from 'src/dto/pedidoDto';
 import { Pedido } from '../pedido';
 import { userGuard } from 'src/user/userAuth.guard';
+import aproveDto from 'src/dto/aproveDto';
 
 @Controller('pedido')
 export class PedidoController {
@@ -29,8 +30,8 @@ export class PedidoController {
     }
     @UseGuards(userGuard)
     @Patch ('aprove/:id')
-    async aproveSt (@Param('id') id: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.aprove(parseInt(id))
+    async aproveSt (@Param('id') id: string, @Req() rq: Request, @Body() body : aproveDto) {
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.aprove(parseInt(id),body.details)
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)
