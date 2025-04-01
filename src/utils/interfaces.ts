@@ -27,3 +27,7 @@ export interface IemailMsg {
 export interface IemailSQL {
     email: string
 }
+export interface IDetailChange {
+    detail_id: number,
+    amount: number
+}

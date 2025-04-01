@@ -3,6 +3,7 @@ import pedidoDto from 'src/dto/pedidoDto';
 import { Pedido } from '../pedido';
 import { userGuard } from 'src/user/userAuth.guard';
 import aproveDto from 'src/dto/aproveDto';
+import rejectDto from 'src/dto/rejectDto';
 
 @Controller('pedido')
 export class PedidoController {
@@ -31,13 +32,13 @@ export class PedidoController {
     @UseGuards(userGuard)
     @Patch ('aprove/:id')
     async aproveSt (@Param('id') id: string, @Req() rq: Request, @Body() body : aproveDto) {
-        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.aprove(parseInt(id),body.details)
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1 || rq['user']['rol'] === 4) return await this.pedido.aprove(parseInt(id),body.details, body.comment, body.change)
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)
     @Patch ('reject/:id')
-    async rejectSt (@Param('id') id: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.reject(parseInt(id))
+    async rejectSt (@Param('id') id: string, @Req() rq: Request, @Body() body : rejectDto) {
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1 || rq['user']['rol'] === 4) return await this.pedido.reject(parseInt(id), body.comment)
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)
