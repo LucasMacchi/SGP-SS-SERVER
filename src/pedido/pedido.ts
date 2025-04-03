@@ -12,7 +12,9 @@ export class Pedido {
             const conn = clientReturner()
             await conn.connect()
             const nro = Math.floor(Math.random() * 100000).toString()
-            const sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive ) values ('Pendiente', ${nro} , NOW(), ${service_id}, ${client_id}, ${usuario_id}, '${requester}', false );`
+            const sql_user_data = `select gsu.email, gsu.first_name, gsu.last_name from  glpi_sgp_users gsu where gsu.usuario_id = ${usuario_id};`
+            const rowsU = (await conn.query(sql_user_data)).rows
+            const sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive, first_name, last_name, email ) values ('Pendiente', ${nro} , NOW(), ${service_id}, ${client_id}, ${usuario_id}, '${requester}', false, '${rowsU[0]['first_name']}', '${rowsU[0]['last_name']}', '${rowsU[0]['email']}' );`
             const sql_data = `select gso.order_id, gso.requester, gso.service_id, gss.service_des, gso.numero from glpi_sgp_orders gso join glpi_sgp_services gss on gso.service_id = gss.service_id where numero = '${nro}';`
             const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4 or gsu.username = '${requester}';`
             await conn.query(sql_pedido)

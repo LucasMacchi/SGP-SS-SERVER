@@ -19,7 +19,7 @@ export class DataProvider {
     async getInsumos () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3, gsi.descripcion) insumo from glpi_sgp_insumos gsi ;`
+        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi ;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
@@ -29,6 +29,18 @@ export class DataProvider {
         const conn = clientReturner()
         await conn.connect()
         const sql = `select * from glpi_sgp_services gss;`
+        const rows = (await conn.query(sql)).rows
+        conn.end()
+        return rows
+    }
+    //Traer todos los insumos pedidos por un cliente dentro de un rango de fecha, '20250310' tipo de fecha q acepta
+    async clientPdf (client_id: number, dateStart: string, dateEnd: string) {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = `select gsod.insumo_des, SUM(gsod.amount) from 
+                    glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id 
+                    where gso.client_id = ${client_id} and gso.date_requested <= '${dateEnd}' and gso.date_requested >= '${dateStart}'
+                    and gso.state = 'Entregado' group by gsod.insumo_des;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
