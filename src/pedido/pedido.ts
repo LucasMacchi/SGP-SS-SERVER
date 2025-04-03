@@ -137,6 +137,29 @@ export class Pedido {
         await conn.end()
         return "Orden "+orId+ " lista."
     }
+    async problem (orId: number, commnet: string) {
+        const sql = `update glpi_sgp_orders gso set state = 'Problemas' where order_id = ${orId}`
+        const conn = clientReturner()
+        await conn.connect()
+        await conn.query(sql)
+        //Datos para mandar correo
+        const sql_order = `select gso.date_requested, gso.numero, gso.requester, gsu.email from glpi_sgp_orders gso inner join glpi_sgp_users gsu on gso.user_id = gsu.usuario_id where gso.order_id = ${orId};`
+        const rows = (await conn.query(sql_order)).rows
+        const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4;`
+        const rows1 = (await conn.query(sql_emails)).rows
+        if(rows.constructor === Array && rows1.constructor === Array){
+            const order = rows[0]
+            const adresses: string [] = rows1.map(r => r['email'])
+            adresses.push(order['email'])
+            const mail: IemailMsg = {
+                subject: `Pedido numero ${order['numero']} Listo - SGP`,
+                msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} informa un problema para la entrega. \n-----------Comentarios-----------------\n${commnet}`
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
+        }
+        await conn.end()
+        return "Orden "+orId+ " lista."
+    }
     async cancel (orId: number) {
         const sql = `update glpi_sgp_orders gso set state = 'Cancelado' where order_id = ${orId};`
         const conn = clientReturner()

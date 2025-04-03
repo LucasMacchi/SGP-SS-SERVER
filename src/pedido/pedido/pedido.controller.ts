@@ -54,5 +54,10 @@ export class PedidoController {
         if(rq['user']['rol'] === 4 || rq['user']['rol'] === 1) return await this.pedido.ready(parseInt(id))
         else throw new UnauthorizedException()
     }
+    @UseGuards(userGuard)
+    @Patch ('problem/:id')
+    async problemOrder (@Param('id') id: string, @Body() body : rejectDto) {
+        return await this.pedido.problem(parseInt(id), body.comment)
+    }
 
 }
