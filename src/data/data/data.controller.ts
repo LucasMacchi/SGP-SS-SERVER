@@ -1,4 +1,5 @@
 import { Body, Controller, Get, 
+    Post, 
     Req, UseGuards } from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
@@ -29,7 +30,7 @@ export class DataController {
     }
 
     @UseGuards(userGuard)
-    @Get('client')
+    @Post('client')
     async getClientPdf (@Body() body: clienteDto) {
         return await this.DataProvider.clientPdf(body.client_id, body.dateStart, body.dateEnd)
     }
