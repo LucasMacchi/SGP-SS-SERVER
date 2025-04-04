@@ -1,5 +1,5 @@
 export interface IPedido {
-    state: 'Pendiente' | 'Aprobado' | 'Cancelado' | 'Rechazado' | 'Entregado',
+    state: 'Pendiente' | 'Aprobado' | 'Cancelado' | 'Rechazado' | 'Entregado' | 'Problemas',
     numero?: number,
     date_aproved?: string,
     date_requested: string,
@@ -26,4 +26,8 @@ export interface IemailMsg {
 
 export interface IemailSQL {
     email: string
+}
+export interface IDetailChange {
+    detail_id: number,
+    amount: number
 }
