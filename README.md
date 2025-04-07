@@ -46,14 +46,14 @@ $ npm run start:prod
 - AUTH (ANY) POST pedido/add --> body(requester: string, service_id: number, client_id: number, user_id: number, insumos: array) Crea una orden y sus subsecuentes detalles
 - AUTH (ANY) PATCH pedido/delivered/:id
 - AUTH (ANY) PATCH pedido/cancel/:id
-- AUTH (ADMINISTRATIVO) PATCH pedido/aprove/:id
-- AUTH (ADMINISTRATIVO) PATCH pedido/reject/:id
+- AUTH (DEPOSITO) PATCH pedido/aprove/:id
+- AUTH (ADMINISTRATIVO / DEPOSITO / ADMIN) PATCH pedido/reject/:id
+- AUTH (ANY) PATCH pedido/problem/:id
 - AUTH (ADMINISTRATIVO) PATCH pedido/archive/:id
-
 
 ### DATA
 - AUTH (ANY) GET data/cco --> Trae todos los servicios
 - AUTH (ANY) GET data/insumos --> Trae todos los insumos
 - AUTH () GET data/ping --> Pingea el server
-
+- AUTH (ANY) GET data/client --> Body (client_id: number, dateStart: string, dateEnd: string) Retorna los datos necesarios para la creacion del informe por cliente.
 
