@@ -8,13 +8,13 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
-console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD)
+console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD, process.env.EMAIL_HOST_PORT)
 
 @Module({
   imports: [DataModule, UserModule, PedidoModule, MailerModule.forRoot({
     transport: {
       host: process.env.EMAIL_HOST ?? 'NaN',
-      port: process.env.EMAIL_HOST ? parseInt(process.env.EMAIL_HOST): 465,
+      port: process.env.EMAIL_HOST_PORT ? parseInt(process.env.EMAIL_HOST_PORT): 465,
       secure: false,
       auth: {
         user: process.env.EMAIL_USERNAME ?? 'NaN',
