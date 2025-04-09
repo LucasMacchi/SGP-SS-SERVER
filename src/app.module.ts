@@ -17,7 +17,8 @@ dotenv.config();
       auth: {
         user: process.env.EMAIL_USERNAME ?? 'NaN',
         pass: process.env.EMAIL_PASSWORD ?? 'NaN'
-      }
+      },
+      tls: { rejectUnauthorized: false }
     }
   })],
   controllers: [AppController],
