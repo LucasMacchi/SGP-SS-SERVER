@@ -8,6 +8,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
+console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD)
+
 @Module({
   imports: [DataModule, UserModule, PedidoModule, MailerModule.forRoot({
     transport: {
