@@ -18,12 +18,16 @@ export class UserService {
         values ('${username}', '${first_name}', '${last_name}', ${rol}, NOW(), false, '${email}' );`
         await conn.query(slq)
         conn.end()
-        const mail: IemailMsg = {
-            subject: `Usuario ${username} Creado - SGP`,
-            msg: `Creacion de usuario '${username}' a nombre de ${last_name} ${first_name} en el dia de la fecha.
-            En breve se le activara la cuenta.`
+        try {
+            const mail: IemailMsg = {
+                subject: `Usuario ${username} Creado - SGP`,
+                msg: `Creacion de usuario '${username}' a nombre de ${last_name} ${first_name} en el dia de la fecha.
+                En breve se le activara la cuenta.`
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+        } catch (error) {
+            return 'Email fail'
         }
-        await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
     }
     //Activa un usuario con sql
     async activateUser (usr: string) {
@@ -34,12 +38,17 @@ export class UserService {
         await conn.query(slq)
         const rows = (await conn.query(sql_data)).rows
         await conn.end()
-        const email = rows[0]['email']
-        const mail: IemailMsg = {
-            subject: `Usuario ${usr} Alta - SGP`,
-            msg: `Alta de usuario '${usr}' en el dia de la fecha.`
+        try {
+            const email = rows[0]['email']
+            const mail: IemailMsg = {
+                subject: `Usuario ${usr} Alta - SGP`,
+                msg: `Alta de usuario '${usr}' en el dia de la fecha.`
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+        } catch (error) {
+            return 'Email fail'
         }
-        await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+
     }
     //Desactivar un Usuario con sql
     async deactivateUser (usr: string) {
@@ -50,12 +59,17 @@ export class UserService {
         const rows = (await conn.query(sql_data)).rows
         await conn.query(slq)
         await conn.end()
-        const email = rows[0]['email']
-        const mail: IemailMsg = {
-            subject: `Baja de Usuario ${usr} - SGP`,
-            msg: `Baja de usuario '${usr}' en el dia de la fecha.`
+        try {
+            const email = rows[0]['email']
+            const mail: IemailMsg = {
+                subject: `Baja de Usuario ${usr} - SGP`,
+                msg: `Baja de usuario '${usr}' en el dia de la fecha.`
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+        } catch (error) {
+            return 'Email fail'
         }
-        await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+
     }
     //Traer todos los usuarios por sql
     async getAll () {

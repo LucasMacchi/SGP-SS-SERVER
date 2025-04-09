@@ -14,7 +14,7 @@ console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD)
   imports: [DataModule, UserModule, PedidoModule, MailerModule.forRoot({
     transport: {
       host: process.env.EMAIL_HOST ?? 'NaN',
-      port: 465,
+      port: process.env.EMAIL_HOST ? parseInt(process.env.EMAIL_HOST): 465,
       secure: true,
       auth: {
         user: process.env.EMAIL_USERNAME ?? 'NaN',
