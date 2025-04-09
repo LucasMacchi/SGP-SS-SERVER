@@ -15,7 +15,7 @@ console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD)
     transport: {
       host: process.env.EMAIL_HOST ?? 'NaN',
       port: process.env.EMAIL_HOST ? parseInt(process.env.EMAIL_HOST): 465,
-      secure: true,
+      secure: false,
       auth: {
         user: process.env.EMAIL_USERNAME ?? 'NaN',
         pass: process.env.EMAIL_PASSWORD ?? 'NaN'
