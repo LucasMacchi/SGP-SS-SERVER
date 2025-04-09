@@ -40,6 +40,7 @@ $ npm run start:prod
 - AUTH (ADMIN) POST user/register --> body (username: string, first_name: string, last_name: string, rol: number) Crea un usuario desactivado
 - AUTH (ADMIN) PATCH user/activate/:username --> Param (username: string) Activa un usuario
 - AUTH (ADMIN) PATCH user/desactivate/:username --> Param (username: string) Desactiva un usuario
+- AUTH (ADMIN) PATCH user/email --> body (to_send, sender, msg) Manda un correo a un usuario
 
 ### PEDIDOS
 - AUTH (ANY) GET pedido/all --> Devuelve todos los pedidos

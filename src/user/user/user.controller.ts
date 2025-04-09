@@ -4,6 +4,7 @@ import loginDto from 'src/dto/loginDto';
 import { UserService } from '../user';
 import { JwtService } from '@nestjs/jwt';
 import { userGuard } from '../userAuth.guard';
+import emailerDto from 'src/dto/emailerDto';
 
 
 @Controller('user')
@@ -58,6 +59,16 @@ export class UserController {
         if(rq['user']['rol'] === 1) {
             await this.userService.deactivateUser(user)
             return 'Usuario ' + user + ' desactivado'
+        }
+        throw new UnauthorizedException()
+    }
+    @UseGuards(userGuard)
+    @Post('email')
+    async emailerUser (@Body() body: emailerDto, @Req() rq: Request) {
+        if(rq['user']['rol'] === 1) {
+            await this.userService.emailer(body.to_send, body.msg, body.sender)
+            console.log('Correo enviado a ',body.to_send)
+            return 'Correo creado'
         }
         throw new UnauthorizedException()
     }
