@@ -5,6 +5,7 @@ import { DataModule } from './data/data.module';
 import { UserModule } from './user/user.module';
 import { PedidoModule } from './pedido/pedido.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ThrottlerModule } from '@nestjs/throttler';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
@@ -20,7 +21,16 @@ dotenv.config();
       },
       tls: { rejectUnauthorized: false }
     }
-  })],
+  }),
+  ThrottlerModule.forRoot({
+    throttlers:[
+      {
+        ttl: 30,
+        limit: 5
+      }
+    ]
+  })
+],
   controllers: [AppController],
   providers: [AppService],
 })

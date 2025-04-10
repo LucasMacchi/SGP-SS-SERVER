@@ -1,6 +1,5 @@
 import { Body, Controller, Get, 
-    Post, 
-    Req, UseGuards } from '@nestjs/common';
+    Post, UseGuards } from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
@@ -16,6 +15,7 @@ export class DataController {
     @Get('email')
     async emailTest() {
         await this.DataProvider.mailerTest()
+        return 'Mail sent'
     }
     @UseGuards(userGuard)
     @Get('cco')

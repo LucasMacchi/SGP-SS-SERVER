@@ -31,7 +31,6 @@ export class Pedido {
                         msg: `Pedido numero "${nro}" solcitado por el usuario "${requester}" al centro de costo ${service_id}-${rows[0]['service_des']}`
                     }
                     const adresses: string [] = rows1.map(r => r['email']) 
-                    console.log(adresses)
                     await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
                     await conn.end()
                     return "Creado"

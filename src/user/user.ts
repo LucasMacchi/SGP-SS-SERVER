@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import poolReturner from 'src/utils/connectionPool';
 import { MailerService } from '@nestjs-modules/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import mailer from 'src/utils/mailer';
