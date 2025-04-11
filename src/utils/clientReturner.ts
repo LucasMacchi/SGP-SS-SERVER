@@ -15,7 +15,7 @@ export default function () {
         host: db_host,
         port: db_port,
         database: db_databse,
-        ssl: false//{rejectUnauthorized: false}
+        ssl: {rejectUnauthorized: false}
     })
     return client
 }
