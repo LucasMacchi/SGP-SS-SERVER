@@ -4,6 +4,7 @@ import loginDto from 'src/dto/loginDto';
 import { UserService } from '../user';
 import { JwtService } from '@nestjs/jwt';
 import { userGuard } from '../userAuth.guard';
+import emailerDto from 'src/dto/emailerDto';
 
 
 @Controller('user')
@@ -14,16 +15,12 @@ export class UserController {
     ) {}
     @UseGuards(userGuard)
     @Get('all')
-    async getAllUsers (@Req() rq: Request) {
-        if(rq['user']['rol'] === 1) {
-            return await this.userService.getAll()
-        }
-        else throw new UnauthorizedException()
+    async getAllUsers () {
+        return await this.userService.getAll()
     }
     @Post('login')
     async loginUser (@Body() body: loginDto) {
         const user = await this.userService.login(body.username)
-        console.log("Username: ",user)
         if(user[0] && user[0]['activated']) {
             const payload = {user: body.username, rol: user[0]['rol'], first_name: user[0]['first_name'], 
                 last_name: user[0]['last_name'], usuario_id: user[0]['usuario_id'], email: user[0]['email']}
@@ -60,6 +57,12 @@ export class UserController {
             return 'Usuario ' + user + ' desactivado'
         }
         throw new UnauthorizedException()
+    }
+    @UseGuards(userGuard)
+    @Post('email')
+    async emailerUser (@Body() body: emailerDto ) {
+        await this.userService.emailer(body.to_send, body.msg, body.sender)
+        return 'Correo creado'
     }
 
 }

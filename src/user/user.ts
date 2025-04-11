@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import poolReturner from 'src/utils/connectionPool';
 import { MailerService } from '@nestjs-modules/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import mailer from 'src/utils/mailer';
@@ -75,7 +74,7 @@ export class UserService {
     async getAll () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select username, first_name, last_name, rol, activated from glpi_sgp_users gsu ;`
+        const sql = `select username, first_name, last_name, rol, activated, email from glpi_sgp_users gsu ;`
         const rows = (await conn.query(sql)).rows
         await conn.end()
         return rows
@@ -88,5 +87,18 @@ export class UserService {
         const rows = (await conn.query(sql)).rows
         await conn.end()
         return rows
+    }
+    //Email sender to user
+    async emailer (to_send: string, msg: string, sender: string) {
+        try {
+            const email = to_send
+            const mail: IemailMsg = {
+                subject: `Mensaje de ${sender} - SGP`,
+                msg: msg
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+        } catch (error) {
+            return 'Email fail'
+        }
     }
 }

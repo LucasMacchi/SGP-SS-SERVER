@@ -1,0 +1,12 @@
+{
+    "categorias": [
+        "Cambios en el Stock.",
+        "Devoluciones.",
+        "Problema en el envio.",
+        "Falta de insumos o equivocados.",
+        "Insumos vencidos o fallados.",
+        "Cambios inesperados.",
+        "Error de sistema.",
+        "Otros."
+    ]
+}

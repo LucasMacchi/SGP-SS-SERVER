@@ -1,6 +1,6 @@
 import { Body, Controller, Get, 
-    Post, 
-    Req, UseGuards } from '@nestjs/common';
+    Param, 
+    Post, UseGuards } from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
@@ -16,6 +16,7 @@ export class DataController {
     @Get('email')
     async emailTest() {
         await this.DataProvider.mailerTest()
+        return 'Mail sent'
     }
     @UseGuards(userGuard)
     @Get('cco')
@@ -33,5 +34,17 @@ export class DataController {
     @Post('client')
     async getClientPdf (@Body() body: clienteDto) {
         return await this.DataProvider.clientPdf(body.client_id, body.dateStart, body.dateEnd)
+    }
+
+    @UseGuards(userGuard)
+    @Get('categories')
+    async getCategories () {
+        return await this.DataProvider.categoriesGetter()
+    }
+
+    //@UseGuards(userGuard)
+    @Get('reports/:id')
+    async getReports (@Param('id') id: string) {
+        return await this.DataProvider.reportGetters(id)
     }
 }

@@ -4,6 +4,7 @@ import { IDetailChange, IemailMsg } from 'src/utils/interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import mailer from 'src/utils/mailer';
 import clientReturner from 'src/utils/clientReturner';
+import reportDto from 'src/dto/reportDto';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
@@ -31,7 +32,6 @@ export class Pedido {
                         msg: `Pedido numero "${nro}" solcitado por el usuario "${requester}" al centro de costo ${service_id}-${rows[0]['service_des']}`
                     }
                     const adresses: string [] = rows1.map(r => r['email']) 
-                    console.log(adresses)
                     await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
                     await conn.end()
                     return "Creado"
@@ -176,7 +176,7 @@ export class Pedido {
                 const adresses: string [] = rows1.map(r => r['email'])
                 adresses.push(order['email'])
                 const mail: IemailMsg = {
-                    subject: `Pedido numero ${order['numero']} Listo - SGP`,
+                    subject: `Pedido numero ${order['numero']} informa Problemas - SGP`,
                     msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} informa un problema para la entrega. \n-----------Comentarios-----------------\n${commnet}`
                 }
                 await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
@@ -217,7 +217,7 @@ export class Pedido {
             return "Orden "+orId+ " Cancelado. Correo no enviado"
         }
     }
-    async delivered (orId: number) {
+    async delivered (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Entregado', date_delivered = NOW() where order_id = ${orId}`
         const conn = clientReturner()
         await conn.connect()
@@ -234,7 +234,7 @@ export class Pedido {
                 adresses.push(order['email'])
                 const mail: IemailMsg = {
                     subject: `Pedido numero ${order['numero']} Entregado - SGP`,
-                    msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Entregado.`
+                    msg: `Pedido numero "${order['numero']}" solcitado por el usuario "${order['requester']}" en la fecha ${order['date_requested']} fue Entregado.  \n-----------Comentarios-----------------\n${commnet}`
                 }
                 await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
             }
@@ -253,6 +253,30 @@ export class Pedido {
         await conn.query(sql)
         await conn.end()
         return "Orden "+orId+ " Archivado."
+    }
+
+    async addReport (report: reportDto){
+        const sql = `INSERT INTO public.glpi_sgp_reports
+        (descripcion, order_id, fecha, category, pedido_numero, user_id, fullname)
+        VALUES('${report.descripcion}',${report.order_id}, NOW(), '${report.category}', '${report.pedido_numero}', ${report.user_id},'${report.nombre_completo}');`
+        const conn = clientReturner()
+        await conn.connect()
+        await conn.query(sql)
+        const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4;`
+        const rows1 = (await conn.query(sql_emails)).rows
+        await conn.end()
+        try {
+            const adresses: string [] = rows1.map(r => r['email'])
+            adresses.push(report.email)
+            const mail: IemailMsg = {
+                subject: `${report.nombre_completo} realizo un reporte - ${report.category} - SGP`,
+                msg: `${report.nombre_completo} realizo un reporte para el pedido numero ${report.pedido_numero}:\n${report.descripcion}`
+            }
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
+        } catch (error) {
+            
+        }
+        return "Reporte creado en pedido numero "+report.pedido_numero
     }
 
 }

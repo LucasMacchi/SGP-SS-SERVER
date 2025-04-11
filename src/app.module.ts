@@ -5,10 +5,9 @@ import { DataModule } from './data/data.module';
 import { UserModule } from './user/user.module';
 import { PedidoModule } from './pedido/pedido.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ThrottlerModule } from '@nestjs/throttler';
 import dotenv from 'dotenv'; 
 dotenv.config();
-
-console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD, process.env.EMAIL_HOST_PORT)
 
 @Module({
   imports: [DataModule, UserModule, PedidoModule, MailerModule.forRoot({
@@ -22,7 +21,16 @@ console.log(process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD, process.env.
       },
       tls: { rejectUnauthorized: false }
     }
-  })],
+  }),
+  ThrottlerModule.forRoot({
+    throttlers:[
+      {
+        ttl: 30,
+        limit: 5
+      }
+    ]
+  })
+],
   controllers: [AppController],
   providers: [AppService],
 })

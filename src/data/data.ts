@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import clientReturner from 'src/utils/clientReturner';
+import categoriesJSON from './categories.json'
 @Injectable()
 export class DataProvider {
     constructor(private readonly mailer: MailerService) {}
@@ -44,5 +45,18 @@ export class DataProvider {
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
+    }
+    //Trae todos los reportes
+    async reportGetters (id: string) {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = `select * from glpi_sgp_reports where glpi_sgp_reports.pedido_numero = '${id}';`
+        const rows = (await conn.query(sql)).rows
+        conn.end()
+        return rows
+    }
+    //Trae todas las categorias para hacer un reporte
+    async categoriesGetter () {
+        return categoriesJSON
     }
 }
