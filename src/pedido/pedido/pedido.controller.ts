@@ -4,6 +4,8 @@ import { Pedido } from '../pedido';
 import { userGuard } from 'src/user/userAuth.guard';
 import aproveDto from 'src/dto/aproveDto';
 import rejectDto from 'src/dto/rejectDto';
+import reportDto from 'src/dto/reportDto';
+import commentDto from 'src/dto/commentDto';
 
 @Controller('pedido')
 export class PedidoController {
@@ -20,8 +22,9 @@ export class PedidoController {
     }
     @UseGuards(userGuard)
     @Patch('delivered/:id')
-    async deliveredSt (@Param('id') id: string) {
-        return await this.pedido.delivered(parseInt(id))
+    async deliveredSt (@Param('id') id: string, @Body() body : commentDto) {
+        console.log("AA ",body)
+        return await this.pedido.delivered(parseInt(id), body.comment)
     }
     @UseGuards(userGuard)
     @Patch('cancel/:id')
@@ -56,8 +59,13 @@ export class PedidoController {
     }
     @UseGuards(userGuard)
     @Patch ('problem/:id')
-    async problemOrder (@Param('id') id: string, @Body() body : rejectDto) {
+    async problemOrder (@Param('id') id: string, @Body() body : commentDto) {
         return await this.pedido.problem(parseInt(id), body.comment)
+    }
+    @UseGuards(userGuard)
+    @Post('report')
+    async postReport (@Body() body: reportDto) {
+        return await this.pedido.addReport(body)
     }
 
 }
