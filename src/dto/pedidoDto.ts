@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, IsArray } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, IsArray, IsBoolean } from "class-validator";
 
 export interface IInsumo {
     insumo_des: string,
@@ -23,6 +23,12 @@ export default class pedidoDto {
     @IsNumber()
     @IsNotEmpty()
     client_id: number
+
+    @IsBoolean()
+    prov: boolean
+
+    @IsString()
+    prov_des: string
 
     @IsArray()
     @IsNotEmpty()
