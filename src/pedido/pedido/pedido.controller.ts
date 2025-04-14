@@ -6,6 +6,7 @@ import aproveDto from 'src/dto/aproveDto';
 import rejectDto from 'src/dto/rejectDto';
 import reportDto from 'src/dto/reportDto';
 import commentDto from 'src/dto/commentDto';
+import changeProvDto from 'src/dto/changeProvDto';
 
 @Controller('pedido')
 export class PedidoController {
@@ -18,7 +19,12 @@ export class PedidoController {
     @UseGuards(userGuard)
     @Post('add')
     async addPedido (@Body() body : pedidoDto) {
-        return await this.pedido.postPedido(body.requester, body.service_id, body.client_id, body.usuario_id, body.insumos)
+        return await this.pedido.postPedido(body)
+    }
+    @UseGuards(userGuard)
+    @Patch('provisional/:id')
+    async provisionalChange (@Param('id') id: string, @Body() body : changeProvDto) {
+        return await this.pedido.changeProv(id, body)
     }
     @UseGuards(userGuard)
     @Patch('delivered/:id')
