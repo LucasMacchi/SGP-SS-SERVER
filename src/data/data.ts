@@ -41,7 +41,7 @@ export class DataProvider {
         const sql = `select gsod.insumo_des, SUM(gsod.amount) from 
                     glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id 
                     where gso.client_id = ${client_id} and gso.date_requested <= '${dateEnd}' and gso.date_requested >= '${dateStart}'
-                    and gso.state = 'Entregado' group by gsod.insumo_des;`
+                    and NOT gso.state = 'Pendiente' and NOT gso.state = 'Aprobado' and NOT gso.state = 'Rechazado' and NOT gso.state = 'Cancelado' group by gsod.insumo_des;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
