@@ -7,14 +7,15 @@ import rejectDto from 'src/dto/rejectDto';
 import reportDto from 'src/dto/reportDto';
 import commentDto from 'src/dto/commentDto';
 import changeProvDto from 'src/dto/changeProvDto';
+import filterDto from 'src/dto/filterDto';
 
 @Controller('pedido')
 export class PedidoController {
     constructor(private pedido: Pedido) {}
-    @UseGuards(userGuard)
-    @Get('all')
-    async getAllPedidos () {
-        return await this.pedido.getAllPedidos()
+    //@UseGuards(userGuard)
+    @Post('all')
+    async getAllPedidos (@Body() body : filterDto) {
+        return await this.pedido.getAllPedidos(body)
     }
     @UseGuards(userGuard)
     @Post('add')

@@ -6,6 +6,7 @@ import mailer from 'src/utils/mailer';
 import clientReturner from 'src/utils/clientReturner';
 import reportDto from 'src/dto/reportDto';
 import changeProvDto from 'src/dto/changeProvDto';
+import filterDto from 'src/dto/filterDto';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
@@ -53,10 +54,18 @@ export class Pedido {
             throw new Error(error)
         }
     }
-    async getAllPedidos () {
+    async getAllPedidos (filter: filterDto) {
+        const limit = filter.limit ? ` LIMIT ${filter.limit}` : ''
+        const client = filter.client ? ` and client_id = ${filter.client}` : ''
+        const service = filter.service ? ` and service_id = ${filter.service}` : ''
+        const requester = filter.requester ? ` and requester = '${filter.requester}'` : ''
+        const numero = filter.numero ? ` and numero = '${filter.numero}'` : ''
+        const state = filter.state ? ` and state = '${filter.state}'` : ''
+        const dateStart = filter.dateStart ? ` and date_requested >= '${filter.dateStart}'` : ''
+        const dateEnd = filter.dateEnd ? ` and date_requested <= '${filter.dateEnd}'` : ''
         const conn = clientReturner()
         await conn.connect()
-        const sql_pedidos = `select * from glpi_sgp_orders where archive = false;`
+        const sql_pedidos = `select * from glpi_sgp_orders where archive = false ${client}${service}${requester}${numero}${state}${dateStart}${dateEnd}${limit};`
         const rows = (await conn.query(sql_pedidos)).rows
         const sql_order_details = `select * from glpi_sgp_order_detail;`
         const rows1 = (await conn.query(sql_order_details)).rows
