@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import pedidoDto, { IInsumo } from 'src/dto/pedidoDto';
+import pedidoDto from 'src/dto/pedidoDto';
 import { IDetailChange, IemailMsg } from 'src/utils/interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import mailer from 'src/utils/mailer';
@@ -10,6 +10,18 @@ import filterDto from 'src/dto/filterDto';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
+
+    async postNewInsumo (id: number, insumo: string, amount: number) {
+        console.log(id, insumo, amount)
+        const conn = clientReturner()
+        const sql =`INSERT INTO public.glpi_sgp_order_detail
+        (amount, order_id, insumo_des)
+        VALUES( ${amount}, ${id}, '${insumo}');`
+        await conn.connect()
+        await conn.query(sql)
+        await conn.end()
+        return 'Insumo agregado'
+    }
     async postPedido (pedido: pedidoDto) {
         const conn = clientReturner()
         try {
