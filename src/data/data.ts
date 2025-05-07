@@ -29,7 +29,7 @@ export class DataProvider {
     async getCcos () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select * from glpi_sgp_services gss;`
+        const sql = `select * from glpi_sgp_services gss order by gss.service_id asc;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
