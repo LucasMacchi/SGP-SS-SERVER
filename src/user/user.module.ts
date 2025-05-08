@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { UserController } from './user/user.controller';
 import { UserService } from './user';
-import { JwtService } from '@nestjs/jwt';
 import { JwtModule } from '@nestjs/jwt';
 import dotenv from 'dotenv';
 dotenv.config();

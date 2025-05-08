@@ -1,0 +1,15 @@
+{
+    "categorias": [
+        "Error de la Aplicacion",
+        "Error al Cargar Datos",
+        "Error al generar informes",
+        "Error a iniciar sesion",
+        "Error al mostrar pedidos",
+        "Error para repetir pedidos",
+        "Error para generar reportes",
+        "Servicios/Cliente desactualizados",
+        "Pedido con errores",
+        "Lentitud",
+        "Solicitudes"
+    ]
+}
