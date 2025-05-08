@@ -35,13 +35,23 @@ export class DataProvider {
         return rows
     }
     //Traer todos los insumos pedidos por un cliente dentro de un rango de fecha, '20250310' tipo de fecha q acepta
-    async clientPdf (client_id: number, dateStart: string, dateEnd: string) {
+    async clientPdf (client_id: number, dateStart: string, dateEnd: string, user_id: number) {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select gsod.insumo_des, SUM(gsod.amount) from 
-                    glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id 
-                    where gso.client_id = ${client_id} and gso.date_requested <= '${dateEnd}' and gso.date_requested >= '${dateStart}'
-                    and NOT gso.state = 'Pendiente' and NOT gso.state = 'Aprobado' and NOT gso.state = 'Rechazado' and NOT gso.state = 'Cancelado' group by gsod.insumo_des;`
+        let sql = ``
+        if(user_id) {
+            sql = `select gsod.insumo_des, SUM(gsod.amount) from
+            glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id
+            where gso.client_id = ${client_id} and gso.date_requested <= '${dateEnd}' and gso.date_requested >= '${dateStart}' and gso.user_id = ${user_id}
+            and NOT gso.state = 'Pendiente' and NOT gso.state = 'Rechazado' and NOT gso.state = 'Cancelado' group by gsod.insumo_des;`
+        }
+        else {
+            sql = `select gsod.insumo_des, SUM(gsod.amount) from
+            glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id
+            where gso.client_id = ${client_id} and gso.date_requested <= '${dateEnd}' and gso.date_requested >= '${dateStart}'
+            and NOT gso.state = 'Pendiente' and NOT gso.state = 'Rechazado' and NOT gso.state = 'Cancelado' group by gsod.insumo_des;`
+        }
+
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows

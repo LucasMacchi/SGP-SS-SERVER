@@ -74,7 +74,7 @@ export class UserService {
     async getAll () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select username, first_name, last_name, rol, activated, email from glpi_sgp_users gsu ;`
+        const sql = `select username, first_name, last_name, rol, activated, email, usuario_id from glpi_sgp_users gsu ;`
         const rows = (await conn.query(sql)).rows
         await conn.end()
         return rows

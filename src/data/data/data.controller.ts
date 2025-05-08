@@ -33,7 +33,7 @@ export class DataController {
     @UseGuards(userGuard)
     @Post('client')
     async getClientPdf (@Body() body: clienteDto) {
-        return await this.DataProvider.clientPdf(body.client_id, body.dateStart, body.dateEnd)
+        return await this.DataProvider.clientPdf(body.client_id, body.dateStart, body.dateEnd,body.user_id)
     }
 
     @UseGuards(userGuard)
