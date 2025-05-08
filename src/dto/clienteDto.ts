@@ -12,4 +12,7 @@ export default class clienteDto {
     @IsString()
     @IsNotEmpty()
     dateEnd: string
+
+    @IsNumber()
+    user_id: number
 }
