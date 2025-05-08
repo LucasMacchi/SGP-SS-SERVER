@@ -87,7 +87,7 @@ export class Pedido {
         const dateEnd = filter.dateEnd ? ` and date_requested <= '${filter.dateEnd}'` : ''
         const conn = clientReturner()
         await conn.connect()
-        const sql_pedidos = `select * from glpi_sgp_orders where archive = false ${client}${service}${requester}${numero}${state}${dateStart}${dateEnd}${limit};`
+        const sql_pedidos = `select * from glpi_sgp_orders sgor where archive = false ${client}${service}${requester}${numero}${state}${dateStart}${dateEnd} order by sgor.date_requested asc ${limit};`
         const rows = (await conn.query(sql_pedidos)).rows
         const sql_order_details = `select * from glpi_sgp_order_detail;`
         const rows1 = (await conn.query(sql_order_details)).rows

@@ -4,6 +4,7 @@ import { Body, Controller, Get,
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
+import reportDto from 'src/dto/reportDto';
 
 @Controller('data')
 export class DataController {
@@ -42,9 +43,19 @@ export class DataController {
         return await this.DataProvider.categoriesGetter()
     }
 
-    //@UseGuards(userGuard)
+    @UseGuards(userGuard)
     @Get('reports/:id')
     async getReports (@Param('id') id: string) {
         return await this.DataProvider.reportGetters(id)
+    }
+    @UseGuards(userGuard)
+    @Get('errors')
+    async getErrorsCategories () {
+        return await this.DataProvider.reportsErrorsCategoriesGetter()
+    }
+    @UseGuards(userGuard)
+    @Post('errors')
+    async createErrorEmail (@Body() body: reportDto) {
+        return await this.DataProvider.emailer(body)
     }
 }

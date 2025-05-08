@@ -2,14 +2,22 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import clientReturner from 'src/utils/clientReturner';
 import categoriesJSON from './categories.json'
+import reportsErrorsJSON from './reports.json'
+import reportDto from 'src/dto/reportDto';
+import mailer from 'src/utils/mailer';
+import { IemailMsg } from 'src/utils/interfaces';
+import emailError from 'src/utils/emailError';
+
+const supportEmail = process.env.EMAIL_SUPPORT ?? ''
+
 @Injectable()
 export class DataProvider {
-    constructor(private readonly mailer: MailerService) {}
+    constructor(private readonly mailerServ: MailerService) {}
 
     //Test de email
     async mailerTest () {
         const msg = "Este correo es de prueba!!"
-        await this.mailer.sendMail({
+        await this.mailerServ.sendMail({
             from: `Lucas Macchi <gestionpedidos@solucionesyservicios.online>`,
             to: 'lucasmacchi25@gmail.com',
             subject: 'Test Mail from SGP S&S',
@@ -68,5 +76,21 @@ export class DataProvider {
     //Trae todas las categorias para hacer un reporte
     async categoriesGetter () {
         return categoriesJSON
+    }
+    //Trae todas las categorias para hacer un reporte de errores
+    async reportsErrorsCategoriesGetter () {
+        return reportsErrorsJSON
+    }
+    async emailer (body: reportDto) {
+        try {
+            const mail: IemailMsg = {
+                subject: `${body.category} - SGP`,
+                msg: emailError(body.descripcion,body.category,body.nombre_completo)
+            }
+            console.log(supportEmail)
+            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', supportEmail,body.category, mail.msg))
+        } catch (error) {
+            return 'Email fail'
+        }
     }
 }
