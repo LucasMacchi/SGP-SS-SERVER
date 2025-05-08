@@ -11,8 +11,18 @@ import filterDto from 'src/dto/filterDto';
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
 
+    async getPedido (id: number) {
+        const conn = clientReturner()
+        const sql = `SELECT * FROM public.glpi_sgp_orders where order_id  = ${id};`
+        await conn.connect()
+        const rows = (await conn.query(sql)).rows
+        const sql_order_details = `select * from glpi_sgp_order_detail where order_id  = ${id};`
+        const rows1 = (await conn.query(sql_order_details)).rows
+        rows[0]['insumos'] = rows1
+        await conn.end()
+        return rows
+    }
     async postNewInsumo (id: number, insumo: string, amount: number) {
-        console.log(id, insumo, amount)
         const conn = clientReturner()
         const sql =`INSERT INTO public.glpi_sgp_order_detail
         (amount, order_id, insumo_des)
