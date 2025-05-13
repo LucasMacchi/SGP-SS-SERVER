@@ -22,6 +22,14 @@ export class Pedido {
         await conn.end()
         return rows
     }
+    async deleteInsumo (detail_id: number) {
+        const conn = clientReturner()
+        const sql = `DELETE FROM public.glpi_sgp_order_detail WHERE detail_id=${detail_id};`
+        await conn.connect()
+        await conn.query(sql)
+        await conn.end()
+        return 'Insumo eliminado'
+    }
     async postNewInsumo (id: number, insumo: string, amount: number) {
         const conn = clientReturner()
         const sql =`INSERT INTO public.glpi_sgp_order_detail
