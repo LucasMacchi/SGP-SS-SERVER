@@ -1,4 +1,4 @@
-import { Controller, Patch, Post, Param, Body, UnauthorizedException, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Patch, Post, Param, Body, UnauthorizedException, UseGuards, Req, Get, Delete } from '@nestjs/common';
 import pedidoDto from 'src/dto/pedidoDto';
 import { Pedido } from '../pedido';
 import { userGuard } from 'src/user/userAuth.guard';
@@ -30,6 +30,11 @@ export class PedidoController {
     @Post('insumo/:id/:insumo/:amount')
     async insumoAdd (@Param('id') id: string, @Param('insumo') insumo: string, @Param('amount') amount: string) {
         return await this.pedido.postNewInsumo(parseInt(id), insumo, parseInt(amount))
+    }
+    @UseGuards(userGuard)
+    @Delete('insumo/:id')
+    async deleteInsumoFromOrder (@Param('id') id:string) {
+        return await this.pedido.deleteInsumo(parseInt(id))
     }
     @UseGuards(userGuard)
     @Patch('provisional/:id')
