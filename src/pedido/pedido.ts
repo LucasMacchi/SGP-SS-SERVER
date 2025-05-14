@@ -60,9 +60,10 @@ export class Pedido {
             const rows= (await conn.query(sql_data)).rows
             const rows1 = (await conn.query(sql_emails)).rows
             const orderId = rows[0].order_id            
-            pedido.insumos.forEach(async i => {
-                await conn.query(`insert into glpi_sgp_order_detail (amount, order_id, insumo_des) values (${i.amount}, ${orderId}, '${i.insumo_des}');`)
-            });
+            for(const i of pedido.insumos) {
+              await conn.query(`insert into glpi_sgp_order_detail (amount, order_id, insumo_des) values (${i.amount}, ${orderId}, '${i.insumo_des}');`)
+
+            }
             if(rows1.constructor === Array) {
                 try {
                     const mail: IemailMsg = {
