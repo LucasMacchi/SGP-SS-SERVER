@@ -7,6 +7,7 @@ import clientReturner from 'src/utils/clientReturner';
 import reportDto from 'src/dto/reportDto';
 import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
+import endCode from 'src/utils/endCode';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
@@ -54,15 +55,16 @@ export class Pedido {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const nro = Math.floor(Math.random() * 100000).toString()
+            const endC = endCode()
+            const nro = Math.floor(Math.random() * 100000).toString() + endC.month + endC.year;
             const sql_user_data = `select gsu.email, gsu.first_name, gsu.last_name from  glpi_sgp_users gsu where gsu.usuario_id = ${pedido.usuario_id};`
             const rowsU = (await conn.query(sql_user_data)).rows
             let sql_pedido: string = ``
             if(pedido.prov){
-                sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive, first_name, last_name, email, prov, prov_des ) values ('Pendiente', ${nro} , NOW(), ${pedido.service_id}, ${pedido.client_id}, ${pedido.usuario_id}, '${pedido.requester}', false, '${rowsU[0]['first_name']}', '${rowsU[0]['last_name']}', '${rowsU[0]['email']}',${pedido.prov},'${pedido.prov_des}' );`
+                sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive, first_name, last_name, email, prov, prov_des ) values ('Pendiente', '${nro}' , NOW(), ${pedido.service_id}, ${pedido.client_id}, ${pedido.usuario_id}, '${pedido.requester}', false, '${rowsU[0]['first_name']}', '${rowsU[0]['last_name']}', '${rowsU[0]['email']}',${pedido.prov},'${pedido.prov_des}' );`
             }
             else {
-                sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive, first_name, last_name, email ) values ('Pendiente', ${nro} , NOW(), ${pedido.service_id}, ${pedido.client_id}, ${pedido.usuario_id}, '${pedido.requester}', false, '${rowsU[0]['first_name']}', '${rowsU[0]['last_name']}', '${rowsU[0]['email']}' );`
+                sql_pedido = `insert into glpi_sgp_orders (state, numero, date_requested, service_id, client_id, user_id, requester, archive, first_name, last_name, email ) values ('Pendiente', '${nro}' , NOW(), ${pedido.service_id}, ${pedido.client_id}, ${pedido.usuario_id}, '${pedido.requester}', false, '${rowsU[0]['first_name']}', '${rowsU[0]['last_name']}', '${rowsU[0]['email']}' );`
             }
             const sql_data = `select gso.order_id, gso.requester, gso.service_id, gss.service_des, gso.numero from glpi_sgp_orders gso join glpi_sgp_services gss on gso.service_id = gss.service_id where numero = '${nro}';`
             const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4 or gsu.username = '${pedido.requester}';`
