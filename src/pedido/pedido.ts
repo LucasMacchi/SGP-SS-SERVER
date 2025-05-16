@@ -10,7 +10,7 @@ import filterDto from 'src/dto/filterDto';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
-
+    
     async getPedido (id: number) {
         const conn = clientReturner()
         const sql = `SELECT * FROM public.glpi_sgp_orders where order_id  = ${id};`
@@ -40,6 +40,16 @@ export class Pedido {
         await conn.end()
         return 'Insumo agregado'
     }
+    
+    async patchAmount (id: number, amount: number) {
+      const conn = clientReturner()
+      const sql = `UPDATE public.glpi_sgp_order_detail SET amount=${amount} WHERE detail_id=${id};`
+      await conn.connect()
+      await conn.query(sql)
+      await conn.end()
+      return 'Cantidad Modificada'
+    }
+    
     async postPedido (pedido: pedidoDto) {
         const conn = clientReturner()
         try {
@@ -62,7 +72,6 @@ export class Pedido {
             const orderId = rows[0].order_id            
             for(const i of pedido.insumos) {
               await conn.query(`insert into glpi_sgp_order_detail (amount, order_id, insumo_des) values (${i.amount}, ${orderId}, '${i.insumo_des}');`)
-
             }
             if(rows1.constructor === Array) {
                 try {
@@ -113,7 +122,7 @@ export class Pedido {
         await conn.end()
         throw new Error('Error getting data')
     }
-    async aprove (orId: number, details: number[], commnet: string, change: IDetailChange[]) {
+    async aprove (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Aprobado' ,date_aproved = NOW() where order_id = ${orId}`
         const conn = clientReturner()
         await conn.connect()
@@ -122,14 +131,6 @@ export class Pedido {
         const rows = (await conn.query(sql_order)).rows
         const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4;`
         const rows1 = (await conn.query(sql_emails)).rows
-        details.forEach( async (de) => {
-            const slq_delete = `delete from glpi_sgp_order_detail where glpi_sgp_order_detail.detail_id = ${de};`
-            await conn.query(slq_delete)
-        });
-        change.forEach(async (o) => {
-            const update_order_sql = `update glpi_sgp_order_detail gsod set amount = ${o.amount} where gsod.detail_id = ${o.detail_id};`
-            await conn.query(update_order_sql)
-        })
         try {
             if(rows.constructor === Array && rows1.constructor === Array){
                 const order = rows[0]
