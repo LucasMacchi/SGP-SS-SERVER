@@ -24,6 +24,23 @@ export class DataProvider {
             text: msg
         })
     }
+    //trae todos los legajos
+    async getLegajos (sector: string) {
+      const conn = clientReturner()
+      await conn.connect()
+      const sql = `select * from glpi_sgp_personal where sector = '${sector}';`
+      const rows = (await conn.query(sql)).rows
+      conn.end()
+      return rows
+    }
+    async getPersonal (id: number) {
+      const conn = clientReturner()
+      await conn.connect()
+      const sql = `select * from glpi_sgp_personal where legajo = '${id}';`
+      const rows = (await conn.query(sql)).rows[0]
+      conn.end()
+      return rows
+    }
     //Traer todos los insumos
     async getInsumos () {
         const conn = clientReturner()
