@@ -12,7 +12,7 @@ import filterDto from 'src/dto/filterDto';
 @Controller('pedido')
 export class PedidoController {
     constructor(private pedido: Pedido) {}
-    //@UseGuards(userGuard)
+    @UseGuards(userGuard)
     @Post('all')
     async getAllPedidos (@Body() body : filterDto) {
         return await this.pedido.getAllPedidos(body)
@@ -37,6 +37,11 @@ export class PedidoController {
         return await this.pedido.deleteInsumo(parseInt(id))
     }
     @UseGuards(userGuard)
+    @Patch('cantidad/:id/:cantidad')
+    async changeAmount (@Param('id') id:string, @Param('cantidad') amount:string) {
+      return await this.pedido.patchAmount(parseInt(id), parseFloat(amount))
+    }
+    @UseGuards(userGuard)
     @Patch('provisional/:id')
     async provisionalChange (@Param('id') id: string, @Body() body : changeProvDto) {
         return await this.pedido.changeProv(id, body)
@@ -56,7 +61,7 @@ export class PedidoController {
     @UseGuards(userGuard)
     @Patch ('aprove/:id')
     async aproveSt (@Param('id') id: string, @Req() rq: Request, @Body() body : aproveDto) {
-        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1 || rq['user']['rol'] === 4) return await this.pedido.aprove(parseInt(id),body.details, body.comment, body.change)
+        if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1 || rq['user']['rol'] === 4) return await this.pedido.aprove(parseInt(id), body.comment)
         else throw new UnauthorizedException()
     }
     @UseGuards(userGuard)

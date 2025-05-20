@@ -33,4 +33,22 @@ export default class pedidoDto {
     @IsArray()
     @IsNotEmpty()
     insumos: IInsumo[]
+    
+    @IsNumber()
+    legajo: number
+    
+    @IsString()
+    @IsNotEmpty()
+    first_name: string
+    
+    @IsString()
+    @IsNotEmpty()
+    last_name: string
+    
+    @IsString()
+    @IsNotEmpty()
+    email: string
+    
+    @IsString()
+    service_des: string
 }

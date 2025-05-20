@@ -14,6 +14,14 @@ export class DataController {
     ping(): string {
         return "Server pinged at "+ new Date()
     }
+    @Get('legajos/:sector')
+    async getLegajos(@Param('sector') sector: string) {
+      return await this.DataProvider.getLegajos(sector)
+    }
+    @Get('legajo/:id')
+    async getPersona(@Param('id') id: string) {
+      return await this.DataProvider.getPersonal(parseInt(id))
+    }
     @Get('email')
     async emailTest() {
         await this.DataProvider.mailerTest()
