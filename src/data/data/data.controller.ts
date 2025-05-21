@@ -1,10 +1,12 @@
 import { Body, Controller, Get, 
     Param, 
-    Post, UseGuards } from '@nestjs/common';
+    Post, UseGuards, Delete } from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
 import reportDto from 'src/dto/reportDto';
+import personalDto from 'src/dto/personalDto';
+import { parse } from 'node:path/win32';
 
 @Controller('data')
 export class DataController {
@@ -13,6 +15,14 @@ export class DataController {
     @Get('ping')
     ping(): string {
         return "Server pinged at "+ new Date()
+    }
+    @Post('personal')
+    async postPersonal (@Body() body: personalDto) {
+      return await this.DataProvider.createPersonal(body)
+    }
+    @Delete('personal/:legajo')
+    async deletePersonal (@Param('legajo') legajo: string) {
+      return await this.DataProvider.deletePersonal(parseInt(legajo))
     }
     @Get('legajos/:sector')
     async getLegajos(@Param('sector') sector: string) {

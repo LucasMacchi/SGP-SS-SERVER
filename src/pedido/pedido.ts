@@ -86,10 +86,6 @@ export class Pedido {
               sql_fields += `,prov,prov_des`
               sql_values += `,${pedido.prov},'${pedido.prov_des}'`
             }
-            if(pedido.legajo){
-              sql_fields += `,legajo`
-              sql_values += `,${pedido.legajo}`
-            }
             const sql_pedido = `INSERT INTO public.glpi_sgp_orders (${sql_fields}) values (${sql_values}) RETURNING order_id`
             const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4 or gsu.username = '${pedido.requester}';`
             const order_id = (await conn.query(sql_pedido)).rows[0]['order_id']
@@ -325,6 +321,15 @@ export class Pedido {
         await conn.query(sql)
         await conn.end()
         return "Orden "+orId+ " Archivado."
+    }
+    
+    async setLegajo (id: number, legajo: number) {
+      const sql = `update glpi_sgp_orders gso set legajo = ${legajo} where order_id = ${id}`
+      const conn = clientReturner()
+      await conn.connect()
+      await conn.query(sql)
+      await conn.end()
+      return "Orden vincualdo con legajo "+legajo
     }
 
     async addReport (report: reportDto){

@@ -34,9 +34,6 @@ export default class pedidoDto {
     @IsNotEmpty()
     insumos: IInsumo[]
     
-    @IsNumber()
-    legajo: number
-    
     @IsString()
     @IsNotEmpty()
     first_name: string
