@@ -7,6 +7,7 @@ import reportDto from 'src/dto/reportDto';
 import mailer from 'src/utils/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import emailError from 'src/utils/emailError';
+import personalDto from 'src/dto/personalDto';
 
 const supportEmail = process.env.EMAIL_SUPPORT ?? ''
 
@@ -93,6 +94,24 @@ export class DataProvider {
     //Trae todas las categorias para hacer un reporte
     async categoriesGetter () {
         return categoriesJSON
+    }
+    async createPersonal (personal: personalDto) {
+      const sql = `INSERT INTO public.glpi_sgp_personal
+      (legajo, fullname, cuil, sector)
+      VALUES(${personal.legajo}, '${personal.fullname}', ${personal.cuil}, '${personal.sector}');`
+      const conn = clientReturner()
+      await conn.connect()
+      await conn.query(sql)
+      conn.end()
+      return 'Personal agregado'
+    }
+    async deletePersonal (id: number) {
+      const sql = `DELETE FROM public.glpi_sgp_personal WHERE legajo = ${id};`
+      const conn = clientReturner()
+      await conn.connect()
+      await conn.query(sql)
+      conn.end()
+      return 'Personal eliminado'
     }
     //Trae todas las categorias para hacer un reporte de errores
     async reportsErrorsCategoriesGetter () {

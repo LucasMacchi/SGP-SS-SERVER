@@ -76,6 +76,12 @@ export class PedidoController {
         if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.archive(parseInt(id))
         else throw new UnauthorizedException()
     }
+    @UseGuards(userGuard)
+    @Patch ('legajo/:id/:legajo') 
+    async legajo (@Param('id') id: string, @Param('legajo') legajo: string, @Req() rq: Request) {
+        if(rq['user']['rol'] === 4 || rq['user']['rol'] === 1) return await this.pedido.setLegajo(parseInt(id),parseInt(legajo))
+        else throw new UnauthorizedException()
+    }
 
     @UseGuards(userGuard)
     @Patch('ready/:id')
