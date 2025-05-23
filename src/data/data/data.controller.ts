@@ -42,12 +42,19 @@ export class DataController {
     async getAllCco () {
         return await this.DataProvider.getCcos()
     }
-
+/*
     @UseGuards(userGuard)
     @Get('insumos/:cat/:rub')
     async getAllIns 
     (@Param('cat') cat: string, @Param('rub') rub: string) {
         return await this.DataProvider.getInsumos(cat, rub)
+    }
+        */
+    @UseGuards(userGuard)
+    @Get('insumos')
+    async getAllIns 
+    () {
+        return await this.DataProvider.getInsumos()
     }
 
     @UseGuards(userGuard)

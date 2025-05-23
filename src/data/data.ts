@@ -58,11 +58,21 @@ export class DataProvider {
       conn.end()
       return rows
     }
+    /*
     //Traer todos los insumos
     async getInsumos (cat: string, rub: string) {
         const conn = clientReturner()
         await conn.connect()
         const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi where rubro = '${rub}' and categoria = '${cat}';`
+        const rows = (await conn.query(sql)).rows
+        conn.end()
+        return rows
+    }
+    */
+    async getInsumos () {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
