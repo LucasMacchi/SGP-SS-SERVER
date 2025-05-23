@@ -44,9 +44,10 @@ export class DataController {
     }
 
     @UseGuards(userGuard)
-    @Get('insumos')
-    async getAllIns () {
-        return await this.DataProvider.getInsumos()
+    @Get('insumos/:cat/:rub')
+    async getAllIns 
+    (@Param('cat') cat: string, @Param('rub') rub: string) {
+        return await this.DataProvider.getInsumos(cat, rub)
     }
 
     @UseGuards(userGuard)
@@ -75,5 +76,10 @@ export class DataController {
     @Post('errors')
     async createErrorEmail (@Body() body: reportDto) {
         return await this.DataProvider.emailer(body)
+    }
+    @UseGuards(userGuard)
+    @Get('categories/insumos')
+    async getInsumosCategories () {
+        return await this.DataProvider.getInsCategories()
     }
 }
