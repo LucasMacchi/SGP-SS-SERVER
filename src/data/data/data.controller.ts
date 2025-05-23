@@ -42,10 +42,18 @@ export class DataController {
     async getAllCco () {
         return await this.DataProvider.getCcos()
     }
-
+/*
+    @UseGuards(userGuard)
+    @Get('insumos/:cat/:rub')
+    async getAllIns 
+    (@Param('cat') cat: string, @Param('rub') rub: string) {
+        return await this.DataProvider.getInsumos(cat, rub)
+    }
+        */
     @UseGuards(userGuard)
     @Get('insumos')
-    async getAllIns () {
+    async getAllIns 
+    () {
         return await this.DataProvider.getInsumos()
     }
 
@@ -75,5 +83,10 @@ export class DataController {
     @Post('errors')
     async createErrorEmail (@Body() body: reportDto) {
         return await this.DataProvider.emailer(body)
+    }
+    @UseGuards(userGuard)
+    @Get('categories/insumos')
+    async getInsumosCategories () {
+        return await this.DataProvider.getInsCategories()
     }
 }

@@ -34,6 +34,22 @@ export class DataProvider {
       conn.end()
       return rows
     }
+    async getInsCategories () {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = `select gsi.categoria from glpi_sgp_insumos gsi group by categoria;`
+        const sql2 = `select gsi.rubro from glpi_sgp_insumos gsi group by gsi.rubro;`
+        const rows = (await conn.query(sql)).rows
+        const rows2 = (await conn.query(sql2)).rows
+        conn.end()
+        const cat = rows.map(c => c['categoria'])
+        const rub = rows2.map(c => c['rubro'])
+        const data = {
+            categorias: cat,
+            rubros: rub
+        }
+        return data
+    }
     async getPersonal (id: number) {
       const conn = clientReturner()
       await conn.connect()
@@ -42,11 +58,21 @@ export class DataProvider {
       conn.end()
       return rows
     }
+    /*
     //Traer todos los insumos
+    async getInsumos (cat: string, rub: string) {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi where rubro = '${rub}' and categoria = '${cat}';`
+        const rows = (await conn.query(sql)).rows
+        conn.end()
+        return rows
+    }
+    */
     async getInsumos () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi ;`
+        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
         const rows = (await conn.query(sql)).rows
         conn.end()
         return rows
