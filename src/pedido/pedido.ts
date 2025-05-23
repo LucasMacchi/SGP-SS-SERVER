@@ -58,6 +58,7 @@ export class Pedido {
             await conn.connect()
             const endC = endCode()
             const nro = Math.floor(Math.random() * 100000).toString() + endC.month + endC.year;
+            console.log(nro, endC)
             let sql_fields = ``
             let sql_values = ``
             sql_fields += `state`
