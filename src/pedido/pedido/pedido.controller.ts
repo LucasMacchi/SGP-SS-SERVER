@@ -99,5 +99,10 @@ export class PedidoController {
     async postReport (@Body() body: reportDto) {
         return await this.pedido.addReport(body)
     }
+    @UseGuards(userGuard)
+    @Delete('eliminar/:id')
+    async deletePedido(@Param('id') id: string) {
+        return await this.pedido.pedidoDel(parseInt(id))
+    }
 
 }
