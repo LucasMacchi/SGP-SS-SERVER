@@ -44,10 +44,10 @@ export class DataController {
     }
     
     @UseGuards(userGuard)
-    @Get('insumos/:cat/:rub')
+    @Get('insumos/:rub')
     async getAllIns 
-    (@Param('cat') cat: string, @Param('rub') rub: string) {
-        return await this.DataProvider.getInsumos(cat, rub)
+    (@Param('rub') rub: string) {
+        return await this.DataProvider.getInsumos(rub)
     }
 
     @UseGuards(userGuard)

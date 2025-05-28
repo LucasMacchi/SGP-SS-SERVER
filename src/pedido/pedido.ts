@@ -376,4 +376,18 @@ export class Pedido {
 
     }
 
+    async pedidoDel (id: number) {
+        const conn = clientReturner()
+        try {
+            const sql = `DELETE FROM public.glpi_sgp_orders WHERE order_id=${id};`
+            await conn.connect()
+            await conn.query(sql)
+            await conn.end()
+            return 'Pedido eliminado'
+        } catch (error) {
+            await conn.end()
+            return 'Pedido no pudo eliminarse'
+        }
+    }
+
 }

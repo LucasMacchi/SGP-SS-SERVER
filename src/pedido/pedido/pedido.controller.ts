@@ -8,6 +8,7 @@ import reportDto from 'src/dto/reportDto';
 import commentDto from 'src/dto/commentDto';
 import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
+import addInsumo from 'src/dto/addInsumo';
 
 @Controller('pedido')
 export class PedidoController {
@@ -27,9 +28,9 @@ export class PedidoController {
         return await this.pedido.postPedido(body)
     }
     @UseGuards(userGuard)
-    @Post('insumo/:id/:insumo/:amount')
-    async insumoAdd (@Param('id') id: string, @Param('insumo') insumo: string, @Param('amount') amount: string) {
-        return await this.pedido.postNewInsumo(parseInt(id), insumo, parseInt(amount))
+    @Post('insumo/:id')
+    async insumoAdd (@Param('id') id: string, @Body() body: addInsumo) {
+        return await this.pedido.postNewInsumo(parseInt(id), body.insumo, body.cantidad)
     }
     @UseGuards(userGuard)
     @Delete('insumo/:id')
@@ -98,6 +99,11 @@ export class PedidoController {
     @Post('report')
     async postReport (@Body() body: reportDto) {
         return await this.pedido.addReport(body)
+    }
+    @UseGuards(userGuard)
+    @Delete('eliminar/:id')
+    async deletePedido(@Param('id') id: string) {
+        return await this.pedido.pedidoDel(parseInt(id))
     }
 
 }
