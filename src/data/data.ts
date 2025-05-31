@@ -31,7 +31,7 @@ export class DataProvider {
       await conn.connect()
       const sql = `select * from glpi_sgp_personal where sector = '${sector}';`
       const rows = (await conn.query(sql)).rows
-      conn.end()
+      await conn.end()
       return rows
     }
     async getInsCategories () {
@@ -41,7 +41,7 @@ export class DataProvider {
         const sql2 = `select gsi.rubro from glpi_sgp_insumos gsi group by gsi.rubro;`
         const rows = (await conn.query(sql)).rows
         const rows2 = (await conn.query(sql2)).rows
-        conn.end()
+        await conn.end()
         const cat = rows.map(c => c['categoria'])
         const rub = rows2.map(c => c['rubro'])
         const data = {
@@ -55,7 +55,7 @@ export class DataProvider {
       await conn.connect()
       const sql = `select * from glpi_sgp_personal where legajo = '${id}';`
       const rows = (await conn.query(sql)).rows[0]
-      conn.end()
+      await conn.end()
       return rows
     }
     //Traer todos los insumos
@@ -64,7 +64,7 @@ export class DataProvider {
         await conn.connect()
         const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi where rubro = '${rub}';`
         const rows = (await conn.query(sql)).rows
-        conn.end()
+        await conn.end()
         return rows
     }
     //Traer todos los Servicios/centro de costo
@@ -73,7 +73,7 @@ export class DataProvider {
         await conn.connect()
         const sql = `select * from glpi_sgp_services gss order by gss.service_id asc;`
         const rows = (await conn.query(sql)).rows
-        conn.end()
+        await conn.end()
         return rows
     }
     //Traer todos los insumos pedidos por un cliente dentro de un rango de fecha, '20250310' tipo de fecha q acepta
@@ -95,7 +95,7 @@ export class DataProvider {
         }
 
         const rows = (await conn.query(sql)).rows
-        conn.end()
+        await conn.end()
         return rows
     }
     //Trae todos los reportes
@@ -104,7 +104,7 @@ export class DataProvider {
         await conn.connect()
         const sql = `select * from glpi_sgp_reports where glpi_sgp_reports.pedido_numero = '${id}';`
         const rows = (await conn.query(sql)).rows
-        conn.end()
+        await conn.end()
         return rows
     }
     //Trae todas las categorias para hacer un reporte
@@ -118,7 +118,7 @@ export class DataProvider {
       const conn = clientReturner()
       await conn.connect()
       await conn.query(sql)
-      conn.end()
+      await conn.end()
       return 'Personal agregado'
     }
     async deletePersonal (id: number) {
@@ -126,7 +126,7 @@ export class DataProvider {
       const conn = clientReturner()
       await conn.connect()
       await conn.query(sql)
-      conn.end()
+      await conn.end()
       return 'Personal eliminado'
     }
     //Trae todas las categorias para hacer un reporte de errores
