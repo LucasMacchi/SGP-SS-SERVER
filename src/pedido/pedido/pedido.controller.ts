@@ -105,5 +105,11 @@ export class PedidoController {
     async deletePedido(@Param('id') id: string) {
         return await this.pedido.pedidoDel(parseInt(id))
     }
-
+    
+    @UseGuards(userGuard)
+    @Get('uniq/:nro')
+    async getUniqPedido (@Param('nro') nro: string) {
+        return this.pedido.getUnqPedido(nro)
+    }
+    
 }

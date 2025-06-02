@@ -122,14 +122,14 @@ export class Pedido {
         const limit = filter.limit ? ` LIMIT ${filter.limit}` : ''
         const client = filter.client ? ` and client_id = ${filter.client}` : ''
         const service = filter.service ? ` and service_id = ${filter.service}` : ''
-        const requester = filter.requester ? ` and requester = '${filter.requester}'` : ''
         const numero = filter.numero ? ` and numero = '${filter.numero}'` : ''
         const state = filter.state ? ` and state = '${filter.state}'` : ''
         const dateStart = filter.dateStart ? ` and date_requested >= '${filter.dateStart}'` : ''
         const dateEnd = filter.dateEnd ? ` and date_requested <= '${filter.dateEnd}'` : ''
+        const user = filter.user_id ? ` and user_id = ${filter.user_id}` : ''
         const conn = clientReturner()
         await conn.connect()
-        const sql_pedidos = `select * from glpi_sgp_orders sgor where archive = false ${client}${service}${requester}${numero}${state}${dateStart}${dateEnd} order by sgor.date_requested asc ${limit};`
+        const sql_pedidos = `select * from glpi_sgp_orders sgor where archive = false ${client}${service}${numero}${state}${dateStart}${dateEnd}${user} order by sgor.order_id asc ${limit};`
         const rows = (await conn.query(sql_pedidos)).rows
         const sql_order_details = `select * from glpi_sgp_order_detail;`
         const rows1 = (await conn.query(sql_order_details)).rows
@@ -389,4 +389,17 @@ export class Pedido {
         }
     }
 
+    async getUnqPedido (nro: string) {
+        const conn = clientReturner()
+        try {
+            const sql = `select exists (select gso.numero from glpi_sgp_orders gso where gso.numero = '${nro}');`
+            await conn.connect()
+            const rows = (await conn.query(sql)).rows
+            await conn.end()
+            return rows[0]['exists']
+        } catch (error) {
+            await conn.end()
+            return false
+        }
+    }
 }

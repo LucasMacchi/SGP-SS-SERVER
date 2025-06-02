@@ -6,7 +6,7 @@ import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
 import reportDto from 'src/dto/reportDto';
 import personalDto from 'src/dto/personalDto';
-import { parse } from 'node:path/win32';
+import collectionOrderDto from 'src/dto/collectionOrder';
 
 @Controller('data')
 export class DataController {
@@ -44,10 +44,10 @@ export class DataController {
     }
     
     @UseGuards(userGuard)
-    @Get('insumos/:rub')
+    @Get('insumos')
     async getAllIns 
-    (@Param('rub') rub: string) {
-        return await this.DataProvider.getInsumos(rub)
+    () {
+        return await this.DataProvider.getInsumos()
     }
 
     @UseGuards(userGuard)
@@ -81,5 +81,10 @@ export class DataController {
     @Get('categories/insumos')
     async getInsumosCategories () {
         return await this.DataProvider.getInsCategories()
+    }
+    @UseGuards(userGuard)
+    @Post('collection')
+    async collectionOrder(@Body() body: collectionOrderDto) {
+        return this.DataProvider.collectionOrders(body)
     }
 }
