@@ -12,9 +12,6 @@ export default class filterDto {
     service: number
 
     @IsString()
-    requester: string
-
-    @IsString()
     numero: string
 
     @IsString()
@@ -25,4 +22,7 @@ export default class filterDto {
 
     @IsString()
     dateEnd: string
+
+    @IsNumber()
+    user_id: number
 }

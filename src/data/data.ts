@@ -8,6 +8,8 @@ import mailer from 'src/utils/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import emailError from 'src/utils/emailError';
 import personalDto from 'src/dto/personalDto';
+import collectionOrder from 'src/dto/collectionOrder';
+import collectionOrderDto from 'src/dto/collectionOrder';
 
 const supportEmail = process.env.EMAIL_SUPPORT ?? ''
 
@@ -59,10 +61,10 @@ export class DataProvider {
       return rows
     }
     //Traer todos los insumos
-    async getInsumos (rub: string) {
+    async getInsumos () {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi where rubro = '${rub}';`
+        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
         const rows = (await conn.query(sql)).rows
         await conn.end()
         return rows
@@ -144,5 +146,31 @@ export class DataProvider {
         } catch (error) {
             return 'Email fail'
         }
+    }
+    async collectionOrders (collection: collectionOrderDto){
+        let orders = ``
+        const conn = clientReturner()
+        collection.orders.forEach((o) => {
+            if(orders.length === 0){
+                orders = orders + `'${o}'`
+            }
+            else{
+                orders = orders + `,'${o}'`
+            }
+        })
+        const sql = `select gsod.insumo_des, SUM(gsod.amount) from
+        glpi_sgp_orders gso join glpi_sgp_order_detail gsod on gso.order_id = gsod.order_id
+        where gso.numero IN(${orders}) group by gsod.insumo_des;`
+        const sql2 = `select gso.numero, gss.service_des, gso.requester from glpi_sgp_orders gso 
+        join glpi_sgp_services gss on gso.service_id = gss.service_id where gso.numero in(${orders});`
+        await conn.connect()
+        const rows2 = (await conn.query(sql2)).rows
+        const rows = (await conn.query(sql)).rows
+        await conn.end()
+        const response = {
+            insumos: rows,
+            servicios: rows2
+        }
+        return response
     }
 }
