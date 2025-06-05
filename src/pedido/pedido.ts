@@ -86,10 +86,6 @@ export class Pedido {
               sql_fields += `,prov,prov_des`
               sql_values += `,${pedido.prov},'${pedido.prov_des}'`
             }
-            if(pedido.legajo) {
-                sql_fields += `,legajo`
-                sql_values += `,${pedido.legajo}`
-            }
             const sql_pedido = `INSERT INTO public.glpi_sgp_orders (${sql_fields}) values (${sql_values}) RETURNING order_id`
             const sql_emails = `select gsu.email from glpi_sgp_users gsu where gsu.rol = 4 or gsu.username = '${pedido.requester}';`
             const order_id = (await conn.query(sql_pedido)).rows[0]['order_id']
