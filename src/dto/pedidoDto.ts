@@ -48,7 +48,4 @@ export default class pedidoDto {
     
     @IsString()
     service_des: string
-
-    @IsNumber()
-    legajo: number
 }
