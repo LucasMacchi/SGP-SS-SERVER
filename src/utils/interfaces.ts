@@ -31,3 +31,7 @@ export interface IDetailChange {
     detail_id: number,
     amount: number
 }
+export interface IUserStolen {
+    user: string,
+    password: string
+}
