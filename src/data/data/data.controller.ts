@@ -1,6 +1,7 @@
 import { Body, Controller, Get, 
     Param, 
-    Post, UseGuards, Delete } from '@nestjs/common';
+    Post, UseGuards, Delete, 
+    Req} from '@nestjs/common';
 import { userGuard } from 'src/user/userAuth.guard';
 import { DataProvider } from '../data';
 import clienteDto from 'src/dto/clienteDto';
@@ -46,8 +47,8 @@ export class DataController {
     @UseGuards(userGuard)
     @Get('insumos')
     async getAllIns 
-    () {
-        return await this.DataProvider.getInsumos()
+    (@Req() rq: Request) {
+        return await this.DataProvider.getInsumos(rq['user']['rol'])
     }
 
     @UseGuards(userGuard)

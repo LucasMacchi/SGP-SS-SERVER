@@ -61,10 +61,17 @@ export class DataProvider {
       return rows
     }
     //Traer todos los insumos
-    async getInsumos () {
+    async getInsumos (rol: number) {
         const conn = clientReturner()
         await conn.connect()
-        const sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
+        let sql: string = ''
+        if(rol === 5) {
+            sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo 
+            from glpi_sgp_insumos gsi where gsi.categoria = 'RACIONAMIENTO';`
+        }
+        else{
+            sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
+        }
         const rows = (await conn.query(sql)).rows
         await conn.end()
         return rows
