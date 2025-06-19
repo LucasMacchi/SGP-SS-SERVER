@@ -67,7 +67,7 @@ export class DataProvider {
         let sql: string = ''
         if(rol === 5) {
             sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo 
-            from glpi_sgp_insumos gsi where gsi.categoria = 'RACI';`
+            from glpi_sgp_insumos gsi where gsi.categoria = 'Racionamiento';`
         }
         else{
             sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
