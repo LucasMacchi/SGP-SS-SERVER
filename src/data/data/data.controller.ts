@@ -38,7 +38,6 @@ export class DataController {
         await this.DataProvider.mailerTest()
         return 'Mail sent'
     }
-    @UseGuards(userGuard)
     @Get('cco')
     async getAllCco () {
         return await this.DataProvider.getCcos()
