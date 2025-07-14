@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { ComprasService } from './compras.service';
 import { userGuard } from 'src/user/userAuth.guard';
 import compraDto from 'src/dto/compraDto';
@@ -26,9 +26,33 @@ export class ComprasController {
     }
 
     @UseGuards(userGuard)
+    @Patch('aprove/:id')
+    aproveCompra (@Param('id') id:string) {
+        return this.ComprasService.aproveCompra(parseInt(id))
+    }
+
+    @UseGuards(userGuard)
+    @Patch('null/:id')
+    anularCompra (@Param('id') id:string) {
+        return this.ComprasService.nullCompra(parseInt(id))
+    }
+
+    @UseGuards(userGuard)
+    @Patch('deactivate/:id')
+    desactivarCompra (@Param('id') id:string) {
+        return this.ComprasService.deactivateCompra(parseInt(id))
+    }
+
+    @UseGuards(userGuard)
     @Get('all')
     allCompras () {
         return this.ComprasService.getAllCompras()
+    }
+
+    @UseGuards(userGuard)
+    @Get('uniq/:id')
+    uniqCompra (@Param('id') id:string) {
+        return this.ComprasService.getUniqCompras(parseInt(id))
     }
 
 }
