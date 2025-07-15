@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { ComprasService } from './compras.service';
 import { userGuard } from 'src/user/userAuth.guard';
 import compraDto from 'src/dto/compraDto';
+import { commentCompra, editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
 
 @Controller('compras')
 export class ComprasController {
@@ -27,14 +28,14 @@ export class ComprasController {
 
     @UseGuards(userGuard)
     @Patch('aprove/:id')
-    aproveCompra (@Param('id') id:string) {
-        return this.ComprasService.aproveCompra(parseInt(id))
+    aproveCompra (@Param('id') id:string, @Body() data: commentCompra) {
+        return this.ComprasService.aproveCompra(parseInt(id),data.comentario)
     }
 
     @UseGuards(userGuard)
     @Patch('null/:id')
-    anularCompra (@Param('id') id:string) {
-        return this.ComprasService.nullCompra(parseInt(id))
+    anularCompra (@Param('id') id:string,@Body() data: commentCompra) {
+        return this.ComprasService.nullCompra(parseInt(id),data.comentario)
     }
 
     @UseGuards(userGuard)
@@ -53,6 +54,24 @@ export class ComprasController {
     @Get('uniq/:id')
     uniqCompra (@Param('id') id:string) {
         return this.ComprasService.getUniqCompras(parseInt(id))
+    }
+
+    @UseGuards(userGuard)
+    @Patch('edit/des')
+    editCompraDes (@Body() data: editCompraDes) {
+        return this.ComprasService.editDes(data)
+    }
+
+    @UseGuards(userGuard)
+    @Patch('edit/cant')
+    editCompraCant (@Body() data: editCompraCant) {
+        return this.ComprasService.editCantidad(data)
+    }
+
+    @UseGuards(userGuard)
+    @Get('delete/:id')
+    deleteProd (@Param('id') id:string) {
+        return this.ComprasService.deleteProd(parseInt(id))
     }
 
 }
