@@ -1,12 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import areas from "./areas.json"
-import compraDto from 'src/dto/compraDto';
+import compraDto, { IinsumoCompra } from 'src/dto/compraDto';
+import { MailerService } from '@nestjs-modules/mailer';
 import clientReturner from 'src/utils/clientReturner';
 import { editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
 import endCode from 'src/utils/endCode';
+import { IemailMsg } from 'src/utils/interfaces';
+import emailCompra from 'src/utils/emailCompra';
+import mailer from 'src/utils/mailer';
+import dotenv from 'dotenv'; 
+dotenv.config();
+
+const glpiEmail = process.env.EMAIL_GLPI ?? 'NaN'
+
 
 @Injectable()
 export class ComprasService {
+    constructor(private readonly mailerServ: MailerService) {}
     
     async getAreas () {
         return areas.areas
@@ -37,9 +47,16 @@ export class ComprasService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `UPDATE public.glpi_sgp_compras SET fecha_aprobado=NOW(), aprobado=true,anulado=false,comentario='${comentario}' WHERE compra_id=${id};`
-            await conn.query(sql)
+            const sql = `UPDATE public.glpi_sgp_compras SET fecha_aprobado=NOW(), aprobado=true,anulado=false,comentario='${comentario}' WHERE compra_id=${id} RETURNING compra_id, nro, fullname, proveedor, descripcion;`
+            const sql_insumos = `select * from glpi_sgp_compras_details g where g.compra_id = ${id};`
+            const rows = (await conn.query(sql)).rows[0]
+            const rowsInsumos: IinsumoCompra[] = (await conn.query(sql_insumos)).rows
             await conn.end()
+            const mail: IemailMsg = {
+                subject: `Solicitud de Compras - ${rows["nro"]} - ${rows["fullname"]}`,
+                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"])
+            }
+            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
             return "Compra Aprobado"
         } catch (error) {
             await conn.end()
@@ -154,6 +171,22 @@ export class ComprasService {
             await conn.end()
             console.log(error)
             return error
+        }
+    }
+
+    async getUniqComprasByNro (nro: string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_compras g where g.activado = true and g.nro = '${nro.toUpperCase()}';`
+            const compra_id = (await conn.query(sql)).rows[0]["compra_id"]
+            console.log("TESTE "+compra_id)
+            await conn.end()
+            return parseInt(compra_id)
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return 0
         }
     }
 

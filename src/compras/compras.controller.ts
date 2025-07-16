@@ -57,6 +57,12 @@ export class ComprasController {
     }
 
     @UseGuards(userGuard)
+    @Get('uniqbynro/:nro')
+    uniqCompraNro (@Param('nro') nro:string) {
+        return this.ComprasService.getUniqComprasByNro(nro)
+    }
+
+    @UseGuards(userGuard)
     @Patch('edit/des')
     editCompraDes (@Body() data: editCompraDes) {
         return this.ComprasService.editDes(data)
