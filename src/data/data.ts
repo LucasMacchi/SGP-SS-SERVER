@@ -5,11 +5,13 @@ import categoriesJSON from './categories.json'
 import reportsErrorsJSON from './reports.json'
 import reportDto from 'src/dto/reportDto';
 import mailer from 'src/utils/mailer';
-import { IemailMsg } from 'src/utils/interfaces';
+import { IemailMsg, IInsumorRes, IOrderRemito } from 'src/utils/interfaces';
 import emailError from 'src/utils/emailError';
 import personalDto from 'src/dto/personalDto';
 import collectionOrder from 'src/dto/collectionOrder';
 import collectionOrderDto from 'src/dto/collectionOrder';
+import blackList from "./blacklist.json"
+import { IInsumo } from 'src/dto/pedidoDto';
 
 const supportEmail = process.env.EMAIL_SUPPORT ?? ''
 
@@ -72,9 +74,13 @@ export class DataProvider {
         else{
             sql = `select CONCAT(gsi.insumo_id,'-', gsi.ins_cod1,'-', gsi.ins_cod2,'-', gsi.ins_cod3,'-', gsi.descripcion) insumo from glpi_sgp_insumos gsi;`
         }
-        const rows = (await conn.query(sql)).rows
+        const blackListSet = new Set(blackList.list)
+        const rows: IInsumorRes[] = (await conn.query(sql)).rows
+        const filteredInsumos: IInsumorRes[] = rows.filter(ins1 => !blackListSet.has(ins1.insumo))
+        console.log(rows.length)
+        console.log(filteredInsumos.length)
         await conn.end()
-        return rows
+        return filteredInsumos
     }
     //Traer todos los Servicios/centro de costo
     async getCcos () {
@@ -179,5 +185,28 @@ export class DataProvider {
             servicios: rows2
         }
         return response
+    }
+    async collectionRemito (collection: collectionOrderDto) {
+        let orders = ``
+        const conn = clientReturner()
+        collection.orders.forEach((o) => {
+            if(orders.length === 0){
+                orders = orders + `'${o}'`
+            }
+            else{
+                orders = orders + `,'${o}'`
+            }
+        })
+        const sql = `select g2.localidad, g2.service_des, g.numero, g2.client_des, g.order_id from glpi_sgp_orders g 
+        join glpi_sgp_services g2 on g.service_id = g2.service_id 
+        where g.numero in (${orders}) ;`
+        await conn.connect()
+        const rows: IOrderRemito[] = (await conn.query(sql)).rows
+        for(const i of rows) {
+            const rowsIn: IInsumo[] = (await conn.query(`select * from glpi_sgp_order_detail g where g.order_id = ${i.order_id};`)).rows
+            i.insumos = rowsIn
+        }
+        await conn.end()
+        return rows
     }
 }

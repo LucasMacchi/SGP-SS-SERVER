@@ -35,3 +35,16 @@ export interface IUserStolen {
     user: string,
     password: string
 }
+
+export interface IInsumorRes {
+    insumo: string
+}
+
+export interface IOrderRemito {
+    order_id: number,
+    client_des: string,
+    numero: number,
+    service_des: string,
+    localidad: string,
+    insumos: IInsumo[]
+}
