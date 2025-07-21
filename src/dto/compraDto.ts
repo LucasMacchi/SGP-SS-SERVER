@@ -32,4 +32,7 @@ export default class compraDto {
     @IsArray()
     @IsNotEmpty()
     compras: IinsumoCompra[]
+
+    @IsString()
+    date: string
 }
