@@ -87,4 +87,12 @@ export class DataController {
     async collectionOrder(@Body() body: collectionOrderDto) {
         return this.DataProvider.collectionOrders(body)
     }
+    @Post('collection/remito')
+    async collectionRemitoOrder(@Body() body: collectionOrderDto) {
+        return this.DataProvider.collectionRemito(body)
+    }
+    @Get("insumos/complete")
+    async getAllInsumosComplete () {
+        return this.DataProvider.getInsumosComplete()
+    }
 }
