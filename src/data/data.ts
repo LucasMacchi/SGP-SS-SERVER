@@ -77,10 +77,16 @@ export class DataProvider {
         const blackListSet = new Set(blackList.list)
         const rows: IInsumorRes[] = (await conn.query(sql)).rows
         const filteredInsumos: IInsumorRes[] = rows.filter(ins1 => !blackListSet.has(ins1.insumo))
-        console.log(rows.length)
-        console.log(filteredInsumos.length)
         await conn.end()
         return filteredInsumos
+    }
+    async getInsumosComplete () {
+        const conn = clientReturner()
+        await conn.connect()
+        const sql = "select * from glpi_sgp_insumos g;"
+        const rows = (await conn.query(sql)).rows
+        await conn.end()
+        return rows
     }
     //Traer todos los Servicios/centro de costo
     async getCcos () {
@@ -202,11 +208,21 @@ export class DataProvider {
         where g.numero in (${orders}) ;`
         await conn.connect()
         const rows: IOrderRemito[] = (await conn.query(sql)).rows
+        const newArrs: IOrderRemito[] = []
         for(const i of rows) {
             const rowsIn: IInsumo[] = (await conn.query(`select * from glpi_sgp_order_detail g where g.order_id = ${i.order_id};`)).rows
-            i.insumos = rowsIn
+            if(rowsIn.length > 23) {
+                const insumos1 = rowsIn.slice(0,24)
+                const insumos2 = rowsIn.slice(24, rowsIn.length)
+                newArrs.push({...i, insumos: insumos2})
+                i.insumos=insumos1
+            }
+            else {
+                i.insumos = rowsIn
+            }       
         }
+        const res = rows.concat(newArrs)
         await conn.end()
-        return rows
+        return res
     }
 }
