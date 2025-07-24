@@ -107,7 +107,7 @@ export class ComprasService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `select * from glpi_sgp_compras g where g.activado = true;`
+            const sql = `select * from glpi_sgp_compras g where g.activado = true order by g.compra_id desc;`
             const rows = (await conn.query(sql)).rows
             await conn.end()
             return rows
