@@ -12,6 +12,7 @@ import endCode from 'src/utils/endCode';
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
     
+    //Esta funcion trae un pedido especifico, para ver los detalles del mismo
     async getPedido (id: number) {
         const conn = clientReturner()
         const sql = `SELECT * FROM public.glpi_sgp_orders where order_id  = ${id};`
@@ -23,6 +24,7 @@ export class Pedido {
         await conn.end()
         return rows
     }
+    //Esta funcion elimina un insumo del array, esto lo hace el encargado de deposito mientra el pedido este pendiente
     async deleteInsumo (detail_id: number) {
         const conn = clientReturner()
         const sql = `DELETE FROM public.glpi_sgp_order_detail WHERE detail_id=${detail_id};`
@@ -31,6 +33,7 @@ export class Pedido {
         await conn.end()
         return 'Insumo eliminado'
     }
+    //Esta funcion agrega un insumo al array, esto lo hace el encargado de deposito mientra el pedido este pendiente
     async postNewInsumo (id: number, insumo: string, amount: number) {
         const conn = clientReturner()
         const sql =`INSERT INTO public.glpi_sgp_order_detail
@@ -41,7 +44,7 @@ export class Pedido {
         await conn.end()
         return 'Insumo agregado'
     }
-    
+    //Esto modifica la cantidad de un insumo del array, esto lo hace el encargado de deposito mientra el pedido este pendiente
     async patchAmount (id: number, amount: number) {
       const conn = clientReturner()
       const sql = `UPDATE public.glpi_sgp_order_detail SET amount=${amount} WHERE detail_id=${id};`
@@ -50,14 +53,17 @@ export class Pedido {
       await conn.end()
       return 'Cantidad Modificada'
     }
-    
+    //Esta funcion crea un pedido, le asigna un numero especifico basado en los datos del pedido y manda un correo informando del pedido.
     async postPedido (pedido: pedidoDto) {
         const conn = clientReturner()
         try {
           console.log(pedido)
             await conn.connect()
             const endC = endCode()
-            const nro = Math.floor(Math.random() * 100000).toString() + endC.month + endC.year;
+            const clientIdCheck = pedido.client_id >= 1 ? pedido.client_id : 0
+            const base = clientIdCheck * 1000 + pedido.usuario_id * 100 + pedido.insumos.length * 10 + (pedido.service_id >= 100000 ? pedido.service_id / 100 : pedido.service_id)
+            const factor = parseInt(endC.year) + parseInt(endC.hour) + endC.sec
+            const nro = ((base + factor)*endC.sec) + endC.month + endC.year;
             let sql_fields = ``
             let sql_values = ``
             sql_fields += `state`
@@ -114,6 +120,8 @@ export class Pedido {
             throw new Error(error)
         }
     }
+    
+    //Esta funcion trae todos los pedidos que cumplan el filtro.
     async getAllPedidos (filter: filterDto) {
         const limit = filter.limit ? ` LIMIT ${filter.limit}` : ''
         const client = filter.client ? ` and client_id = ${filter.client}` : ''
@@ -142,6 +150,7 @@ export class Pedido {
         await conn.end()
         throw new Error('Error getting data')
     }
+    //Esta funcion aprueba el pedido
     async aprove (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Aprobado' ,date_aproved = NOW() where order_id = ${orId}`
         const conn = clientReturner()
@@ -156,6 +165,7 @@ export class Pedido {
         }
 
     }
+    //Esta funcion rechaza el pedido
     async reject (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Rechazado' where order_id = ${orId}`
         const conn = clientReturner()
@@ -170,6 +180,7 @@ export class Pedido {
         }
 
     }
+    //Esta funcion pone en listo al pedido
     async ready (orId: number) {
         const sql = `update glpi_sgp_orders gso set state = 'Listo' where order_id = ${orId}`
         const conn = clientReturner()
@@ -185,6 +196,7 @@ export class Pedido {
         }
 
     }
+    //Esta funcion informa de un problema al pedido
     async problem (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Problemas' where order_id = ${orId}`
         const conn = clientReturner()
@@ -214,6 +226,7 @@ export class Pedido {
         }
 
     }
+    //Esta funcion cancela el pedido
     async cancel (orId: number) {
         const sql = `update glpi_sgp_orders gso set state = 'Cancelado' where order_id = ${orId};`
         const conn = clientReturner()
@@ -227,6 +240,7 @@ export class Pedido {
             return "Orden "+orId+ " Cancelado. Correo no enviado"
         }
     }
+    //Esta funcion entrega el pedido
     async delivered (orId: number, commnet: string) {
         const sql = `update glpi_sgp_orders gso set state = 'Entregado', date_delivered = NOW() where order_id = ${orId}`
         const conn = clientReturner()
@@ -242,6 +256,7 @@ export class Pedido {
         }
 
     }
+    //Esta funcion archiva el pedido
     async archive (orId: number) {
         const sql = `update glpi_sgp_orders gso set archive = true where order_id = ${orId}`
         const conn = clientReturner()
@@ -250,7 +265,7 @@ export class Pedido {
         await conn.end()
         return "Orden "+orId+ " Archivado."
     }
-    
+    //No funciona *****
     async setLegajo (id: number, legajo: number) {
       const sql = `update glpi_sgp_orders gso set legajo = ${legajo} where order_id = ${id}`
       const conn = clientReturner()
@@ -259,7 +274,7 @@ export class Pedido {
       await conn.end()
       return "Orden vincualdo con legajo "+legajo
     }
-
+    //Agrega un reporte al pedido
     async addReport (report: reportDto){
         const sql = `INSERT INTO public.glpi_sgp_reports
         (descripcion, order_id, fecha, category, pedido_numero, user_id, fullname)
@@ -283,7 +298,7 @@ export class Pedido {
         }
         return "Reporte creado en pedido numero "+report.pedido_numero
     }
-
+    //Esta funcion asigna un cco al pedido con servicio especial
     async changeProv (id: string, data: changeProvDto) {
         const conn = clientReturner()
         try {
@@ -298,7 +313,7 @@ export class Pedido {
         }
 
     }
-
+    //Esta funcion elimina un pedido, solo admins
     async pedidoDel (id: number) {
         const conn = clientReturner()
         try {
@@ -312,7 +327,7 @@ export class Pedido {
             return 'Pedido no pudo eliminarse'
         }
     }
-
+    //No funciona***
     async getUnqPedido (nro: string) {
         const conn = clientReturner()
         try {

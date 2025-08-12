@@ -1,12 +1,18 @@
 interface IEndCode {
   month: string,
-  year: string
+  year: string,
+  day: string,
+  hour: string,
+  sec: number
 }
 export default function (): IEndCode {
   const currentDate = new Date()
   const end: IEndCode = {
     month: '',
-    year: ''
+    year: '',
+    day: '',
+    hour: '',
+    sec: 0
   }
   switch(currentDate.getMonth()){
     case 0:
@@ -49,5 +55,8 @@ export default function (): IEndCode {
       end.month = 'ZU'
   }
   end.year += new Date().getFullYear() - 2000  
+  end.day += new Date().getDate().toString()
+  end.hour += new Date().getHours().toString()
+  end.sec = new Date().getSeconds()
   return end
 }

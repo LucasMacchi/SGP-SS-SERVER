@@ -22,7 +22,7 @@ export class PedidoController {
     async getDetails (@Param('id') id:string) {
         return await this.pedido.getPedido(parseInt(id))
     }
-    @UseGuards(userGuard)
+    //@UseGuards(userGuard)
     @Post('add')
     async addPedido (@Body() body : pedidoDto) {
         return await this.pedido.postPedido(body)
