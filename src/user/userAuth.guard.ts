@@ -11,6 +11,7 @@ dotenv.config();
 
 const secret = process.env.TOKEN_SECRET ?? undefined
 
+//Verifica que el JWT sea valido
 @Injectable()
 export class userGuard implements CanActivate {
     constructor(private jwtService: JwtService) {}

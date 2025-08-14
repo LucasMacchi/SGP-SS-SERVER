@@ -265,7 +265,7 @@ export class Pedido {
         await conn.end()
         return "Orden "+orId+ " Archivado."
     }
-    //No funciona *****
+    /* No funciona *****
     async setLegajo (id: number, legajo: number) {
       const sql = `update glpi_sgp_orders gso set legajo = ${legajo} where order_id = ${id}`
       const conn = clientReturner()
@@ -274,6 +274,7 @@ export class Pedido {
       await conn.end()
       return "Orden vincualdo con legajo "+legajo
     }
+      */
     //Agrega un reporte al pedido
     async addReport (report: reportDto){
         const sql = `INSERT INTO public.glpi_sgp_reports
@@ -327,7 +328,7 @@ export class Pedido {
             return 'Pedido no pudo eliminarse'
         }
     }
-    //No funciona***
+    /*No funciona***
     async getUnqPedido (nro: string) {
         const conn = clientReturner()
         try {
@@ -341,4 +342,5 @@ export class Pedido {
             return false
         }
     }
+    */
 }
