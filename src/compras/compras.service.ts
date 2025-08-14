@@ -30,15 +30,8 @@ export class ComprasService {
             const time = (parseInt(endC.hour) + endC.sec) * parseInt(endC.day)
             const nro = "C" + (base + time) + endC.month + endC.year;
             await conn.connect()
-            let sql_compra = ""
-            if(data.date) {
-                sql_compra = `INSERT INTO public.glpi_sgp_compras (area, tipo, descripcion, lugar, activado, aprobado, anulado, fullname, proveedor, fecha, nro)
-                VALUES('${data.area}', '${data.tipo}', '${data.descripcion}', '${data.lugar}', true, false, false, '${data.fullname}', '${data.proveedor}', '${data.date}', '${nro}') RETURNING compra_id;`
-            }
-            else{
-                sql_compra = `INSERT INTO public.glpi_sgp_compras (area, tipo, descripcion, lugar, activado, aprobado, anulado, fullname, proveedor, fecha, nro)
-                VALUES('${data.area}', '${data.tipo}', '${data.descripcion}', '${data.lugar}', true, false, false, '${data.fullname}', '${data.proveedor}', NOW(), '${nro}') RETURNING compra_id;`
-            }
+            const sql_compra = `INSERT INTO public.glpi_sgp_compras (area, tipo, descripcion, lugar, activado, aprobado, anulado, fullname, proveedor, fecha, nro, fecha_req,preaprobado)
+            VALUES('${data.area}', '${data.tipo}', '${data.descripcion}', '${data.lugar}', true, false, false, '${data.fullname}', '${data.proveedor}', '${data.date}', '${nro}', NOW(), 'false') RETURNING compra_id;`
             const compra_id = (await conn.query(sql_compra)).rows[0]['compra_id']
             console.log(compra_id)
             for(const i of data.compras) {

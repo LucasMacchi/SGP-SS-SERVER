@@ -7,8 +7,8 @@ import reportDto from 'src/dto/reportDto';
 import mailer from 'src/utils/mailer';
 import { IemailMsg, IInsumorRes, IOrderRemito } from 'src/utils/interfaces';
 import emailError from 'src/utils/emailError';
-import personalDto from 'src/dto/personalDto';
-import collectionOrder from 'src/dto/collectionOrder';
+//import personalDto from 'src/dto/personalDto';
+//import collectionOrder from 'src/dto/collectionOrder';
 import collectionOrderDto from 'src/dto/collectionOrder';
 import blackList from "./blacklist.json"
 import { IInsumo } from 'src/dto/pedidoDto';
@@ -29,6 +29,7 @@ export class DataProvider {
             text: msg
         })
     }
+    /*
     //trae todos los legajos
     async getLegajos (sector: string) {
       const conn = clientReturner()
@@ -38,6 +39,7 @@ export class DataProvider {
       await conn.end()
       return rows
     }
+    */
     async getInsCategories () {
         const conn = clientReturner()
         await conn.connect()
@@ -54,6 +56,7 @@ export class DataProvider {
         }
         return data
     }
+    /*
     async getPersonal (id: number) {
       const conn = clientReturner()
       await conn.connect()
@@ -62,6 +65,7 @@ export class DataProvider {
       await conn.end()
       return rows
     }
+    */
     //Traer todos los insumos
     async getInsumos (rol: number) {
         const conn = clientReturner()
@@ -80,6 +84,7 @@ export class DataProvider {
         await conn.end()
         return filteredInsumos
     }
+    //Devuelve los insumos pero como objetos completos
     async getInsumosComplete () {
         const conn = clientReturner()
         await conn.connect()
@@ -132,6 +137,8 @@ export class DataProvider {
     async categoriesGetter () {
         return categoriesJSON
     }
+    //No en uso
+    /*
     async createPersonal (personal: personalDto) {
       const sql = `INSERT INTO public.glpi_sgp_personal
       (legajo, fullname, cuil, sector)
@@ -150,10 +157,12 @@ export class DataProvider {
       await conn.end()
       return 'Personal eliminado'
     }
+    */
     //Trae todas las categorias para hacer un reporte de errores
     async reportsErrorsCategoriesGetter () {
         return reportsErrorsJSON
     }
+    //Manda un correo en caso de errores
     async emailer (body: reportDto) {
         try {
             const mail: IemailMsg = {
@@ -166,6 +175,7 @@ export class DataProvider {
             return 'Email fail'
         }
     }
+    //Devuelve los pedidos de la coleccion proporcionada para despues imprimirlos
     async collectionOrders (collection: collectionOrderDto){
         let orders = ``
         const conn = clientReturner()
@@ -192,6 +202,7 @@ export class DataProvider {
         }
         return response
     }
+    //Devuelve los pedidos de la coleccion proporcionada para despues imprimirlos en un remito
     async collectionRemito (collection: collectionOrderDto) {
         let orders = ``
         const conn = clientReturner()
