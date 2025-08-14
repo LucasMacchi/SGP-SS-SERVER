@@ -34,5 +34,6 @@ export default class compraDto {
     compras: IinsumoCompra[]
 
     @IsString()
+    @IsNotEmpty()
     date: string
 }
