@@ -33,6 +33,12 @@ export class ComprasController {
     }
 
     @UseGuards(userGuard)
+    @Patch('preaprove/:id')
+    preaproveCompra (@Param('id') id:string, @Body() data: commentCompra) {
+        return this.ComprasService.preAproveCompra(parseInt(id),data.comentario)
+    }
+
+    @UseGuards(userGuard)
     @Patch('null/:id')
     anularCompra (@Param('id') id:string,@Body() data: commentCompra) {
         return this.ComprasService.nullCompra(parseInt(id),data.comentario)

@@ -17,16 +17,18 @@ const glpiEmail = process.env.EMAIL_GLPI ?? 'NaN'
 @Injectable()
 export class ComprasService {
     constructor(private readonly mailerServ: MailerService) {}
-    
+    //Esta funcion devuelve las areas que se necesitan para crear una compra
     async getAreas () {
         return areas.areas
     }
-
+    //Esta funcion registra una nueva compra, se divide si se crea con una fecha de entrega o no
     async registerCompra (data: compraDto) {
         const conn = clientReturner()
         try {
             const endC = endCode()
-            const nro = "C" + Math.floor(Math.random() * 1000).toString() + endC.month + endC.year;
+            const base = data.fullname.length + data.tipo.length + data.compras.length
+            const time = (parseInt(endC.hour) + endC.sec) * parseInt(endC.day)
+            const nro = "C" + (base + time) + endC.month + endC.year;
             await conn.connect()
             let sql_compra = ""
             if(data.date) {
@@ -50,7 +52,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Aprueva la compra y manda el correo al sistema de tickets, que lo carga automaticamente
     async aproveCompra (id: number,comentario: string) {
         const conn = clientReturner()
         try {
@@ -62,7 +64,7 @@ export class ComprasService {
             await conn.end()
             const mail: IemailMsg = {
                 subject: `Solicitud de Compras - ${rows["nro"]} - ${rows["fullname"]}`,
-                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"])
+                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], rows['fecha'])
             }
             await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
             return "Compra Aprobado"
@@ -72,7 +74,22 @@ export class ComprasService {
             return error
         }
     }
-
+    //Esta funcion pre aprueba una compra, esto se requiere para compras del area de racionamiento
+    async preAproveCompra (id: number, comentario: string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `UPDATE public.glpi_sgp_compras SET aprobado=false,preaprobado=true, anulado=false,comentario='${comentario}' WHERE compra_id=${id};`
+            await conn.query(sql)
+            await conn.end()
+            return "Compra Anulada"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Este anula o rechaza una compra
     async nullCompra (id: number, comentario: string) {
         const conn = clientReturner()
         try {
@@ -87,7 +104,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Desactiva una compra para que no se muestre mas
     async deactivateCompra (id: number) {
         const conn = clientReturner()
         try {
@@ -102,7 +119,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Devuelve todas las compras
     async getAllCompras () {
         const conn = clientReturner()
         try {
@@ -117,7 +134,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Edita la cantidad de un insumo
     async editCantidad (data: editCompraCant) {
         const conn = clientReturner()
         try {
@@ -132,7 +149,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Edita la descripcion de un insumo
     async editDes (data: editCompraDes) {
         const conn = clientReturner()
         console.log(data)
@@ -148,7 +165,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Elimina un insumo de la compra
     async deleteProd (id: number) {
         const conn = clientReturner()
         try {
@@ -163,7 +180,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Devuelve los detalles de una compra
     async getUniqCompras (id: number) {
         const conn = clientReturner()
         try {
@@ -181,7 +198,7 @@ export class ComprasService {
             return error
         }
     }
-
+    //Devuelve una compra unica usando su numero identificador
     async getUniqComprasByNro (nro: string) {
         const conn = clientReturner()
         try {
