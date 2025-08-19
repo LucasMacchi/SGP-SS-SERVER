@@ -28,16 +28,24 @@ export class ComprasService {
             const endC = endCode()
             const base = data.fullname.length + data.tipo.length + data.compras.length
             const time = (parseInt(endC.hour) + endC.sec) * parseInt(endC.day)
-            const nro = "C" + (base + time) + endC.month + endC.year;
+            const calc = (base + time) ? (base + time) : Math.floor(Math.random() * 1000);
+            const nro = "C" + calc + endC.month + endC.year;
             await conn.connect()
             const sql_compra = `INSERT INTO public.glpi_sgp_compras (area, tipo, descripcion, lugar, activado, aprobado, anulado, fullname, proveedor, fecha, nro, fecha_req,preaprobado)
             VALUES('${data.area}', '${data.tipo}', '${data.descripcion}', '${data.lugar}', true, false, false, '${data.fullname}', '${data.proveedor}', '${data.date}', '${nro}', NOW(), 'false') RETURNING compra_id;`
             const compra_id = (await conn.query(sql_compra)).rows[0]['compra_id']
-            console.log(compra_id)
             for(const i of data.compras) {
                 await conn.query(`INSERT INTO public.glpi_sgp_compras_details (descripcion, cantidad, compra_id) VALUES('${i.descripcion}', ${i.cantidad}, ${compra_id});`)
             }
+            const sql2 = `select email from glpi_sgp_users g where g.rol = 2;`
+            const rows2 = (await conn.query(sql2)).rows
             await conn.end()
+            const emails:string[] = rows2.map(e => e["email"])
+            const mail: IemailMsg = {
+                subject: `Compra registrada - ${nro} - ${data.fullname}`,
+                msg:`Compra registrada para el area ${data.area} con el numero ${nro}.`
+            }
+            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
             return "Creado compra"
         } catch (error) {
             await conn.end()
@@ -72,10 +80,18 @@ export class ComprasService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `UPDATE public.glpi_sgp_compras SET aprobado=false,preaprobado=true, anulado=false,comentario='${comentario}' WHERE compra_id=${id};`
-            await conn.query(sql)
+            const sql = `UPDATE public.glpi_sgp_compras SET aprobado=false,preaprobado=true, anulado=false,comentario='${comentario}' WHERE compra_id=${id} RETURNING nro;`
+            const sql2 = `select email from glpi_sgp_users g where g.rol = 2;`
+            const rows = (await conn.query(sql)).rows[0]
+            const rows2 = (await conn.query(sql2)).rows
             await conn.end()
-            return "Compra Anulada"
+            const emails:string[] = rows2.map(e => e["email"])
+            const mail: IemailMsg = {
+                subject: `Compra preaprobada - ${rows["nro"]}`,
+                msg:`Se ha preparobado la compra ${rows["nro"]}.`
+            }
+            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
+            return "Compra preaprobada"
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -145,7 +161,6 @@ export class ComprasService {
     //Edita la descripcion de un insumo
     async editDes (data: editCompraDes) {
         const conn = clientReturner()
-        console.log(data)
         try {
             const sql = `UPDATE public.glpi_sgp_compras_details SET descripcion='${data.descripcion}' WHERE detail_id=${data.detailID};`
             await conn.connect()
@@ -198,7 +213,6 @@ export class ComprasService {
             await conn.connect()
             const sql = `select * from glpi_sgp_compras g where g.activado = true and g.nro = '${nro.toUpperCase()}';`
             const compra_id = (await conn.query(sql)).rows[0]["compra_id"]
-            console.log("TESTE "+compra_id)
             await conn.end()
             return parseInt(compra_id)
         } catch (error) {
