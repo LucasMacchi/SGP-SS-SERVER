@@ -3,7 +3,8 @@ interface IEndCode {
   year: string,
   day: string,
   hour: string,
-  sec: number
+  sec: number,
+  dayWeek: number
 }
 export default function (): IEndCode {
   const currentDate = new Date()
@@ -12,7 +13,8 @@ export default function (): IEndCode {
     year: '',
     day: '',
     hour: '',
-    sec: 0
+    sec: 0,
+    dayWeek: 0
   }
   switch(currentDate.getMonth()){
     case 0:
@@ -54,9 +56,11 @@ export default function (): IEndCode {
     default:
       end.month = 'ZU'
   }
-  end.year += new Date().getFullYear() - 2000  
-  end.day += new Date().getDate().toString()
-  end.hour += new Date().getHours().toString()
-  end.sec = new Date().getSeconds()
+  const current = new Date()
+  end.year += current.getFullYear() - 2000  
+  end.day += current.getDate().toString()
+  end.hour += current.getHours().toString()
+  end.sec = current.getSeconds()
+  end.dayWeek = current.getDay() + 1
   return end
 }

@@ -63,7 +63,8 @@ export class Pedido {
             const clientIdCheck = pedido.client_id >= 1 ? pedido.client_id : 0
             const base = clientIdCheck * 1000 + pedido.usuario_id * 100 + pedido.insumos.length * 10 + (pedido.service_id >= 100000 ? pedido.service_id / 100 : pedido.service_id)
             const factor = parseInt(endC.year) + parseInt(endC.hour) + endC.sec
-            const nro = (Math.floor((base + factor)*endC.sec)) + endC.month + endC.year;
+            const calc = (base + factor)*endC.sec ? Math.floor((base + factor)*endC.sec) : Math.floor(Math.random() * 1000);
+            const nro = endC.dayWeek.toString() +calc + endC.month + endC.year;
             let sql_fields = ``
             let sql_values = ``
             sql_fields += `state`
