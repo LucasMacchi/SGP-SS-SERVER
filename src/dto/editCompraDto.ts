@@ -25,3 +25,17 @@ export class commentCompra {
     @IsNotEmpty()
     comentario: string
 }
+
+export class addDetailDto {
+    @IsString()
+    @IsNotEmpty()
+    descripcion: string
+
+    @IsNumber()
+    @IsNotEmpty()
+    compraID: number
+
+    @IsNumber()
+    @IsNotEmpty()
+    cantidad: number
+}

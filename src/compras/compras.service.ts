@@ -3,7 +3,7 @@ import areas from "./areas.json"
 import compraDto, { IinsumoCompra } from 'src/dto/compraDto';
 import { MailerService } from '@nestjs-modules/mailer';
 import clientReturner from 'src/utils/clientReturner';
-import { editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
+import { addDetailDto, editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
 import endCode from 'src/utils/endCode';
 import { IemailMsg } from 'src/utils/interfaces';
 import emailCompra from 'src/utils/emailCompra';
@@ -168,6 +168,21 @@ export class ComprasService {
             await conn.query(sql)
             await conn.end()
             return "Producto cambiado"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Agrega la descripcion de un insumo
+    async addDes (data: addDetailDto) {
+        const conn = clientReturner()
+        try {
+            const sql = `INSERT INTO public.glpi_sgp_compras_details (descripcion, cantidad, compra_id, detail_id) VALUES('${data.descripcion}', ${data.cantidad}, ${data.compraID});`
+            await conn.connect()
+            await conn.query(sql)
+            await conn.end()
+            return "Detalle añadido"
         } catch (error) {
             await conn.end()
             console.log(error)
