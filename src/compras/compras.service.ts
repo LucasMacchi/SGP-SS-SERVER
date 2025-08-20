@@ -58,14 +58,15 @@ export class ComprasService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `UPDATE public.glpi_sgp_compras SET fecha_aprobado=NOW(), aprobado=true,anulado=false,comentario='${comentario}' WHERE compra_id=${id} RETURNING compra_id, nro, fullname, proveedor, descripcion;`
+            const sql = `UPDATE public.glpi_sgp_compras SET fecha_aprobado=NOW(), aprobado=true,anulado=false,comentario='${comentario}' WHERE compra_id=${id} RETURNING compra_id, nro, fullname, proveedor, descripcion, fecha, area, lugar;`
             const sql_insumos = `select * from glpi_sgp_compras_details g where g.compra_id = ${id};`
             const rows = (await conn.query(sql)).rows[0]
             const rowsInsumos: IinsumoCompra[] = (await conn.query(sql_insumos)).rows
             await conn.end()
+            const parsedFec = new Date(rows['fecha']).toISOString().split("T")[0]
             const mail: IemailMsg = {
                 subject: `Solicitud de Compras - ${rows["nro"]} - ${rows["fullname"]}`,
-                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], rows['fecha'])
+                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], parsedFec, rows['area'], rows['lugar'])
             }
             await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
             return "Compra Aprobado"
