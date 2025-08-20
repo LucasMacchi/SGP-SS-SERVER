@@ -41,7 +41,7 @@ export class UserService {
             const email = rows[0]['email']
             const mail: IemailMsg = {
                 subject: `Usuario ${usr} Alta - SGP`,
-                msg: `Alta de usuario '${usr}' en el dia de la fecha.`
+                msg: `Alta de usuario '${usr}' en el dia de la fecha.\nLink: https://sistemagestorpedidos.solucionesyservicios.online/`
             }
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
         } catch (error) {
