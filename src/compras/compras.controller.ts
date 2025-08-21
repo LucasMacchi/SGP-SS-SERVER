@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { ComprasService } from './compras.service';
 import { userGuard } from 'src/user/userAuth.guard';
 import compraDto from 'src/dto/compraDto';
-import { commentCompra, editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
+import { addDetailDto, commentCompra, editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
 
 @Controller('compras')
 export class ComprasController {
@@ -84,6 +84,11 @@ export class ComprasController {
     @Get('delete/:id')
     deleteProd (@Param('id') id:string) {
         return this.ComprasService.deleteProd(parseInt(id))
+    }
+    @UseGuards(userGuard)
+    @Post('add')
+    addCompraDetail (@Body() data: addDetailDto) {
+        return this.ComprasService.addDes(data)
     }
 
 }
