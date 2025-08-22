@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
-
+import desglosesJson from "./desgloses.json"
 
 @Injectable()
 export class EnviosService {
@@ -22,7 +22,8 @@ export class EnviosService {
     }
     async getDesgloses () {
         const conn = clientReturner()
-        try {
+        return desglosesJson.deslogses
+        /*try {
             await conn.connect()
             const sql = "SELECT * FROM public.glpi_sgp_desglose;"
             const rows = (await conn.query(sql)).rows
@@ -31,7 +32,7 @@ export class EnviosService {
             await conn.end()
             console.log(error)
             return error
-        }
+        }*/
     }
     async getEnvios () {
         const conn = clientReturner()
