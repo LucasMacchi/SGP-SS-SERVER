@@ -7,6 +7,7 @@ import { PedidoModule } from './pedido/pedido.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ComprasModule } from './compras/compras.module';
+import { EnviosModule } from './envios/envios.module';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
@@ -30,7 +31,8 @@ dotenv.config();
         limit: 5
       }
     ]
-  })
+  }),
+  EnviosModule
 ],
   controllers: [AppController],
   providers: [AppService],
