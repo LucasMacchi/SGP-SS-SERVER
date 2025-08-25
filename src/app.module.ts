@@ -12,7 +12,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 @Module({
-  imports: [DataModule, UserModule, PedidoModule,ComprasModule, MailerModule.forRoot({
+  imports: [DataModule, UserModule, PedidoModule,ComprasModule,EnviosModule, MailerModule.forRoot({
     transport: {
       host: process.env.EMAIL_HOST ?? 'NaN',
       port: process.env.EMAIL_HOST_PORT ? parseInt(process.env.EMAIL_HOST_PORT): 465,
@@ -31,8 +31,7 @@ dotenv.config();
         limit: 5
       }
     ]
-  }),
-  EnviosModule
+  })
 ],
   controllers: [AppController],
   providers: [AppService],
