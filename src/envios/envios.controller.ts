@@ -1,36 +1,43 @@
-import { Controller, Get, Param, Body, Patch } from '@nestjs/common';
+import { Controller, Get, Param, Body, Patch, UseGuards } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
+import { userGuard } from 'src/user/userAuth.guard';
 
 @Controller('envios')
 export class EnviosController {
     constructor(private EnviosService: EnviosService){}
     
+    @UseGuards(userGuard)
     @Get('ping')
     ping(): string {
         return "Server pinged at "+ new Date()
     }
 
+    @UseGuards(userGuard)
     @Get('all')
     getAllEnvios() {
         return this.EnviosService.getEnvios()
     }
 
+    @UseGuards(userGuard)
     @Get('entregas')
     getLentregas() {
         return this.EnviosService.getLugaresEntrega()
     }
 
+    @UseGuards(userGuard)
     @Get('desgloses')
     getAllDesgloses() {
         return this.EnviosService.getDesgloses()
     }
     
+    @UseGuards(userGuard)
     @Get('uniq/envio/:id')
     getUniqEnv(@Param('id') id:string) {
         return this.EnviosService.getEnviosUniq(parseInt(id))
     }
 
+    @UseGuards(userGuard)
     @Patch('edit/cant')
     editCantEnv(@Body() data: editCantidadDto) {
         return this.EnviosService.editCantidad(data)
