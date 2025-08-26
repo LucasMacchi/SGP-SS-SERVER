@@ -15,7 +15,7 @@ dotenv.config();
   imports: [DataModule, UserModule, PedidoModule,ComprasModule,EnviosModule, MailerModule.forRoot({
     transport: {
       host: process.env.EMAIL_HOST ?? 'NaN',
-      port: process.env.EMAIL_HOST_PORT ? parseInt(process.env.EMAIL_HOST_PORT): 465,
+      port: process.env.EMAIL_HOST_PORT ? parseInt(process.env.EMAIL_HOST_PORT): 587,
       secure: false,
       auth: {
         user: process.env.EMAIL_USERNAME ?? 'NaN',
