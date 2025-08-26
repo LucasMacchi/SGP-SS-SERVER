@@ -21,8 +21,8 @@ export class EnviosService {
         }
     }
     async getDesgloses () {
-        return desglosesJson
-        /*
+
+        
         const conn = clientReturner()
         try {
             await conn.connect()
@@ -35,7 +35,6 @@ export class EnviosService {
             console.log(error)
             return error
         }
-            */
     }
     async getEnvios () {
         const conn = clientReturner()
