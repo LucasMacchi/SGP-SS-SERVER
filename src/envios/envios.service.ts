@@ -26,6 +26,7 @@ export class EnviosService {
             await conn.connect()
             const sql = "SELECT * FROM public.glpi_sgp_desglose;"
             const rows = (await conn.query(sql)).rows
+            await conn.end()
             return rows
         } catch (error) {
             await conn.end()
