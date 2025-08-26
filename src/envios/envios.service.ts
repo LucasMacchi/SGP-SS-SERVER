@@ -22,8 +22,7 @@ export class EnviosService {
     }
     async getDesgloses () {
         const conn = clientReturner()
-        return desglosesJson.deslogses
-        /*try {
+        try {
             await conn.connect()
             const sql = "SELECT * FROM public.glpi_sgp_desglose;"
             const rows = (await conn.query(sql)).rows
@@ -32,7 +31,7 @@ export class EnviosService {
             await conn.end()
             console.log(error)
             return error
-        }*/
+        }
     }
     async getEnvios () {
         const conn = clientReturner()
