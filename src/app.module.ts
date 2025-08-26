@@ -21,7 +21,9 @@ dotenv.config();
         user: process.env.EMAIL_USERNAME ?? 'NaN',
         pass: process.env.EMAIL_PASSWORD ?? 'NaN'
       },
-      tls: { rejectUnauthorized: false }
+      tls: { rejectUnauthorized: false },
+      logger: true,
+      debug: true
     }
   }),
   ThrottlerModule.forRoot({
