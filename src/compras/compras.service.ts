@@ -8,7 +8,9 @@ import endCode from 'src/utils/endCode';
 import { IemailMsg } from 'src/utils/interfaces';
 import emailCompra from 'src/utils/emailCompra';
 import mailer from 'src/utils/mailer';
+import { Resend } from 'resend';
 import dotenv from 'dotenv'; 
+import mailerResend from 'src/utils/mailerResend';
 dotenv.config();
 
 const glpiEmail = process.env.EMAIL_GLPI ?? 'NaN'
@@ -16,6 +18,7 @@ const glpiEmail = process.env.EMAIL_GLPI ?? 'NaN'
 
 @Injectable()
 export class ComprasService {
+    
     constructor(private readonly mailerServ: MailerService) {}
     //Esta funcion devuelve las areas que se necesitan para crear una compra
     async getAreas () {
@@ -45,7 +48,7 @@ export class ComprasService {
                 subject: `Compra registrada - ${nro} - ${data.fullname}`,
                 msg:`Compra registrada para el area ${data.area} con el numero ${nro}.`
             }
-            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
+            //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
             return "Creado compra"
         } catch (error) {
             await conn.end()
@@ -68,7 +71,8 @@ export class ComprasService {
                 subject: `Solicitud de Compras - ${rows["nro"]} - ${rows["fullname"]}`,
                 msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], parsedFec, rows['area'], rows['lugar'])
             }
-            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
+            await mailerResend(glpiEmail,mail.subject, mail.msg)
+            //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
             return "Compra Aprobado"
         } catch (error) {
             await conn.end()

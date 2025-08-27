@@ -12,34 +12,32 @@ import emailError from 'src/utils/emailError';
 import collectionOrderDto from 'src/dto/collectionOrder';
 import blackList from "./blacklist.json"
 import { IInsumo } from 'src/dto/pedidoDto';
+import { Resend } from 'resend';
+import mailerResend from 'src/utils/mailerResend';
 
 const supportEmail = process.env.EMAIL_SUPPORT ?? ''
+const API_KEY_RESEND = process.env.API_KEY_RESEND ?? ''
 
 @Injectable()
 export class DataProvider {
-    constructor(private readonly mailerServ: MailerService) {}
+    private resend: Resend
+    constructor(private readonly mailerServ: MailerService) {
+        this.resend = new Resend(API_KEY_RESEND)
+    }
+
 
     //Test de email
     async mailerTest () {
         const msg = "Este correo es de prueba!!"
-        await this.mailerServ.sendMail({
+        await mailerResend("lmacchi@solucionesyservicios.com.ar","Test Resend",msg)
+        return 0
+        /*await this.mailerServ.sendMail({
             from: `Lucas Macchi <gestionpedidos@solucionesyservicios.online>`,
             to: 'lucasmacchi25@gmail.com',
             subject: 'Test Mail from SGP S&S',
             text: msg
-        })
+        })*/
     }
-    /*
-    //trae todos los legajos
-    async getLegajos (sector: string) {
-      const conn = clientReturner()
-      await conn.connect()
-      const sql = `select * from glpi_sgp_personal where sector = '${sector}';`
-      const rows = (await conn.query(sql)).rows
-      await conn.end()
-      return rows
-    }
-    */
     async getInsCategories () {
         const conn = clientReturner()
         await conn.connect()
@@ -56,16 +54,6 @@ export class DataProvider {
         }
         return data
     }
-    /*
-    async getPersonal (id: number) {
-      const conn = clientReturner()
-      await conn.connect()
-      const sql = `select * from glpi_sgp_personal where legajo = '${id}';`
-      const rows = (await conn.query(sql)).rows[0]
-      await conn.end()
-      return rows
-    }
-    */
     //Traer todos los insumos
     async getInsumos (rol: number) {
         const conn = clientReturner()
@@ -137,27 +125,6 @@ export class DataProvider {
     async categoriesGetter () {
         return categoriesJSON
     }
-    //No en uso
-    /*
-    async createPersonal (personal: personalDto) {
-      const sql = `INSERT INTO public.glpi_sgp_personal
-      (legajo, fullname, cuil, sector)
-      VALUES(${personal.legajo}, '${personal.fullname}', ${personal.cuil}, '${personal.sector}');`
-      const conn = clientReturner()
-      await conn.connect()
-      await conn.query(sql)
-      await conn.end()
-      return 'Personal agregado'
-    }
-    async deletePersonal (id: number) {
-      const sql = `DELETE FROM public.glpi_sgp_personal WHERE legajo = ${id};`
-      const conn = clientReturner()
-      await conn.connect()
-      await conn.query(sql)
-      await conn.end()
-      return 'Personal eliminado'
-    }
-    */
     //Trae todas las categorias para hacer un reporte de errores
     async reportsErrorsCategoriesGetter () {
         return reportsErrorsJSON
