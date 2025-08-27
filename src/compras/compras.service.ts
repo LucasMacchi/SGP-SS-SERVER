@@ -95,7 +95,7 @@ export class ComprasService {
                 subject: `Compra preaprobada - ${rows["nro"]}`,
                 msg:`Se ha preparobado la compra ${rows["nro"]}.`
             }
-            await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
+            //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
             return "Compra preaprobada"
         } catch (error) {
             await conn.end()
