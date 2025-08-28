@@ -182,7 +182,7 @@ export class ComprasService {
     async addDes (data: addDetailDto) {
         const conn = clientReturner()
         try {
-            const sql = `INSERT INTO public.glpi_sgp_compras_details (descripcion, cantidad, compra_id, detail_id) VALUES('${data.descripcion}', ${data.cantidad}, ${data.compraID});`
+            const sql = `INSERT INTO public.glpi_sgp_compras_details (descripcion, cantidad, compra_id) VALUES('${data.descripcion}', ${data.cantidad}, ${data.compraID});`
             await conn.connect()
             await conn.query(sql)
             await conn.end()
