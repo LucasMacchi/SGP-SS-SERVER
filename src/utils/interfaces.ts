@@ -48,3 +48,38 @@ export interface IOrderRemito {
     localidad: string,
     insumos: IInsumo[]
 }
+
+export interface IrequestEnvio {
+    entregaId: number,
+    desglose: string,
+    leche: {
+      kilos: number,
+      cajas: number,
+      bolsas: number,
+      raciones: number
+    },
+    azucar: {
+      kilos: number,
+      cajas: number,
+      bolsas: number,
+      raciones: number
+    },
+    yerba: {
+      kilos: number,
+      cajas: number,
+      bolsas: number,
+      raciones: number
+    },
+    alfajores: {
+      kilos: number,
+      cajas: number,
+      bolsas: number,
+      raciones: number
+    },
+    galletitas: {
+      kilos: number,
+      cajas: number,
+      bolsas: number,
+      raciones: number
+    }
+}

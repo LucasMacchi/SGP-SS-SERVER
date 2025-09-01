@@ -2,6 +2,7 @@ import { Controller, Get, Param, Body, Patch, UseGuards, Post } from '@nestjs/co
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
+import { createEnvioDto } from 'src/dto/enviosDto';
 
 @Controller('envios')
 export class EnviosController {
@@ -44,8 +45,9 @@ export class EnviosController {
     }
 
     @Post('create')
-    createEnvio(@Body() data) {
-        console.log(data)
+    createEnvio(@Body() data: createEnvioDto) {
+        console.log("Enviados: "+data.enviados.length)
+        console.log("Errores: "+data.no_enviados)
         return 0
     }
 }
