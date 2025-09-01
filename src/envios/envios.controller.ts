@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Body, Patch, UseGuards, Post } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
@@ -41,5 +41,11 @@ export class EnviosController {
     @Patch('edit/cant')
     editCantEnv(@Body() data: editCantidadDto) {
         return this.EnviosService.editCantidad(data)
+    }
+
+    @Post('create')
+    createEnvio(@Body() data) {
+        console.log(data)
+        return 0
     }
 }
