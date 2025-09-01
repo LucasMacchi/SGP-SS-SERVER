@@ -49,37 +49,16 @@ export interface IOrderRemito {
     insumos: IInsumo[]
 }
 
+export interface IDetalleEnvio {
+  kilos: number,
+  cajas: number,
+  bolsas: number,
+  raciones: number,
+  des: string
+}
+
 export interface IrequestEnvio {
-    entregaId: number,
-    desglose: string,
-    leche: {
-      kilos: number,
-      cajas: number,
-      bolsas: number,
-      raciones: number
-    },
-    azucar: {
-      kilos: number,
-      cajas: number,
-      bolsas: number,
-      raciones: number
-    },
-    yerba: {
-      kilos: number,
-      cajas: number,
-      bolsas: number,
-      raciones: number
-    },
-    alfajores: {
-      kilos: number,
-      cajas: number,
-      bolsas: number,
-      raciones: number
-    },
-    galletitas: {
-      kilos: number,
-      cajas: number,
-      bolsas: number,
-      raciones: number
-    }
+  entregaId: number,
+  desglose: string,
+  detalles: IDetalleEnvio[]
 }

@@ -46,7 +46,7 @@ export class EnviosController {
 
     @Post('create')
     createEnvio(@Body() data: createEnvioDto) {
-        console.log("Enviados: "+data.enviados.length)
+        console.log("Enviados: "+data.enviados[0].detalles)
         console.log("Errores: "+data.no_enviados)
         return 0
     }
