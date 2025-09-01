@@ -83,28 +83,47 @@ export class EnviosService {
         }
         
     }
+
+    private emptyFill(amount: number, value: number): string {
+        let formatted = ""+value
+        if(value.toString().length < amount) {
+            const diff = amount - formatted.length
+            for (let index = 1; index <= diff; index++) {
+                formatted = "0"+formatted
+            }
+        }
+        return formatted
+    }
+
     async createEnvios (data: createEnvioDto) {
         const conn = clientReturner()
         try {
             let created = 0
             let prodCreated = 0
             await conn.connect()
-            for(const envio of data.enviados) {
+            const enviosSorted = data.enviados.sort((a,b) => a.entregaId - b.entregaId)
+            let aux = enviosSorted[0].entregaId
+            for(const envio of enviosSorted) {
+                if(envio.entregaId > aux) {
+                    aux = envio.entregaId
+                    data.start_remito++
+                }
+                console.log(envio.entregaId,this.emptyFill(5,data.pv_remito)+"-"+this.emptyFill(6,data.start_remito))
                 const sql = `INSERT INTO public.glpi_sgp_envio(
 	            lentrega_id, dependencia, exported,fecha_created)
 	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW()) RETURNING envio_id;`
-                const envId = (await conn.query(sql)).rows[0]["envio_id"]
+                const envId = 0//(await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
 	                envio_id, kilos, cajas, bolsas, raciones, des)
 	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}');`
-                    await conn.query(sql2)
+                    //await conn.query(sql2)
                     prodCreated++
                 }
                 created++
             }
             await conn.end()
-            return "Envios creados: "+created+ "\nProductos agregados: "+ prodCreated +"\nEnvios no creados: "+data.no_enviados
+            return "Envios creados: "+created+ "\nProductos agregados: "+ prodCreated +"\nEnvios no creados por falta de lugar de entrega: "+data.no_lugarentrega+"\nEnvios sin insumos: "+data.no_insumo
         } catch (error) {
             await conn.end()
             console.log(error)

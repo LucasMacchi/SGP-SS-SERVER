@@ -8,5 +8,16 @@ export class createEnvioDto {
     enviados: IrequestEnvio[]
 
     @IsNumber()
-    no_enviados: number
+    @IsNotEmpty()
+    start_remito: number
+
+    @IsNumber()
+    @IsNotEmpty()
+    pv_remito: number
+
+    @IsNumber()
+    no_lugarentrega: number
+
+    @IsNumber()
+    no_insumo: number
 }
