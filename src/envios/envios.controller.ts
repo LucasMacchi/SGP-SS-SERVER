@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Body, Patch, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Body, Patch, UseGuards, Post } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
+import { createEnvioDto } from 'src/dto/enviosDto';
 
 @Controller('envios')
 export class EnviosController {
@@ -41,5 +42,15 @@ export class EnviosController {
     @Patch('edit/cant')
     editCantEnv(@Body() data: editCantidadDto) {
         return this.EnviosService.editCantidad(data)
+    }
+
+    @Post('create')
+    createEnvio(@Body() data: createEnvioDto) {
+        return this.EnviosService.createEnvios(data)
+    }
+
+    @Get('tanda/:id')
+    getAllEnviosTanda(@Param('id') id:number) {
+        return this.EnviosService.getTandaEnvios(id)
     }
 }
