@@ -101,14 +101,13 @@ export class EnviosService {
             let created = 0
             let prodCreated = 0
             await conn.connect()
-            const enviosSorted = data.enviados.sort((a,b) => a.entregaId - b.entregaId)
-            let aux = enviosSorted[0].entregaId
-            for(const envio of enviosSorted) {
+            let aux = data.enviados[0].entregaId
+            for(const envio of data.enviados) {
                 if(envio.entregaId > aux) {
                     aux = envio.entregaId
                     data.start_remito++
                 }
-                console.log(envio.entregaId,this.emptyFill(5,data.pv_remito)+"-"+this.emptyFill(6,data.start_remito))
+                console.log(envio.entregaId, this.emptyFill(5,data.pv_remito)+"-"+this.emptyFill(6,data.start_remito))
                 const sql = `INSERT INTO public.glpi_sgp_envio(
 	            lentrega_id, dependencia, exported,fecha_created)
 	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW()) RETURNING envio_id;`
