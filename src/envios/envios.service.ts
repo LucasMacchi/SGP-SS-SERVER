@@ -135,7 +135,7 @@ export class EnviosService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `SELECT * FROM public.glpi_sgp_envio e INNER JOIN public.glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.tanda = ${tanda};`
+            const sql = `SELECT * FROM public.glpi_sgp_envio e INNER JOIN public.glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.tanda = ${tanda} ORDER BY e.lentrega_id ASC;`
             const sql2 = `SELECT * FROM public.glpi_sgp_envio_details WHERE tanda = ${tanda};`
             const envios: IrequestEnvio[] = (await conn.query(sql)).rows
             const detalles: IDetalleEnvio[] = (await conn.query(sql2)).rows
