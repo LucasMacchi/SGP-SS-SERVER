@@ -54,11 +54,13 @@ export interface IDetalleEnvio {
   cajas: number,
   bolsas: number,
   raciones: number,
-  des: string
+  des: string,
+  envio_id: number
 }
 
 export interface IrequestEnvio {
   entregaId: number,
   desglose: string,
-  detalles: IDetalleEnvio[]
+  detalles: IDetalleEnvio[],
+  envio_id?: number
 }

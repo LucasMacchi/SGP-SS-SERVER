@@ -20,4 +20,7 @@ export class createEnvioDto {
 
     @IsNumber()
     no_insumo: number
+
+    @IsNumber()
+    tanda: number
 }

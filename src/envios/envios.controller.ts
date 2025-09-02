@@ -48,4 +48,9 @@ export class EnviosController {
     createEnvio(@Body() data: createEnvioDto) {
         return this.EnviosService.createEnvios(data)
     }
+
+    @Get('tanda/:id')
+    getAllEnviosTanda(@Param('id') id:number) {
+        return this.EnviosService.getTandaEnvios(id)
+    }
 }
