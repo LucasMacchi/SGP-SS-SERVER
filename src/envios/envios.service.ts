@@ -471,7 +471,7 @@ export class EnviosService {
                 // nro renglon
                 line2 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
                 blank3.forEach((s) => {
-                    line += fillEmptyTxt("",s,true,true,false)    
+                    line2 += fillEmptyTxt("",s,true,true,false)    
                 });
                 itemLin++
                 cabeceraLines.push(line)
