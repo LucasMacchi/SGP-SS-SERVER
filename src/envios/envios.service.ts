@@ -194,21 +194,24 @@ export class EnviosService {
             const arrayRemitos: IRemitoInd[] = []
             data1.forEach(data => {
                 if(data.lentrega_id !== aux) {
+                    const detallesToAdd: IDetalleEnvioTxt[] = []
+                    data1.forEach(de => {
+                        if(de.lentrega_id === data.lentrega_id) {
+                            const detalle: IDetalleEnvioTxt = {
+                                descripcion: de.descripcion,
+                                total_raciones: parseInt(de.total_raciones),
+                                total_kilos: parseInt(de.total_kilos),
+                                total_bolsas: parseInt(de.total_bolsas),
+                                total_cajas: parseInt(de.total_cajas)
+                            }
+                            detallesToAdd.push(detalle)
+                        }
+                    });
+
                     const fila: IRemitoInd = {
                         remito: data.nro_remito,
                         lentrega: data.lentrega_id,
-                        detalles: data1.filter((de) => {
-                            if(de.lentrega_id === data.lentrega_id) {
-                                const detalle: IDetalleEnvioTxt = {
-                                    descripcion: de.descripcion,
-                                    total_raciones: de.total_raciones,
-                                    total_kilos: de.total_kilos,
-                                    total_bolsas: de.total_bolsas,
-                                    total_cajas: de.total_cajas
-                                }
-                                return detalle
-                            }
-                        })
+                        detalles: detallesToAdd
                     }
                     arrayRemitos.push(fila)
                 }
@@ -337,16 +340,23 @@ export class EnviosService {
         const lines = remito.length
         for (let index = 0; index < lines; index++) {
             let itemLin = 1
+            let bolsasTotal = 0
+            let cajasTotal = 0
+            let racionesTotal = 0
             const r = remito[index]
             const fecha = this.dateParser(new Date())
-            r.detalles.forEach(detalle => {
+            r.detalles.forEach((detalle,i) => {
                 let line = ""
                 let line2 = ""
+                let line3 = ""
                 const de = detalle
+                bolsasTotal = bolsasTotal+detalle.total_bolsas
+                cajasTotal = cajasTotal+detalle.total_cajas
+                racionesTotal = racionesTotal+detalle.total_raciones
                 const des = de.descripcion.split("-")
                 // ARTICULO ------------------------------------
                 // - Comprobante
-                line += fillEmptyTxt("RT",3,false,true,false)
+                line += fillEmptyTxt("NP",3,false,true,false)
                 //Letra
                 line += fillEmptyTxt("R",1,false,false,false)
                 //Punto de venta
@@ -411,7 +421,7 @@ export class EnviosService {
                 // Leyenda ------------------------------------
                 itemLin++
                 //Comprobante
-                line2 += fillEmptyTxt("RT",3,false,true,false)
+                line2 += fillEmptyTxt("NP",3,false,true,false)
                 //Letra
                 line2 += fillEmptyTxt("R",1,false,false,false)
                 //Punto de venta
@@ -476,6 +486,75 @@ export class EnviosService {
                 itemLin++
                 cabeceraLines.push(line)
                 cabeceraLines.push(line2)
+                if(i === r.detalles.length - 1) {
+                    itemLin++
+                    // Leyenda ------------------------------------
+                    itemLin++
+                    //Comprobante
+                    line3 += fillEmptyTxt("NP",3,false,true,false)
+                    //Letra
+                    line3 += fillEmptyTxt("R",1,false,false,false)
+                    //Punto de venta
+                    line3 += fillEmptyTxt(r.remito.split("-")[0],5,false,false,true)
+                    //Nro comprobante
+                    line3 += fillEmptyTxt(r.remito.split("-")[1],8,false,false,true)
+                    //nro hasta
+                    line3 += fillEmptyTxt("",8,true,false,false)
+                    //fecha comprobante
+                    line3 += fillEmptyTxt(fecha,8,false,true,false)
+                    //cod cliente
+                    line3 += fillEmptyTxt("1",6,false,false,true)
+                    //tip item
+                    line3 += fillEmptyTxt("L",1,false,false,true)
+                    //tip item
+                    line3 += fillEmptyTxt("",23,true,false,false)
+                    //cant unidad 1
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //cant unidad 2
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tip item
+                    line3 += fillEmptyTxt(`Total: Cajas ${cajasTotal} - Bolsas ${bolsasTotal} - Raciones ${racionesTotal}`,50,false,true,false)
+                    //prec unitario
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tasa iva ins
+                    line3 += fillEmptyTxt("21.00",8,false,false,false)
+                    //tasa iva no ins
+                    line3 += fillEmptyTxt("",8,true,false,false)
+                    //imp iva ins
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //imp iva no ins
+                    line3 += fillEmptyTxt("",16,true,false,false)
+                    //imp total
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //19 - 23
+                    blank1.forEach((s) => {
+                        line3 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    //tip iva
+                    line3 += fillEmptyTxt("",1,true,false,false)
+                    //cod desc
+                    line3 += fillEmptyTxt("",2,true,false,false)
+                    //imp desc
+                    line3 += fillEmptyTxt("",16,true,false,false)
+                    //deposito
+                    line3 += fillEmptyTxt("",3,true,false,false)
+                    //partida
+                    line3 += fillEmptyTxt("",26,true,false,false)
+                    //tasa desc
+                    line3 += fillEmptyTxt("",8,true,false,false)
+                    //imp renglon
+                    line3 += fillEmptyTxt("0.00",16,false,false,false)
+                    //31 - 46
+                    blank2.forEach((s) => {
+                        line3 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    // nro renglon
+                    line3 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                    blank3.forEach((s) => {
+                        line3 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    cabeceraLines.push(line3)
+                }
             });
 
         }
