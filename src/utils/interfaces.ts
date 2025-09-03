@@ -69,10 +69,10 @@ export interface IEntregaDetalleTxt {
     lentrega_id: number,
     nro_remito: string,
     descripcion: string,
-    total_raciones: number,
-    total_kilos: number,
-    total_bolsas: number,
-    total_cajas: number
+    total_raciones: string,
+    total_kilos: string,
+    total_bolsas: string,
+    total_cajas: string
 }
 
 export interface IDetalleEnvioTxt {
