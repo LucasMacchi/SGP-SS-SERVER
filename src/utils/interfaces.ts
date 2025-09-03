@@ -64,3 +64,27 @@ export interface IrequestEnvio {
   detalles: IDetalleEnvio[],
   envio_id?: number
 }
+
+export interface IEntregaDetalleTxt {
+    lentrega_id: number,
+    nro_remito: string,
+    descripcion: string,
+    total_raciones: number,
+    total_kilos: number,
+    total_bolsas: number,
+    total_cajas: number
+}
+
+export interface IDetalleEnvioTxt {
+    descripcion: string,
+    total_raciones: number,
+    total_kilos: number,
+    total_bolsas: number,
+    total_cajas: number
+}
+
+export interface IRemitoInd {
+    remito: string,
+    lentrega: number,
+    detalles: IDetalleEnvioTxt[]
+}
