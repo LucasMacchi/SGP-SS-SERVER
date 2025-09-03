@@ -332,10 +332,11 @@ export class EnviosService {
     private createItemTxt (remito: IRemitoInd[]) {
         let cabeceraLines: string[] = []
         const blank1 = [16,16,16,4,16]
-        const blank2 = [3,4,25,4,25,6,40,15,15,15,20,8,3,1,5,1]
+        const blank2 = [3,4,25,4,25,6,40,15,15,15,20,8]
+        const blank3 = [1,5,1]
         const lines = remito.length
         for (let index = 0; index < lines; index++) {
-            
+            let itemLin = 1
             const r = remito[index]
             const fecha = this.dateParser(new Date())
             r.detalles.forEach(detalle => {
@@ -402,7 +403,13 @@ export class EnviosService {
                 blank2.forEach((s) => {
                     line += fillEmptyTxt("",s,true,true,false)    
                 });
+                // nro renglon
+                line += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                blank3.forEach((s) => {
+                    line += fillEmptyTxt("",s,true,true,false)    
+                });
                 // Leyenda ------------------------------------
+                itemLin++
                 //Comprobante
                 line2 += fillEmptyTxt("RT",3,false,true,false)
                 //Letra
@@ -461,6 +468,12 @@ export class EnviosService {
                 blank2.forEach((s) => {
                     line2 += fillEmptyTxt("",s,true,true,false)    
                 });
+                // nro renglon
+                line2 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                blank3.forEach((s) => {
+                    line += fillEmptyTxt("",s,true,true,false)    
+                });
+                itemLin++
                 cabeceraLines.push(line)
                 cabeceraLines.push(line2)
             });
