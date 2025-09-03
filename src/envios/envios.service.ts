@@ -263,7 +263,7 @@ export class EnviosService {
             const r = remito[index]
             const fecha = this.dateParser(new Date())
             //Comprobante
-            line += fillEmptyTxt("RT",3,false,true,false)
+            line += fillEmptyTxt("NP",3,false,true,false)
             //Letra
             line += fillEmptyTxt("R",1,false,false,false)
             //Punto de venta
