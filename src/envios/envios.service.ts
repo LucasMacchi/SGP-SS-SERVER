@@ -252,7 +252,8 @@ export class EnviosService {
         let cabeceraLines: string[] = []
         const blank1 = [2,2,2,4,4,30,8,25,4,40]
         const blank2 = [15,15,15,15,25]
-        const blank3 = [8,8,8,8,8,15,8,1,50,30,30,50,4,3,16,1,3,3,8,8,15,15,3,3,1,4,8,6]
+        const blank3 = [8,8,8,8,8,15,8,1,50,30,30,50,4,3,16,1,3,3,8,8,15,15,3]
+        const blank4 = [1,4,8,6]
         const lines = remito.length
         for (let index = 0; index < lines; index++) {
             let line = ""
@@ -314,6 +315,12 @@ export class EnviosService {
             line += fillEmptyTxt(" ",1,true,true,false)
             //39 - 66
             blank3.forEach((s) => {
+                line += fillEmptyTxt("",s,true,true,false)    
+            });
+            //lgar de entrega
+            line += fillEmptyTxt(r.lentrega.toString(),3,false,false,true)
+            //
+            blank4.forEach((s) => {
                 line += fillEmptyTxt("",s,true,true,false)    
             });
 
