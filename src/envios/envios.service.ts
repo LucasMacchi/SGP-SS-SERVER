@@ -487,9 +487,8 @@ export class EnviosService {
                 cabeceraLines.push(line)
                 cabeceraLines.push(line2)
                 if(i === r.detalles.length - 1) {
-                    itemLin++
+                    console.log(itemLin)
                     // Leyenda ------------------------------------
-                    itemLin++
                     //Comprobante
                     line3 += fillEmptyTxt("NP",3,false,true,false)
                     //Letra
