@@ -136,8 +136,8 @@ export class DataProvider {
                 subject: `${body.category} - SGP`,
                 msg: emailError(body.descripcion,body.category,body.nombre_completo)
             }
-            console.log(supportEmail)
-            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', supportEmail,body.category, mail.msg))
+            await mailerResend(supportEmail,mail.subject, mail.msg)
+            //await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', supportEmail,body.category, mail.msg))
         } catch (error) {
             return 'Email fail'
         }

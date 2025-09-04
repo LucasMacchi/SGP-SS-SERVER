@@ -8,6 +8,7 @@ import reportDto from 'src/dto/reportDto';
 import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
 import endCode from 'src/utils/endCode';
+import mailerResend from 'src/utils/mailerResend';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
@@ -102,12 +103,12 @@ export class Pedido {
             }
             if(rows1.constructor === Array) {
                 try {
-                    const mail: IemailMsg = {
-                        subject: `Nuevo Pedido Solicitado - SGP`,
-                        msg: `Pedido numero "${nro}" solcitado por el usuario "${pedido.requester}" al centro de costo ${pedido.service_id}-${pedido.service_des}`
-                    }
-                    const adresses: string [] = rows1.map(r => r['email']) 
-                    await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
+                    //const mail: IemailMsg = {
+                    //    subject: `Nuevo Pedido Solicitado - SGP`,
+                    //    msg: `Pedido numero "${nro}" solcitado por el usuario "${pedido.requester}" al centro de costo ${pedido.service_id}-${pedido.service_des}`
+                    //}
+                    //const adresses: string [] = rows1.map(r => r['email']) 
+                    //await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
                     await conn.end()
                     return "Creado"
                 } catch (error) {
@@ -266,16 +267,6 @@ export class Pedido {
         await conn.end()
         return "Orden "+orId+ " Archivado."
     }
-    /* No funciona *****
-    async setLegajo (id: number, legajo: number) {
-      const sql = `update glpi_sgp_orders gso set legajo = ${legajo} where order_id = ${id}`
-      const conn = clientReturner()
-      await conn.connect()
-      await conn.query(sql)
-      await conn.end()
-      return "Orden vincualdo con legajo "+legajo
-    }
-      */
     //Agrega un reporte al pedido
     async addReport (report: reportDto){
         const sql = `INSERT INTO public.glpi_sgp_reports
@@ -294,6 +285,7 @@ export class Pedido {
                 subject: `${report.nombre_completo} realizo un reporte - ${report.category} - SGP`,
                 msg: `${report.nombre_completo} realizo un reporte para el pedido numero ${report.pedido_numero}:\n${report.descripcion}`
             }
+            await mailerResend(adresses,mail.subject, mail.msg)
             await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', adresses, mail.subject, mail.msg))
         } catch (error) {
             
@@ -329,19 +321,5 @@ export class Pedido {
             return 'Pedido no pudo eliminarse'
         }
     }
-    /*No funciona***
-    async getUnqPedido (nro: string) {
-        const conn = clientReturner()
-        try {
-            const sql = `select exists (select gso.numero from glpi_sgp_orders gso where gso.numero = '${nro}');`
-            await conn.connect()
-            const rows = (await conn.query(sql)).rows
-            await conn.end()
-            return rows[0]['exists']
-        } catch (error) {
-            await conn.end()
-            return false
-        }
-    }
-    */
+
 }

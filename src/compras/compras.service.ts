@@ -48,6 +48,7 @@ export class ComprasService {
                 subject: `Compra registrada - ${nro} - ${data.fullname}`,
                 msg:`Compra registrada para el area ${data.area} con el numero ${nro}.`
             }
+            await mailerResend(glpiEmail,mail.subject, mail.msg)
             //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
             return "Creado compra"
         } catch (error) {
