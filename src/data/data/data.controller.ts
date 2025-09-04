@@ -17,26 +17,6 @@ export class DataController {
     ping(): string {
         return "Server pinged at "+ new Date()
     }
-    /*
-    @Post('personal')
-    async postPersonal (@Body() body: personalDto) {
-      return await this.DataProvider.createPersonal(body)
-    }
-    @Delete('personal/:legajo')
-    async deletePersonal (@Param('legajo') legajo: string) {
-      return await this.DataProvider.deletePersonal(parseInt(legajo))
-    }
-    
-    @Get('legajos/:sector')
-    async getLegajos(@Param('sector') sector: string) {
-      return await this.DataProvider.getLegajos(sector)
-    }
-    
-    @Get('legajo/:id')
-    async getPersona(@Param('id') id: string) {
-      return await this.DataProvider.getPersonal(parseInt(id))
-    }
-    */
     @Get('email')
     async emailTest() {
         await this.DataProvider.mailerTest()

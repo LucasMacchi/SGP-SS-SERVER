@@ -3,6 +3,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { IemailMsg } from 'src/utils/interfaces';
 import mailer from 'src/utils/mailer';
 import clientReturner from 'src/utils/clientReturner';
+import mailerResend from 'src/utils/mailerResend';
 
 @Injectable()
 export class UserService {
@@ -96,7 +97,8 @@ export class UserService {
                 subject: `Mensaje de ${sender} - SGP`,
                 msg: msg
             }
-            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+            await mailerResend(email,mail.subject, mail.msg)
+            //await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
         } catch (error) {
             return 'Email fail'
         }
