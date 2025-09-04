@@ -207,7 +207,6 @@ export class EnviosService {
                             detallesToAdd.push(detalle)
                         }
                     });
-
                     const fila: IRemitoInd = {
                         remito: data.nro_remito,
                         lentrega: data.lentrega_id,
@@ -230,6 +229,7 @@ export class EnviosService {
         }
     }
 
+    //devuelve la fecha en el formato adecuado para la exportacion
     private dateParser (tDate: Date): string {
         const day = tDate.getUTCDate()
         let dayStr = day.toString()
@@ -241,6 +241,7 @@ export class EnviosService {
         if(month < 10) mStr = "0"+mStr
         return year+mStr+dayStr
     }
+    //Devuelve el cuit con lineas
     private cuitParserFn (cuit: number): string {
         const cuitStr = cuit.toString()
         let newCuit = ""
@@ -251,6 +252,8 @@ export class EnviosService {
         
         return newCuit
     }
+
+    //Crea una cabecera por remito
     private createCabeceraTxt (remito: IRemitoInd[]) {
         let cabeceraLines: string[] = []
         const blank1 = [2,2,2,4,4,30,8,25,4,40]
@@ -332,6 +335,7 @@ export class EnviosService {
         return cabeceraLines
     }
 
+    //Esta funcion crea una los items del remito, crea el item, la leyenda del mismo y al final de todos el total.
     private createItemTxt (remito: IRemitoInd[]) {
         let cabeceraLines: string[] = []
         const blank1 = [16,16,16,4,16]
@@ -562,4 +566,3 @@ export class EnviosService {
     
 
 }
-//"MINISTERIO DE EDUCACION DE CORRIENTES"
