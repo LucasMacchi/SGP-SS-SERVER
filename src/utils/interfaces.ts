@@ -88,3 +88,9 @@ export interface IRemitoInd {
     lentrega: number,
     detalles: IDetalleEnvioTxt[]
 }
+
+export interface IitemsTotal {
+    tcajas: number,
+    tbolsas: number,
+    traciones: number
+}

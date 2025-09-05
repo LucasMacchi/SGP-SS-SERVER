@@ -4,11 +4,12 @@ import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
 import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IRemitoInd, IrequestEnvio } from 'src/utils/interfaces';
+import { IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IitemsTotal, IRemitoInd, IrequestEnvio } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 @Injectable()
 export class EnviosService {
 
+    //Trae los lugares de entrega
     async getLugaresEntrega () {
         const conn = clientReturner()
         try {
@@ -22,6 +23,8 @@ export class EnviosService {
             return error
         }
     }
+
+    //Consigue todos los desgloses
     async getDesgloses () {
 
         //ACA
@@ -38,6 +41,7 @@ export class EnviosService {
             return error
         }
     }
+    //Trae todos los envios
     async getEnvios () {
         const conn = clientReturner()
         try {
@@ -52,6 +56,7 @@ export class EnviosService {
             return error
         }
     }
+    //trae un envio por id
     async getEnviosUniq (id:number) {
         const conn = clientReturner()
         try {
@@ -69,6 +74,7 @@ export class EnviosService {
             return error
         }
     }
+    //Edita la cantidad de una insuno en una compra
     async editCantidad (data: editCantidadDto) {
         const conn = clientReturner()
         try {
@@ -84,7 +90,7 @@ export class EnviosService {
         }
         
     }
-
+    //Funcion para rellenar un espacio vacio con ceros
     private emptyFill(amount: number, value: number): string {
         let formatted = ""+value
         if(value.toString().length < amount) {
@@ -96,6 +102,7 @@ export class EnviosService {
         return formatted
     }
 
+    //Crea envios masivamente para crear remitos
     async createEnvios (data: createEnvioDto) {
         const conn = clientReturner()
         try {
@@ -133,6 +140,8 @@ export class EnviosService {
         }
     }
 
+    //Trae los envios por una tanda especifica
+
     async getTandaEnvios (tanda: number) {
         const conn = clientReturner()
         try {
@@ -154,17 +163,7 @@ export class EnviosService {
         }
     }
 
-    async getCurrentTanda () {
-        const conn = clientReturner()
-        try {
-            
-        } catch (error) {
-            await conn.end()
-            console.log(error)
-            return error
-        }
-    }
-
+    //Crea las lineas de texto para los dos TXTs necesarios para la importacion
     async createTxtEnvio (tanda: number) {
         const conn = clientReturner()
         const sqlRemitos = `SELECT 
@@ -335,6 +334,25 @@ export class EnviosService {
         return cabeceraLines
     }
 
+    private divisorioReturner (des: string): number {
+        if(des === "9000-000078-Leche entera en polvo 800 gr") return 12
+        else if(des === "9003-000011-Azucar 1 Kg") return 10
+        else if(des === "9002-000011-Yerba 1 Kg") return 10
+        else if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 50
+        else if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 12
+        else return 0
+    }
+
+    private totalReturner (remito: IRemitoInd): IRemitoInd {
+        const detalles = remito.detalles
+        detalles.forEach(de => {
+            const numberDiv = this.divisorioReturner(de.descripcion)
+            de.total_cajas = de.total_bolsas > numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
+            de.total_bolsas = de.total_bolsas % numberDiv
+        });
+        return remito
+    }
+
     //Esta funcion crea una los items del remito, crea el item, la leyenda del mismo y al final de todos el total.
     private createItemTxt (remito: IRemitoInd[]) {
         let cabeceraLines: string[] = []
@@ -347,7 +365,7 @@ export class EnviosService {
             let bolsasTotal = 0
             let cajasTotal = 0
             let racionesTotal = 0
-            const r = remito[index]
+            const r = this.totalReturner(remito[index])
             const fecha = this.dateParser(new Date())
             r.detalles.forEach((detalle,i) => {
                 let line = ""
@@ -491,7 +509,6 @@ export class EnviosService {
                 cabeceraLines.push(line)
                 cabeceraLines.push(line2)
                 if(i === r.detalles.length - 1) {
-                    console.log(itemLin)
                     // Leyenda ------------------------------------
                     //Comprobante
                     line3 += fillEmptyTxt("NP",3,false,true,false)
