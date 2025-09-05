@@ -54,8 +54,8 @@ export class EnviosController {
         return this.EnviosService.getTandaEnvios(id)
     }
 
-    @Get('txt/:id')
-    getcreateTxt(@Param('id') id:number) {
-        return this.EnviosService.createTxtEnvio(id)
+    @Get('txt/:tanda/:dias')
+    getcreateTxt(@Param('tanda') tanda:number,@Param('dias') dias:number,) {
+        return this.EnviosService.createTxtEnvio(tanda,dias)
     }
 }
