@@ -347,7 +347,7 @@ export class EnviosService {
         const detalles = remito.detalles
         detalles.forEach(de => {
             const numberDiv = this.divisorioReturner(de.descripcion)
-            de.total_cajas = de.total_bolsas > numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
+            de.total_cajas = de.total_bolsas >= numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
             de.total_bolsas = de.total_bolsas % numberDiv
         });
         return remito
