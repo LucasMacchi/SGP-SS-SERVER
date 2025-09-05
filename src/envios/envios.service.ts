@@ -4,7 +4,7 @@ import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
 import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IitemsTotal, IRemitoInd, IrequestEnvio } from 'src/utils/interfaces';
+import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IitemsTotal, IRemitoInd, IrequestEnvio } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 @Injectable()
 export class EnviosService {
@@ -164,7 +164,7 @@ export class EnviosService {
     }
 
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
-    async createTxtEnvio (tanda: number) {
+    async createTxtEnvio (tanda: number, dias: number) {
         const conn = clientReturner()
         const sqlRemitos = `SELECT 
                             e.lentrega_id,
@@ -186,9 +186,11 @@ export class EnviosService {
                             	d.des
                             ORDER BY 
                                 e.lentrega_id;`
+        const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
         try {
             await conn.connect()
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
+            const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
             let aux = 0
             const arrayRemitos: IRemitoInd[] = []
             data1.forEach(data => {
@@ -206,18 +208,24 @@ export class EnviosService {
                             detallesToAdd.push(detalle)
                         }
                     });
+                    let desglosesCount = 0
+                    desgloses.forEach(desc => {
+                        if(desc.nro_remito === data.nro_remito) desglosesCount = desc.count; console.log(desc)
+                    });
                     const fila: IRemitoInd = {
                         remito: data.nro_remito,
                         lentrega: data.lentrega_id,
-                        detalles: detallesToAdd
+                        detalles: detallesToAdd,
+                        desgloses: desglosesCount
                     }
                     arrayRemitos.push(fila)
                 }
                 aux = data.lentrega_id
             });
+            console.log(arrayRemitos)
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
-                items: this.createItemTxt(arrayRemitos)
+                items: this.createItemTxt(arrayRemitos,dias)
             }
             return response
 
@@ -354,7 +362,7 @@ export class EnviosService {
     }
 
     //Esta funcion crea una los items del remito, crea el item, la leyenda del mismo y al final de todos el total.
-    private createItemTxt (remito: IRemitoInd[]) {
+    private createItemTxt (remito: IRemitoInd[],dias: number) {
         let cabeceraLines: string[] = []
         const blank1 = [16,16,16,4,16]
         const blank2 = [3,4,25,4,25,6,40,15,15,15,20,8]
@@ -371,6 +379,8 @@ export class EnviosService {
                 let line = ""
                 let line2 = ""
                 let line3 = ""
+                let linea4 = ""
+                let linea5 = ""
                 const de = detalle
                 bolsasTotal = bolsasTotal+detalle.total_bolsas
                 cajasTotal = cajasTotal+detalle.total_cajas
@@ -575,6 +585,136 @@ export class EnviosService {
                     });
                     cabeceraLines.push(line3)
                 }
+                    // Leyenda ------------------------------------
+                    //Comprobante
+                    linea4 += fillEmptyTxt("NP",3,false,true,false)
+                    //Letra
+                    linea4 += fillEmptyTxt("R",1,false,false,false)
+                    //Punto de venta
+                    linea4 += fillEmptyTxt(r.remito.split("-")[0],5,false,false,true)
+                    //Nro comprobante
+                    linea4 += fillEmptyTxt(r.remito.split("-")[1],8,false,false,true)
+                    //nro hasta
+                    linea4 += fillEmptyTxt("",8,true,false,false)
+                    //fecha comprobante
+                    linea4 += fillEmptyTxt(fecha,8,false,true,false)
+                    //cod cliente
+                    linea4 += fillEmptyTxt("1",6,false,false,true)
+                    //tip item
+                    linea4 += fillEmptyTxt("L",1,false,false,true)
+                    //tip item
+                    linea4 += fillEmptyTxt("",23,true,false,false)
+                    //cant unidad 1
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //cant unidad 2
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tip item
+                    linea4 += fillEmptyTxt(`Total de desgloses: ${r.desgloses}`,50,false,true,false)
+                    //prec unitario
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tasa iva ins
+                    linea4 += fillEmptyTxt("21.00",8,false,false,false)
+                    //tasa iva no ins
+                    linea4 += fillEmptyTxt("",8,true,false,false)
+                    //imp iva ins
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //imp iva no ins
+                    linea4 += fillEmptyTxt("",16,true,false,false)
+                    //imp total
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //19 - 23
+                    blank1.forEach((s) => {
+                        linea4 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    //tip iva
+                    linea4 += fillEmptyTxt("",1,true,false,false)
+                    //cod desc
+                    linea4 += fillEmptyTxt("",2,true,false,false)
+                    //imp desc
+                    linea4 += fillEmptyTxt("",16,true,false,false)
+                    //deposito
+                    linea4 += fillEmptyTxt("",3,true,false,false)
+                    //partida
+                    linea4 += fillEmptyTxt("",26,true,false,false)
+                    //tasa desc
+                    linea4 += fillEmptyTxt("",8,true,false,false)
+                    //imp renglon
+                    linea4 += fillEmptyTxt("0.00",16,false,false,false)
+                    //31 - 46
+                    blank2.forEach((s) => {
+                        linea4 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    // nro renglon
+                    linea4 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                    blank3.forEach((s) => {
+                        linea4 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    cabeceraLines.push(linea4)
+                    // Leyenda ------------------------------------
+                    //Comprobante
+                    linea5 += fillEmptyTxt("NP",3,false,true,false)
+                    //Letra
+                    linea5 += fillEmptyTxt("R",1,false,false,false)
+                    //Punto de venta
+                    linea5 += fillEmptyTxt(r.remito.split("-")[0],5,false,false,true)
+                    //Nro comprobante
+                    linea5 += fillEmptyTxt(r.remito.split("-")[1],8,false,false,true)
+                    //nro hasta
+                    linea5 += fillEmptyTxt("",8,true,false,false)
+                    //fecha comprobante
+                    linea5 += fillEmptyTxt(fecha,8,false,true,false)
+                    //cod cliente
+                    linea5 += fillEmptyTxt("1",6,false,false,true)
+                    //tip item
+                    linea5 += fillEmptyTxt("L",1,false,false,true)
+                    //tip item
+                    linea5 += fillEmptyTxt("",23,true,false,false)
+                    //cant unidad 1
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //cant unidad 2
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tip item
+                    linea5 += fillEmptyTxt(`Raciones por ${dias} dias habiles`,50,false,true,false)
+                    //prec unitario
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tasa iva ins
+                    linea5 += fillEmptyTxt("21.00",8,false,false,false)
+                    //tasa iva no ins
+                    linea5 += fillEmptyTxt("",8,true,false,false)
+                    //imp iva ins
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //imp iva no ins
+                    linea5 += fillEmptyTxt("",16,true,false,false)
+                    //imp total
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //19 - 23
+                    blank1.forEach((s) => {
+                        linea5 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    //tip iva
+                    linea5 += fillEmptyTxt("",1,true,false,false)
+                    //cod desc
+                    linea5 += fillEmptyTxt("",2,true,false,false)
+                    //imp desc
+                    linea5 += fillEmptyTxt("",16,true,false,false)
+                    //deposito
+                    linea5 += fillEmptyTxt("",3,true,false,false)
+                    //partida
+                    linea5 += fillEmptyTxt("",26,true,false,false)
+                    //tasa desc
+                    linea5 += fillEmptyTxt("",8,true,false,false)
+                    //imp renglon
+                    linea5 += fillEmptyTxt("0.00",16,false,false,false)
+                    //31 - 46
+                    blank2.forEach((s) => {
+                        linea5 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    // nro renglon
+                    linea5 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                    blank3.forEach((s) => {
+                        linea5 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    cabeceraLines.push(linea5)
             });
 
         }

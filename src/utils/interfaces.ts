@@ -86,11 +86,17 @@ export interface IDetalleEnvioTxt {
 export interface IRemitoInd {
     remito: string,
     lentrega: number,
-    detalles: IDetalleEnvioTxt[]
+    detalles: IDetalleEnvioTxt[],
+    desgloses: number
 }
 
 export interface IitemsTotal {
     tcajas: number,
     tbolsas: number,
     traciones: number
+}
+
+export interface desgloseCount {
+    nro_remito: string,
+    count: number
 }
