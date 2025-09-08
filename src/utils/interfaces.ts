@@ -54,6 +54,7 @@ export interface IDetalleEnvio {
   cajas: number,
   bolsas: number,
   raciones: number,
+  unidades: number,
   des: string,
   envio_id: number
 }
@@ -72,7 +73,8 @@ export interface IEntregaDetalleTxt {
     total_raciones: string,
     total_kilos: string,
     total_bolsas: string,
-    total_cajas: string
+    total_cajas: string,
+    total_unidades: string
 }
 
 export interface IDetalleEnvioTxt {
@@ -80,7 +82,8 @@ export interface IDetalleEnvioTxt {
     total_raciones: number,
     total_kilos: number,
     total_bolsas: number,
-    total_cajas: number
+    total_cajas: number,
+    total_unidades: number
 }
 
 export interface IRemitoInd {

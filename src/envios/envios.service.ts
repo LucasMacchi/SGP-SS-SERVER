@@ -124,8 +124,8 @@ export class EnviosService {
                 const envId = (await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-	                envio_id, kilos, cajas, bolsas, raciones, des, tanda)
-	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${data.tanda});`
+	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades)
+	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${data.tanda}, ${prod.unidades});`
                     await conn.query(sql2)
                     prodCreated++
                 }
@@ -173,7 +173,8 @@ export class EnviosService {
                             SUM(d.raciones) AS total_raciones,
                             SUM(d.kilos) AS total_kilos,
                             SUM(d.bolsas) AS total_bolsas,
-                            SUM(d.cajas) AS total_cajas
+                            SUM(d.cajas) AS total_cajas,
+                            SUM(d.unidades) AS total_unidades
                             FROM 
                                 glpi_sgp_envio e
                             JOIN 
@@ -203,7 +204,8 @@ export class EnviosService {
                                 total_raciones: parseInt(de.total_raciones),
                                 total_kilos: parseFloat(parseFloat(de.total_kilos).toFixed(2)),
                                 total_bolsas: parseInt(de.total_bolsas),
-                                total_cajas: parseInt(de.total_cajas)
+                                total_cajas: parseInt(de.total_cajas),
+                                total_unidades: parseInt(de.total_unidades)
                             }
                             detallesToAdd.push(detalle)
                         }
@@ -406,7 +408,7 @@ export class EnviosService {
                 //tip item
                 line += fillEmptyTxt(des[0]+"-"+des[1],23,false,true,false)
                 //cant unidad 1
-                line += fillEmptyTxt(de.total_kilos.toString(),16,false,false,false)
+                line += fillEmptyTxt(de.total_unidades.toString(),16,false,false,false)
                 //cant unidad 2
                 line += fillEmptyTxt("0.00",16,false,false,false)
                 //tip item
@@ -475,7 +477,7 @@ export class EnviosService {
                 //cant unidad 2
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tip item
-                line2 += fillEmptyTxt(`Contiene: Cajas ${de.total_cajas} - Bolsas ${de.total_bolsas} - Raciones ${de.total_raciones}`,50,false,true,false)
+                line2 += fillEmptyTxt(`Contiene: Kilogramos ${de.total_kilos} - Cajas ${de.total_cajas} - Bolsas ${de.total_bolsas} - Raciones ${de.total_raciones}`,50,false,true,false)
                 //prec unitario
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tasa iva ins
