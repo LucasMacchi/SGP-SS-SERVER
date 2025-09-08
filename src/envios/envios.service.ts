@@ -477,7 +477,7 @@ export class EnviosService {
                 //cant unidad 2
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tip item
-                line2 += fillEmptyTxt(`Contiene: Kg ${de.total_kilos} - Cajas ${de.total_cajas} - Bolsas ${de.total_bolsas} - Rac ${de.total_raciones}`,50,false,true,false)
+                line2 += fillEmptyTxt(`Contiene: Kg ${de.total_kilos}-Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
                 //prec unitario
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tasa iva ins
