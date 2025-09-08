@@ -201,7 +201,7 @@ export class EnviosService {
                             const detalle: IDetalleEnvioTxt = {
                                 descripcion: de.descripcion,
                                 total_raciones: parseInt(de.total_raciones),
-                                total_kilos: parseInt(de.total_kilos),
+                                total_kilos: parseFloat(parseFloat(de.total_kilos).toFixed(2)),
                                 total_bolsas: parseInt(de.total_bolsas),
                                 total_cajas: parseInt(de.total_cajas)
                             }
@@ -210,7 +210,7 @@ export class EnviosService {
                     });
                     let desglosesCount = 0
                     desgloses.forEach(desc => {
-                        if(desc.nro_remito === data.nro_remito) desglosesCount = desc.count; console.log(desc)
+                        if(desc.nro_remito === data.nro_remito) desglosesCount = desc.count;
                     });
                     const fila: IRemitoInd = {
                         remito: data.nro_remito,
@@ -222,7 +222,7 @@ export class EnviosService {
                 }
                 aux = data.lentrega_id
             });
-            console.log(arrayRemitos)
+            console.log(arrayRemitos[0].detalles)
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
                 items: this.createItemTxt(arrayRemitos,dias)
