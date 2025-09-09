@@ -588,7 +588,6 @@ export class EnviosService {
                         line3 += fillEmptyTxt("",s,true,true,false)    
                     });
                     cabeceraLines.push(line3)
-                }
                     // Leyenda ------------------------------------
                     //Comprobante
                     linea4 += fillEmptyTxt("NP",3,false,true,false)
@@ -719,6 +718,8 @@ export class EnviosService {
                         linea5 += fillEmptyTxt("",s,true,true,false)    
                     });
                     cabeceraLines.push(linea5)
+
+                }
             });
 
         }
