@@ -351,6 +351,7 @@ export class EnviosService {
         else if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 50
         else if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 12
         else if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 10
+        else if(des === "9005-000080-Budin 170g") return 20
         else return 0
     }
 
