@@ -436,7 +436,7 @@ export class EnviosService {
                 //imp desc
                 line += fillEmptyTxt("",16,true,false,false)
                 //deposito
-                line += fillEmptyTxt("CEN",3,false,true,false)
+                line += fillEmptyTxt("RIA",3,false,true,false)
                 //partida
                 line += fillEmptyTxt("",26,true,false,false)
                 //tasa desc
