@@ -350,6 +350,7 @@ export class EnviosService {
         else if(des === "9002-000011-Yerba 1 Kg") return 10
         else if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 50
         else if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 12
+        else if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 10
         else return 0
     }
 
@@ -477,7 +478,6 @@ export class EnviosService {
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //cant unidad 2
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
-                console.log("ANTES = ",de)
                 //tip item
                 line2 += fillEmptyTxt(`Contiene: Kg ${de.total_kilos}-Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
                 //prec unitario
