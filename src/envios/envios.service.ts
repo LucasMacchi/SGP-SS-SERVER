@@ -350,6 +350,7 @@ export class EnviosService {
         else if(des === "9002-000011-Yerba 1 Kg") return 10
         else if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 50
         else if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 12
+        else if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 10
         else return 0
     }
 
@@ -360,6 +361,7 @@ export class EnviosService {
             de.total_cajas = de.total_bolsas >= numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
             de.total_bolsas = de.total_bolsas % numberDiv
         });
+        console.log("Calculadora: ",remito.detalles)
         return remito
     }
 
