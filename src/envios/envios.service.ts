@@ -360,6 +360,7 @@ export class EnviosService {
             de.total_cajas = de.total_bolsas >= numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
             de.total_bolsas = de.total_bolsas % numberDiv
         });
+        console.log("Calculadora: ",remito.detalles)
         return remito
     }
 
@@ -476,6 +477,7 @@ export class EnviosService {
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //cant unidad 2
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
+                console.log("ANTES = ",de)
                 //tip item
                 line2 += fillEmptyTxt(`Contiene: Kg ${de.total_kilos}-Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
                 //prec unitario
