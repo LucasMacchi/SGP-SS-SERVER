@@ -132,7 +132,7 @@ export class EnviosService {
                 created++
             }
             await conn.end()
-            return "Envios creados: "+created+ "\nProductos agregados: "+ prodCreated +"\nEnvios no creados por falta de lugar de entrega: "+data.no_lugarentrega+"\nEnvios sin insumos: "+data.no_insumo
+            return "Tanda: "+data.tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated
         } catch (error) {
             await conn.end()
             console.log(error)

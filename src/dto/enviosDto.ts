@@ -16,11 +16,5 @@ export class createEnvioDto {
     pv_remito: number
 
     @IsNumber()
-    no_lugarentrega: number
-
-    @IsNumber()
-    no_insumo: number
-
-    @IsNumber()
     tanda: number
 }
