@@ -110,29 +110,37 @@ export class EnviosService {
             let prodCreated = 0
             await conn.connect()
             let aux = data.enviados[0].entregaId
-            const sqlTandaUpdate = `UPDATE public.glpi_sgp_config SET payload=${data.tanda} WHERE config_id= 1;`
-            await conn.query(sqlTandaUpdate)
+            const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
+            const sqlPv = "select payload from glpi_sgp_config where config_id = 2;"
+            const sqlRemito = "select payload from glpi_sgp_config where config_id = 1;"
+            let startRemito = await (await conn.query(sqlRemito)).rows[0]["payload"]
+            const pv = await (await conn.query(sqlPv)).rows[0]["payload"]
+            const startRemitoConst = startRemito
+            const tanda = await (await conn.query(sqlTanda)).rows[0]["max"] + 1
             for(const envio of data.enviados) {
                 if(envio.entregaId > aux) {
                     aux = envio.entregaId
-                    data.start_remito++
+                    startRemito++
                 }
-                const nro_remito = this.emptyFill(5,data.pv_remito)+"-"+this.emptyFill(6,data.start_remito)
+                const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
                 const sql = `INSERT INTO public.glpi_sgp_envio(
 	            lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda)
-	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${data.tanda}) RETURNING envio_id;`
+	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}) RETURNING envio_id;`
                 const envId = (await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
 	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja)
-	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${data.tanda}, ${prod.unidades}, ${prod.unit_caja});`
+	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja});`
                     await conn.query(sql2)
                     prodCreated++
                 }
                 created++
             }
+            startRemito++
+            const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
+            await conn.query(updateRemito)
             await conn.end()
-            return "Tanda: "+data.tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated
+            return "Tanda: "+tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated+"\nRemitos Creados: "+(startRemito-startRemitoConst)
         } catch (error) {
             await conn.end()
             console.log(error)
