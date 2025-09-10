@@ -55,6 +55,7 @@ export interface IDetalleEnvio {
   bolsas: number,
   raciones: number,
   unidades: number,
+  unit_caja: number,
   des: string,
   envio_id: number
 }
