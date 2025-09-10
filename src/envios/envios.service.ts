@@ -124,8 +124,8 @@ export class EnviosService {
                 const envId = (await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades)
-	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${data.tanda}, ${prod.unidades});`
+	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja)
+	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${data.tanda}, ${prod.unidades}, ${prod.unit_caja});`
                     await conn.query(sql2)
                     prodCreated++
                 }
