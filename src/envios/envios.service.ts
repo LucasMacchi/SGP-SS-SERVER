@@ -170,6 +170,7 @@ export class EnviosService {
                             e.lentrega_id,
 	                        e.nro_remito,
 	                        d.des AS descripcion,
+                            d.unit_caja,
                             SUM(d.raciones) AS total_raciones,
                             SUM(d.kilos) AS total_kilos,
                             SUM(d.bolsas) AS total_bolsas,
@@ -184,7 +185,8 @@ export class EnviosService {
                             GROUP BY 
                                 e.lentrega_id,
                             	e.nro_remito,
-                            	d.des
+                            	d.des,
+                                d.unit_caja
                             ORDER BY 
                                 e.lentrega_id;`
         const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
@@ -205,7 +207,8 @@ export class EnviosService {
                                 total_kilos: parseFloat(parseFloat(de.total_kilos).toFixed(2)),
                                 total_bolsas: parseInt(de.total_bolsas),
                                 total_cajas: parseInt(de.total_cajas),
-                                total_unidades: parseInt(de.total_unidades)
+                                total_unidades: parseInt(de.total_unidades),
+                                unit_caja: parseInt(de.unit_caja)
                             }
                             detallesToAdd.push(detalle)
                         }
@@ -224,7 +227,6 @@ export class EnviosService {
                 }
                 aux = data.lentrega_id
             });
-            console.log(arrayRemitos[0].detalles)
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
                 items: this.createItemTxt(arrayRemitos,dias)
@@ -344,25 +346,13 @@ export class EnviosService {
         return cabeceraLines
     }
 
-    private divisorioReturner (des: string): number {
-        if(des === "9000-000078-Leche entera en polvo 800 gr") return 12
-        else if(des === "9003-000011-Azucar 1 Kg") return 10
-        else if(des === "9002-000011-Yerba 1 Kg") return 10
-        else if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 50
-        else if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 12
-        else if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 10
-        else if(des === "9005-000080-Budin 170g") return 20
-        else return 0
-    }
-
     private totalReturner (remito: IRemitoInd): IRemitoInd {
         const detalles = remito.detalles
         detalles.forEach(de => {
-            const numberDiv = this.divisorioReturner(de.descripcion)
+            const numberDiv = de.unit_caja
             de.total_cajas = de.total_bolsas >= numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
             de.total_bolsas = de.total_bolsas % numberDiv
         });
-        console.log("Calculadora: ",remito.detalles)
         return remito
     }
 
