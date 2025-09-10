@@ -6,15 +6,4 @@ export class createEnvioDto {
     @IsArray()
     @IsNotEmpty()
     enviados: IrequestEnvio[]
-
-    @IsNumber()
-    @IsNotEmpty()
-    start_remito: number
-
-    @IsNumber()
-    @IsNotEmpty()
-    pv_remito: number
-
-    @IsNumber()
-    tanda: number
 }
