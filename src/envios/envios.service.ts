@@ -138,7 +138,7 @@ export class EnviosService {
             }
             startRemito++
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
-            await conn.query(updateRemito)
+            if(data.update) await conn.query(updateRemito)
             await conn.end()
             return "Tanda: "+tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated+"\nRemitos Creados: "+(startRemito-startRemitoConst)
         } catch (error) {
