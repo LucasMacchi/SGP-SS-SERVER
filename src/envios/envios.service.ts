@@ -4,8 +4,9 @@ import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
 import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IitemsTotal, IRemitoInd, IrequestEnvio } from 'src/utils/interfaces';
+import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
+import { rutaSql, rutaSqlRemito, txtSql } from 'src/utils/sqlReturner';
 @Injectable()
 export class EnviosService {
 
@@ -148,6 +149,62 @@ export class EnviosService {
         }
     }
 
+    paletReturner (des: string): number {
+        if(des === "9000-000078-Leche entera en polvo 800 gr") return 56
+        if(des === "9003-000011-Azucar 1 Kg") return 150
+        if(des === "9002-000011-Yerba 1 Kg") return 60
+        if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 300
+        if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 80
+        if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 66
+        if(des === "9005-000080-Budin 170g") return 90
+        if(des === "9007-000082-Alfajores 28gr") return 300
+        return 1
+    }
+
+    //Traer para ruta
+    async getRuta (tanda: number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const data1: IDesglosesRuta[] = (await conn.query(rutaSql(tanda))).rows
+            const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemito(tanda))).rows
+            const sqlTotalsTanda = `SELECT d.des, SUM(d.kilos) as kilos, SUM(d.cajas) as Cajas ,SUM(d.bolsas) as Bolsas,d.unit_caja as UCaja from glpi_sgp_envio_details d where tanda = ${tanda} group by d.des,d.unit_caja;`
+            const totales: ITotalRutas[] = (await conn.query(sqlTotalsTanda)).rows
+            const totalesParsed: IRutaTotalsParsed[] = []
+            totales.forEach(t => {
+                const numberDiv = parseInt(t.ucaja)
+                const cajaN = parseInt(t.cajas)
+                const bolsasN = parseInt(t.bolsas)
+                const kilosN = parseFloat(t.kilos).toFixed(2)
+                const paletDiv = this.paletReturner(t.des)
+                let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
+                let bolsasF = bolsasN % numberDiv
+                const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
+                const data: IRutaTotalsParsed = {
+                    des: t.des,
+                    cajas: cajasF,
+                    bolsas: bolsasF,
+                    ucaja: numberDiv,
+                    kilos: parseFloat(kilosN),
+                    palet: palet
+                }
+                totalesParsed.push(data)
+            });
+            const response = {
+                desgloses: data1,
+                remitos: data2,
+                totales: totalesParsed
+            }
+            await conn.end()
+            return response
+
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
     //Trae los envios por una tanda especifica
 
     async getTandaEnvios (tanda: number) {
@@ -174,29 +231,7 @@ export class EnviosService {
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
     async createTxtEnvio (tanda: number, dias: number) {
         const conn = clientReturner()
-        const sqlRemitos = `SELECT 
-                            e.lentrega_id,
-	                        e.nro_remito,
-	                        d.des AS descripcion,
-                            d.unit_caja,
-                            SUM(d.raciones) AS total_raciones,
-                            SUM(d.kilos) AS total_kilos,
-                            SUM(d.bolsas) AS total_bolsas,
-                            SUM(d.cajas) AS total_cajas,
-                            SUM(d.unidades) AS total_unidades
-                            FROM 
-                                glpi_sgp_envio e
-                            JOIN 
-                                glpi_sgp_envio_details d ON e.envio_id = d.envio_id
-                            WHERE
-                            	e.tanda = ${tanda}
-                            GROUP BY 
-                                e.lentrega_id,
-                            	e.nro_remito,
-                            	d.des,
-                                d.unit_caja
-                            ORDER BY 
-                                e.lentrega_id;`
+        const sqlRemitos = txtSql(tanda)
         const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
         try {
             await conn.connect()
