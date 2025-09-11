@@ -43,19 +43,24 @@ export class EnviosController {
     editCantEnv(@Body() data: editCantidadDto) {
         return this.EnviosService.editCantidad(data)
     }
-
+    
     @Post('create')
     createEnvio(@Body() data: createEnvioDto) {
         return this.EnviosService.createEnvios(data)
     }
-
+    @UseGuards(userGuard)
     @Get('tanda/:id')
     getAllEnviosTanda(@Param('id') id:number) {
         return this.EnviosService.getTandaEnvios(id)
     }
-
+    @UseGuards(userGuard)
     @Get('txt/:tanda/:dias')
-    getcreateTxt(@Param('tanda') tanda:number,@Param('dias') dias:number,) {
+    getcreateTxt(@Param('tanda') tanda:number,@Param('dias') dias:number) {
         return this.EnviosService.createTxtEnvio(tanda,dias)
+    }
+    @UseGuards(userGuard)
+    @Get('ruta/:tanda')
+    getcreateRuta(@Param('tanda') tanda:number) {
+        return this.EnviosService.getRuta(tanda)
     }
 }

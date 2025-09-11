@@ -76,8 +76,39 @@ export interface IEntregaDetalleTxt {
     total_bolsas: string,
     total_cajas: string,
     total_unidades: string,
-    unit_caja: string
+    unit_caja: string,
+
 }
+
+    export interface IDesglosesRuta {
+        nro_remito: string,
+        dependencia: string,
+        localidad: string,
+        direccion: string
+    }
+    export interface IRemitoRuta {
+        nro_remito: string,
+        localidad: string,
+        direccion: string
+    }
+
+
+    export interface ITotalRutas {
+        des: string,
+        cajas: string,
+        bolsas: string,
+        kilos: string,
+        ucaja: string
+    }
+export interface IRutaTotalsParsed {
+    des: string,
+    cajas: number,
+    bolsas: number,
+    ucaja: number,
+    kilos: number,
+    palet: number
+}
+
 
 export interface IDetalleEnvioTxt {
     descripcion: string,
