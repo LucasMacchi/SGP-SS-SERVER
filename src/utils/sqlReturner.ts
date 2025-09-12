@@ -9,7 +9,7 @@ export function rutaSql (tanda: number) : string {
 }
 
 export function rutaSqlRemito (tanda: number):string {
-    return `select e.nro_remito, l.localidad, l.direccion from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where tanda = ${tanda};`
+    return `select e.nro_remito, l.localidad, l.direccion from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where tanda = ${tanda} group by nro_remito,l.localidad, l.direccion order by nro_remito;`
 }
 
 export function rutaSqlTotales (tanda: number) {
