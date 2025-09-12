@@ -6,7 +6,7 @@ import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
 import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { rutaSql, rutaSqlRemito, txtSql } from 'src/utils/sqlReturner';
+import { rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 @Injectable()
 export class EnviosService {
 
@@ -149,18 +149,6 @@ export class EnviosService {
         }
     }
 
-    paletReturner (des: string): number {
-        if(des === "9000-000078-Leche entera en polvo 800 gr") return 56
-        if(des === "9003-000011-Azucar 1 Kg") return 150
-        if(des === "9002-000011-Yerba 1 Kg") return 60
-        if(des === "9008-000083-Turron x 50 unid. 25 Gr") return 300
-        if(des === "9009-000089-Galletita caricias surtidas 12 unid. 350 Gr") return 80
-        if(des === "9001-000011-Leche Chocolatada en polvo 1 kg") return 66
-        if(des === "9005-000080-Budin 170g") return 90
-        if(des === "9007-000082-Alfajores 28gr") return 300
-        return 1
-    }
-
     //Traer para ruta
     async getRuta (tanda: number) {
         const conn = clientReturner()
@@ -168,15 +156,14 @@ export class EnviosService {
             await conn.connect()
             const data1: IDesglosesRuta[] = (await conn.query(rutaSql(tanda))).rows
             const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemito(tanda))).rows
-            const sqlTotalsTanda = `SELECT d.des, SUM(d.kilos) as kilos, SUM(d.cajas) as Cajas ,SUM(d.bolsas) as Bolsas,d.unit_caja as UCaja from glpi_sgp_envio_details d where tanda = ${tanda} group by d.des,d.unit_caja;`
-            const totales: ITotalRutas[] = (await conn.query(sqlTotalsTanda)).rows
+            const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(tanda))).rows
             const totalesParsed: IRutaTotalsParsed[] = []
             totales.forEach(t => {
                 const numberDiv = parseInt(t.ucaja)
                 const cajaN = parseInt(t.cajas)
                 const bolsasN = parseInt(t.bolsas)
                 const kilosN = parseFloat(t.kilos).toFixed(2)
-                const paletDiv = this.paletReturner(t.des)
+                const paletDiv = parseInt(t.palet)
                 let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
                 let bolsasF = bolsasN % numberDiv
                 const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
@@ -513,7 +500,7 @@ export class EnviosService {
                 //cant unidad 2
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tip item
-                line2 += fillEmptyTxt(`Contiene: Kg ${de.total_kilos}-Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
+                line2 += fillEmptyTxt(`Contiene: ${de.total_kilos} Kg-Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
                 //prec unitario
                 line2 += fillEmptyTxt("0.00",16,false,false,false)
                 //tasa iva ins

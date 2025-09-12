@@ -11,3 +11,7 @@ export function rutaSql (tanda: number) : string {
 export function rutaSqlRemito (tanda: number):string {
     return `select e.nro_remito, l.localidad, l.direccion from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where tanda = ${tanda};`
 }
+
+export function rutaSqlTotales (tanda: number) {
+    return `SELECT d.des, SUM(d.kilos) as kilos, SUM(d.cajas) as Cajas ,SUM(d.bolsas) as Bolsas,d.unit_caja as UCaja, d.caja_palet as Palet from glpi_sgp_envio_details d where tanda = ${tanda} group by d.des,d.unit_caja,d.caja_palet;`
+}
