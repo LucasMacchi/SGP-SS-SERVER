@@ -167,6 +167,7 @@ export class EnviosService {
                 let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
                 let bolsasF = bolsasN % numberDiv
                 const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
+                cajasF = cajasF - (palet * paletDiv)
                 const data: IRutaTotalsParsed = {
                     des: t.des,
                     cajas: cajasF,
