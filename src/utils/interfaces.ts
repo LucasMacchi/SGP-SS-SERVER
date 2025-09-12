@@ -56,6 +56,7 @@ export interface IDetalleEnvio {
   raciones: number,
   unidades: number,
   unit_caja: number,
+  caja_palet: number,
   des: string,
   envio_id: number
 }
@@ -80,26 +81,25 @@ export interface IEntregaDetalleTxt {
 
 }
 
-    export interface IDesglosesRuta {
-        nro_remito: string,
-        dependencia: string,
-        localidad: string,
-        direccion: string
-    }
-    export interface IRemitoRuta {
-        nro_remito: string,
-        localidad: string,
-        direccion: string
-    }
-
-
-    export interface ITotalRutas {
-        des: string,
-        cajas: string,
-        bolsas: string,
-        kilos: string,
-        ucaja: string
-    }
+export interface IDesglosesRuta {
+    nro_remito: string,
+    dependencia: string,
+    localidad: string,
+    direccion: string
+}
+export interface IRemitoRuta {
+    nro_remito: string,
+    localidad: string,
+    direccion: string
+}
+export interface ITotalRutas {
+    des: string,
+    cajas: string,
+    bolsas: string,
+    kilos: string,
+    ucaja: string,
+    palet: string
+}
 export interface IRutaTotalsParsed {
     des: string,
     cajas: number,
