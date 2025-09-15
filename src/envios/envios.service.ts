@@ -4,7 +4,7 @@ import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
 import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta } from 'src/utils/interfaces';
+import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 import { rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 @Injectable()
@@ -216,6 +216,52 @@ export class EnviosService {
         }
     }
 
+    //Crea un informe de la tanda
+    async createInformeTandaEnvio (tanda: number, dias: number): Promise<string[]> {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sqlRm = `select e.nro_remito from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
+            const sqlSumatoria = `select SUM(e.kilos) as kilos, SUM(e.cajas) as cajas, SUM(e.bolsas) as bolsas from glpi_sgp_envio_details e where tanda = ${tanda};`
+            const sqlCountDesgloses = `select COUNT(*) from glpi_sgp_envio e where tanda = ${tanda};`
+            const sqlRatios = `select e.des,e.unit_caja, e.caja_palet from glpi_sgp_envio_details e where tanda = ${tanda} group by e.des,e.unit_caja, e.caja_palet;`
+            const remitos: string[] = (await conn.query(sqlRm)).rows
+            const ratios: IinformeEnvioRatios[] = (await conn.query(sqlRatios)).rows
+            const count: IinformeEnvioRatios[] = (await conn.query(sqlCountDesgloses)).rows[0]["count"]
+            const sum: IinformeSum = (await conn.query(sqlSumatoria)).rows[0]
+            let txt: string[] = []
+            txt.push(`INFORME DE TANDA ${tanda} ----------------`)
+            txt.push(" ")
+            txt.push(`Remitos Creado (${remitos.length}): `)
+            txt.push(" ")
+            remitos.forEach(re => {
+                txt.push(re["nro_remito"])
+                txt.push(" ")
+            });
+            txt.push("Cantidad de desgloses: "+count)
+            txt.push(" ")
+            txt.push("Cantidad de dias habiles: "+dias)
+            txt.push(" ")
+            txt.push("Ratios de los insumos: ")
+            txt.push(" ")
+            ratios.forEach(r => {
+                txt.push("Insumo: "+r.des+" ---> Cantidad en una caja: "+r.unit_caja+" ---> Cantidad de cajas en palet: "+r.caja_palet)
+                txt.push(" ")
+            });
+            txt.push("Sumatoria de kilos, cajas y bolsas:")
+            txt.push(" ")
+            txt.push("Kilos: "+sum.kilos)
+            txt.push("Cajas: "+sum.cajas)
+            txt.push( "Bolsas: "+sum.bolsas)
+            await conn.end()
+            return txt
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return ["ERROR AL CREAR INFORME"]
+        }
+    }
+
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
     async createTxtEnvio (tanda: number, dias: number) {
         const conn = clientReturner()
@@ -260,7 +306,8 @@ export class EnviosService {
             });
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
-                items: this.createItemTxt(arrayRemitos,dias)
+                items: this.createItemTxt(arrayRemitos,dias),
+                informe: await this.createInformeTandaEnvio(tanda,dias)
             }
             return response
 
