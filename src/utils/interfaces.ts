@@ -137,3 +137,15 @@ export interface desgloseCount {
     nro_remito: string,
     count: number
 }
+
+export interface IinformeEnvioRatios {
+    des: string,
+    unit_caja: number,
+    caja_palet: number
+}
+
+export interface IinformeSum {
+    kilos: string,
+    cajas: string,
+    bolsas: string
+}
