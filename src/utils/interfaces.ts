@@ -65,6 +65,7 @@ export interface IrequestEnvio {
   entregaId: number,
   desglose: string,
   detalles: IDetalleEnvio[],
+  completo: string,
   envio_id?: number
 }
 
@@ -90,7 +91,8 @@ export interface IDesglosesRuta {
 export interface IRemitoRuta {
     nro_remito: string,
     localidad: string,
-    direccion: string
+    direccion: string,
+    completo: string
 }
 export interface ITotalRutas {
     des: string,
