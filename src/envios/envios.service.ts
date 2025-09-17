@@ -4,9 +4,9 @@ import clientReturner from 'src/utils/clientReturner';
 import endCode from 'src/utils/endCode';
 import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
+import { conformidadSql, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 @Injectable()
 export class EnviosService {
 
@@ -207,7 +207,23 @@ export class EnviosService {
                 env.detalles = detalles.filter((d) => d.envio_id === env.envio_id)
                 
             });
+            await conn.end()
             return envios
+            
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async getActasConformidad (tanda: number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const data: IConformidad[] = (await conn.query(conformidadSql(tanda))).rows
+            await conn.end()
+            return data
             
         } catch (error) {
             await conn.end()
