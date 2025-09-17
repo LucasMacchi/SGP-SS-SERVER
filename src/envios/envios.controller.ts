@@ -63,4 +63,9 @@ export class EnviosController {
     getcreateRuta(@Param('tanda') tanda:number) {
         return this.EnviosService.getRuta(tanda)
     }
+    @UseGuards(userGuard)
+    @Get('actas/:tanda')
+    getcreateActas(@Param('tanda') tanda:number) {
+        return this.EnviosService.getActasConformidad(tanda)
+    }
 }

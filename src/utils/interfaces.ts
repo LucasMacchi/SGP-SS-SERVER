@@ -151,3 +151,9 @@ export interface IinformeSum {
     cajas: string,
     bolsas: string
 }
+
+export interface IConformidad {
+    nro_remito: string,
+    completo: string,
+    localidad: string
+}
