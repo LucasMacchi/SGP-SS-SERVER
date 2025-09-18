@@ -15,7 +15,7 @@ export class EnviosService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = "SELECT * FROM public.glpi_sgp_lentrega;"
+            const sql = "SELECT * FROM public.glpi_sgp_lentrega ORDER BY lentrega_id ASC;"
             const rows = (await conn.query(sql)).rows
             return rows
         } catch (error) {
