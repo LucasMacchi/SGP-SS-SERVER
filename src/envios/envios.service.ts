@@ -159,7 +159,7 @@ export class EnviosService {
             const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(tanda))).rows
             const totalesParsed: IRutaTotalsParsed[] = []
             totales.forEach(t => {
-                if(t.ucaja > 0) {
+                if(parseInt(t.ucaja) > 0) {
                     const numberDiv = parseInt(t.ucaja)
                     const cajaN = parseInt(t.cajas)
                     const bolsasN = parseInt(t.bolsas)
