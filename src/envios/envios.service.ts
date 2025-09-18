@@ -159,24 +159,43 @@ export class EnviosService {
             const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(tanda))).rows
             const totalesParsed: IRutaTotalsParsed[] = []
             totales.forEach(t => {
-                const numberDiv = parseInt(t.ucaja)
-                const cajaN = parseInt(t.cajas)
-                const bolsasN = parseInt(t.bolsas)
-                const kilosN = parseFloat(t.kilos).toFixed(2)
-                const paletDiv = parseInt(t.palet)
-                let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
-                let bolsasF = bolsasN % numberDiv
-                const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
-                cajasF = cajasF - (palet * paletDiv)
-                const data: IRutaTotalsParsed = {
-                    des: t.des,
-                    cajas: cajasF,
-                    bolsas: bolsasF,
-                    ucaja: numberDiv,
-                    kilos: parseFloat(kilosN),
-                    palet: palet
+                if(t.ucaja > 0) {
+                    const numberDiv = parseInt(t.ucaja)
+                    const cajaN = parseInt(t.cajas)
+                    const bolsasN = parseInt(t.bolsas)
+                    const kilosN = parseFloat(t.kilos).toFixed(2)
+                    const paletDiv = parseInt(t.palet)
+                    let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
+                    let bolsasF = bolsasN % numberDiv
+                    const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
+                    cajasF = cajasF - (palet * paletDiv)
+                    const data: IRutaTotalsParsed = {
+                        des: t.des,
+                        cajas: cajasF,
+                        bolsas: bolsasF,
+                        ucaja: numberDiv,
+                        kilos: parseFloat(kilosN),
+                        palet: palet
+                    }
+                    totalesParsed.push(data)
                 }
-                totalesParsed.push(data)
+                else {
+                    const bolsasN = parseInt(t.bolsas)
+                    const kilosN = parseFloat(t.kilos).toFixed(2)
+                    const paletDiv = parseInt(t.palet)
+                    const palet = bolsasN >= paletDiv ? Math.floor(bolsasN / paletDiv) : 0
+                    let bolsasF = bolsasN - (palet * paletDiv)
+                    const data: IRutaTotalsParsed = {
+                        des: t.des,
+                        cajas: 0,
+                        bolsas: bolsasF,
+                        ucaja: 0,
+                        kilos: parseFloat(kilosN),
+                        palet: palet
+                    }
+                    totalesParsed.push(data)
+                }
+
             });
             const response = {
                 desgloses: data1,
