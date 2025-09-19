@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
-import endCode from 'src/utils/endCode';
-import desglosesJson from "./desgloses.json"
 import { createEnvioDto } from 'src/dto/enviosDto';
 import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { conformidadSql, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
+import { conformidadSql, deleteTandaSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
+import dotenv from 'dotenv'; 
+dotenv.config();
+
+const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
+
+
 @Injectable()
 export class EnviosService {
 
@@ -17,6 +21,7 @@ export class EnviosService {
             await conn.connect()
             const sql = "SELECT * FROM public.glpi_sgp_lentrega ORDER BY lentrega_id ASC;"
             const rows = (await conn.query(sql)).rows
+            await conn.end()
             return rows
         } catch (error) {
             await conn.end()
@@ -25,10 +30,27 @@ export class EnviosService {
         }
     }
 
+    //Eliminar tanda
+    async deleteTanda (tanda: number, key: string) {
+        const conn = clientReturner()
+        try {
+            if(key === DELETE_KEY) {
+                await conn.connect()
+                await conn.query(deleteTandaSQL(tanda))
+                await conn.end()
+                return "Tanda eliminada: "+tanda
+            }
+            else {
+                return "Clave equivocada."
+            }
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Consigue todos los desgloses
     async getDesgloses () {
-
-        //ACA
         const conn = clientReturner()
         try {
             await conn.connect()

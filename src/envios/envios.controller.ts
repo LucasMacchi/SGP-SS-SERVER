@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Patch, UseGuards, Post } from '@nestjs/common';
+import { Controller, Get, Param, Body, Patch, UseGuards, Post, Delete } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
@@ -67,5 +67,10 @@ export class EnviosController {
     @Get('actas/:tanda')
     getcreateActas(@Param('tanda') tanda:number) {
         return this.EnviosService.getActasConformidad(tanda)
+    }
+    @UseGuards(userGuard)
+    @Delete("del/tanda/:tanda/:key")
+    deleteTandaController(@Param('tanda') tanda:number,@Param('key') key:string) {
+        return this.EnviosService.deleteTanda(tanda, key)
     }
 }

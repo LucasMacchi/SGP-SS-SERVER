@@ -19,3 +19,7 @@ export function rutaSqlTotales (tanda: number) {
 export function conformidadSql (tanda: number) {
     return `select e.nro_remito, l.completo, l.localidad from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on l.lentrega_id = e.lentrega_id where tanda = ${tanda} group by e.nro_remito, l.completo,l.localidad;`
 }
+
+export function deleteTandaSQL (tanda: number) {
+    return `DELETE FROM public.glpi_sgp_envio WHERE tanda = ${tanda};`
+}
