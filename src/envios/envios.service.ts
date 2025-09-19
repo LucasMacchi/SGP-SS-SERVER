@@ -539,7 +539,7 @@ export class EnviosService {
                 let linea5 = ""
                 const de = detalle
                 bolsasTotal = bolsasTotal+detalle.total_bolsas
-                cajasTotal = cajasTotal+detalle.total_cajas
+                cajasTotal = detalle.total_cajas ? cajasTotal+detalle.total_cajas : 0
                 racionesTotal = racionesTotal+detalle.total_raciones
                 const des = de.descripcion.split("-")
                 // ARTICULO ------------------------------------
