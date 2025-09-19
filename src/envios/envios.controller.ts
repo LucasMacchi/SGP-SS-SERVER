@@ -70,7 +70,7 @@ export class EnviosController {
     }
     @UseGuards(userGuard)
     @Delete("del/tanda/:tanda/:key")
-    deleteTandaController(@Param('tanda') tanda:number,@Param('key') key:string) {
-        return this.EnviosService.deleteTanda(tanda, key)
+    deleteTandaController(@Param('tanda') tanda:string,@Param('key') key:string) {
+        return this.EnviosService.deleteTanda(parseInt(tanda), key)
     }
 }

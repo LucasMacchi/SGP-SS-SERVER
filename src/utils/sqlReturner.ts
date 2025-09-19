@@ -23,3 +23,11 @@ export function conformidadSql (tanda: number) {
 export function deleteTandaSQL (tanda: number) {
     return `DELETE FROM public.glpi_sgp_envio WHERE tanda = ${tanda};`
 }
+
+export function deleteTandaLogSQL (tanda: number) {
+    return `DELETE FROM public.glpi_sgp_tanda_log WHERE nro_tanda = ${tanda};`
+}
+
+export function gobackRemitoSQL (tanda: number) {
+    return `UPDATE public.glpi_sgp_config SET payload=(SELECT payload FROM public.glpi_sgp_config WHERE config_id= 1 ) - (SELECT remitos FROM public.glpi_sgp_tanda_log WHERE nro_tanda = ${tanda}) WHERE config_id= 1;`
+}

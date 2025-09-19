@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { conformidadSql, deleteTandaSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
+import { conformidadSql, deleteTandaLogSQL, deleteTandaSQL, gobackRemitoSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
@@ -34,9 +34,19 @@ export class EnviosService {
     async deleteTanda (tanda: number, key: string) {
         const conn = clientReturner()
         try {
-            if(key === DELETE_KEY) {
-                await conn.connect()
+            await conn.connect()
+            const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
+            const tandaMax: number = await (await conn.query(sqlTanda)).rows[0]["max"]
+            if(key === DELETE_KEY && tanda === tandaMax) {
                 await conn.query(deleteTandaSQL(tanda))
+                await conn.query(gobackRemitoSQL(tanda))
+                await conn.query(deleteTandaLogSQL(tanda))
+                await conn.end()
+                return "Tanda eliminada: "+tanda+" | Se volvio remitos para atras."
+            }
+            else if(key === DELETE_KEY) {
+                await conn.query(deleteTandaSQL(tanda))
+                await conn.query(deleteTandaLogSQL(tanda))
                 await conn.end()
                 return "Tanda eliminada: "+tanda
             }
@@ -129,6 +139,13 @@ export class EnviosService {
     async createEnvios (data: createEnvioDto) {
         const conn = clientReturner()
         try {
+            const log: ITandaLog = {
+                nro_tanda: 0,
+                remitos: 0,
+                remitos_iniciales: 0,
+                desgloses: 0,
+                pv: 0
+            }
             let created = 0
             let prodCreated = 0
             await conn.connect()
@@ -139,6 +156,8 @@ export class EnviosService {
             let startRemito = await (await conn.query(sqlRemito)).rows[0]["payload"]
             const pv = await (await conn.query(sqlPv)).rows[0]["payload"]
             const startRemitoConst = startRemito
+            log.remitos_iniciales = startRemitoConst
+            log.pv = pv
             const tanda = await (await conn.query(sqlTanda)).rows[0]["max"] + 1
             for(const envio of data.enviados) {
                 if(envio.entregaId > aux) {
@@ -161,7 +180,14 @@ export class EnviosService {
             }
             startRemito++
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
-            if(data.update) await conn.query(updateRemito)
+            log.desgloses = created
+            log.nro_tanda = tanda
+            if(data.update) {
+                await conn.query(updateRemito)
+                log.remitos = startRemito-startRemitoConst
+            }
+            const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
+            await conn.query(sqlLog)
             await conn.end()
             return "Tanda: "+tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated+"\nRemitos Creados: "+(startRemito-startRemitoConst)+"\nActualizo remitos: "+data.update
         } catch (error) {
@@ -513,7 +539,7 @@ export class EnviosService {
                 let linea5 = ""
                 const de = detalle
                 bolsasTotal = bolsasTotal+detalle.total_bolsas
-                cajasTotal = cajasTotal+detalle.total_cajas
+                cajasTotal = detalle.total_cajas ? cajasTotal+detalle.total_cajas : 0
                 racionesTotal = racionesTotal+detalle.total_raciones
                 const des = de.descripcion.split("-")
                 // ARTICULO ------------------------------------
