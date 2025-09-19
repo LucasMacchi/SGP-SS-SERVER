@@ -65,7 +65,7 @@ export interface IrequestEnvio {
   entregaId: number,
   desglose: string,
   detalles: IDetalleEnvio[],
-  completo: string,
+  completo?: string,
   envio_id?: number
 }
 
@@ -156,4 +156,12 @@ export interface IConformidad {
     nro_remito: string,
     completo: string,
     localidad: string
+}
+
+export interface ITandaLog {
+    nro_tanda: number,
+    remitos: number,
+    remitos_iniciales: number,
+    desgloses: number,
+    pv: number
 }
