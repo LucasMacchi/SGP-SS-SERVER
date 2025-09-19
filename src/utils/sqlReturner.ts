@@ -4,8 +4,8 @@ export function txtSql (tanda: number) : string {
     return sql
 }
 export function rutaSql (tanda: number) : string {
-    return `SELECT e.nro_remito,e.dependencia,l.localidad,l.direccion FROM glpi_sgp_envio e JOIN glpi_sgp_envio_details d ON e.envio_id = d.envio_id JOIN glpi_sgp_lentrega l ON e.lentrega_id = l.lentrega_id
-    WHERE e.tanda = ${tanda} GROUP BY e.lentrega_id,e.nro_remito,d.des,d.unit_caja,e.dependencia,l.localidad,l.direccion ORDER BY e.lentrega_id;`
+    return `SELECT e.nro_remito,e.dependencia,l.localidad,l.direccion FROM glpi_sgp_envio e JOIN glpi_sgp_lentrega l ON e.lentrega_id = l.lentrega_id
+    WHERE e.tanda = ${tanda} GROUP BY e.lentrega_id,e.nro_remito,e.dependencia,l.localidad,l.direccion ORDER BY e.lentrega_id;`
 }
 
 export function rutaSqlRemito (tanda: number):string {
