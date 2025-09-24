@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 import { conformidadSql, deleteTandaLogSQL, deleteTandaSQL, gobackRemitoSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
+import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
+import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
@@ -14,6 +16,107 @@ const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
 @Injectable()
 export class EnviosService {
 
+    //Agregar insumo al plan
+    async AddInsumosPlan (plan_id: number, ins_id: number,dias: number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `INSERT INTO public.glpi_sgp_envio_plan_detail(plan_id, ins_id, dias) VALUES (${plan_id}, ${ins_id}, ${dias});`
+            await conn.query(sql)
+            await conn.end()
+            return "Insumo agregado al plan"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Eliminar detalle de plan
+    async delInsumosPlan (id: number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `DELETE FROM public.glpi_sgp_envio_plan_detail WHERE detail_id=${id};`
+            await conn.query(sql)
+            await conn.end()
+            return "Insumo eliminado del plan"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Editar dias detalle plan
+    async patchInsumosPlan (data: editInsumoEnvioPlanDto) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            console.log(data.newVal)
+            const sql = `UPDATE public.glpi_sgp_envio_plan_detail SET dias=${data.newVal} WHERE detail_id=${data.detail_id};`
+            await conn.query(sql)
+            await conn.end()
+            return "Insumo editado en el plan, nuevo valor -> "+data.newVal
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Editar insumo
+    async patchInsumosEnvios (data: editInsumoEnvioDto) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `UPDATE public.glpi_sgp_envio_insumo SET ${data.stat}=${data.newVal} WHERE ins_id=${data.ins_id};`
+            await conn.query(sql)
+            await conn.end()
+            return "Insumo editado: "+data.stat+" -> "+data.newVal
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Trae los planes para la creacion de envios
+    async getPlanesEnvios () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = "SELECT * FROM glpi_sgp_envio_plan ORDER BY plan_id ASC;"
+            const rowsPlan: IPlan[] = (await conn.query(sql)).rows
+            const sql2 = `SELECT d.detail_id, d.plan_id,d.ins_id,i.des,d.dias FROM glpi_sgp_envio_plan_detail d JOIN glpi_sgp_envio_insumo i on d.ins_id = i.ins_id ORDER BY plan_id ASC;`
+            const rowsDetails: IDetailPlan[] = (await conn.query(sql2)).rows
+            let data: IPlanComplete[] = []
+            rowsPlan.forEach(p => {
+                let data1: IPlanComplete ={plan_id: p.plan_id, des: p.des, dias: p.dias,details:[]}
+                rowsDetails.forEach(d => {
+                    if(d.plan_id === p.plan_id) data1.details.push({...d, des: d.des.split("-")[2]})
+                });
+                data.push(data1)
+            });
+            await conn.end()
+            return data
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Trae los insumos de copa de leche y alimento fortificado
+    async getInsumosEnvios () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = "SELECT * FROM public.glpi_sgp_envio_insumo ORDER BY ins_id ASC;"
+            const rows = (await conn.query(sql)).rows
+            await conn.end()
+            return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Trae los lugares de entrega
     async getLugaresEntrega () {
         const conn = clientReturner()
@@ -189,7 +292,7 @@ export class EnviosService {
             const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
             await conn.query(sqlLog)
             await conn.end()
-            return "Tanda: "+tanda+"\nEnvios creados: "+created+ "\nProductos agregados: "+ prodCreated+"\nRemitos Creados: "+(startRemito-startRemitoConst)+"\nActualizo remitos: "+data.update
+            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -223,7 +326,8 @@ export class EnviosService {
                         bolsas: bolsasF,
                         ucaja: numberDiv,
                         kilos: parseFloat(kilosN),
-                        palet: palet
+                        palet: palet,
+                        caja_palet: paletDiv
                     }
                     totalesParsed.push(data)
                 }
@@ -239,7 +343,8 @@ export class EnviosService {
                         bolsas: bolsasF,
                         ucaja: 0,
                         kilos: parseFloat(kilosN),
-                        palet: palet
+                        palet: palet,
+                        caja_palet: paletDiv
                     }
                     totalesParsed.push(data)
                 }

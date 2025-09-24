@@ -100,7 +100,7 @@ export interface ITotalRutas {
     bolsas: string,
     kilos: string,
     ucaja: string,
-    palet: string
+    palet: string,
 }
 export interface IRutaTotalsParsed {
     des: string,
@@ -108,7 +108,8 @@ export interface IRutaTotalsParsed {
     bolsas: number,
     ucaja: number,
     kilos: number,
-    palet: number
+    palet: number,
+    caja_palet: number
 }
 
 
@@ -164,4 +165,31 @@ export interface ITandaLog {
     remitos_iniciales: number,
     desgloses: number,
     pv: number
+}
+
+export interface IPlan {
+    plan_id: number,
+    des: string,
+    dias: number
+}
+
+export interface IDetailPlan {
+    detail_id: number,
+    plan_id: number,
+    ins_id: number,
+    dias: number,
+    des: string
+}
+
+export interface IPlanComplete {
+    plan_id: number,
+    des: string,
+    dias: number,
+    details: IDetailPlan[]
+}
+
+export interface IChangeEnvioInsumo {
+    ins_id: number,
+    stat: string,
+    newVal: number
 }
