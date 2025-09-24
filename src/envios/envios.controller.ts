@@ -3,6 +3,8 @@ import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
 import { createEnvioDto } from 'src/dto/enviosDto';
+import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
+import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 
 @Controller('envios')
 export class EnviosController {
@@ -19,13 +21,41 @@ export class EnviosController {
     getAllEnvios() {
         return this.EnviosService.getEnvios()
     }
-
+    @UseGuards(userGuard)
+    @Get('planes')
+    getEnviosPlanes() {
+        return this.EnviosService.getPlanesEnvios()
+    }
+    @UseGuards(userGuard)
+    @Patch('plan/edit/insumo')
+    patchEnviosPlanes(@Body() data: editInsumoEnvioPlanDto) {
+        return this.EnviosService.patchInsumosPlan(data)
+    }
+    @UseGuards(userGuard)
+    @Post('plan/add/insumo/:plan/:ins/:dias')
+    addEnviosPlanes(@Param('plan') plan:number,@Param('ins') ins:number,@Param('dias') dias:number) {
+        return this.EnviosService.AddInsumosPlan(plan,ins,dias)
+    }
+    @UseGuards(userGuard)
+    @Delete('plan/del/insumo/:id')
+    deleteEnviosPlanes(@Param('id') id:number) {
+        return this.EnviosService.delInsumosPlan(id)
+    }
     @UseGuards(userGuard)
     @Get('entregas')
     getLentregas() {
         return this.EnviosService.getLugaresEntrega()
     }
-
+    @UseGuards(userGuard)
+    @Get('insumos')
+    getInsumos() {
+        return this.EnviosService.getInsumosEnvios()
+    }
+    @UseGuards(userGuard)
+    @Patch('insumos')
+    patchInsumos(@Body() data: editInsumoEnvioDto) {
+        return this.EnviosService.patchInsumosEnvios(data)
+    }
     @UseGuards(userGuard)
     @Get('desgloses')
     getAllDesgloses() {
