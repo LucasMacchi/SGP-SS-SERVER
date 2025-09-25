@@ -602,7 +602,7 @@ export class EnviosService {
                 line += fillEmptyTxt("",s,true,true,false)    
             });
             //compr anul
-            line += fillEmptyTxt(" ",1,false,false,false)
+            line += fillEmptyTxt("",1,false,false,false)
             //act stock
             line += fillEmptyTxt("S",1,false,false,false)
             //33 - 37
@@ -610,7 +610,7 @@ export class EnviosService {
                 line += fillEmptyTxt("",s,true,true,false)    
             });
             //no disp
-            line += fillEmptyTxt(" ",1,true,true,false)
+            line += fillEmptyTxt("",1,true,true,false)
             //39 - 66
             blank3.forEach((s) => {
                 line += fillEmptyTxt("",s,true,true,false)    
