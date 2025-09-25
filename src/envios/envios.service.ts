@@ -16,6 +16,21 @@ const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
 @Injectable()
 export class EnviosService {
 
+    //Crear plan
+    async AddPlan (des:string, dias:number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `INSERT INTO public.glpi_sgp_envio_plan(des, dias) VALUES ('${des}', ${dias});`
+            await conn.query(sql)
+            await conn.end()
+            return "Plan "+des+" creado."
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Agregar insumo al plan
     async AddInsumosPlan (plan_id: number, ins_id: number,dias: number) {
         const conn = clientReturner()
