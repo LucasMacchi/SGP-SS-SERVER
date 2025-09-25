@@ -27,6 +27,11 @@ export class EnviosController {
         return this.EnviosService.getPlanesEnvios()
     }
     @UseGuards(userGuard)
+    @Post('add/plan/:des/:dias')
+    addPlanes(@Param('des') des:string,@Param('dias') dias:number) {
+        return this.EnviosService.AddPlan(des,dias)
+    }
+    @UseGuards(userGuard)
     @Patch('plan/edit/insumo')
     patchEnviosPlanes(@Body() data: editInsumoEnvioPlanDto) {
         return this.EnviosService.patchInsumosPlan(data)
