@@ -193,3 +193,14 @@ export interface IChangeEnvioInsumo {
     stat: string,
     newVal: number
 }
+
+export interface IDateExport {
+    lentrega_id: number,
+    completo: string,
+    dependencia: string,
+    localidad: string,
+    direccion: string,
+    nro_remito: string,
+    fecha_created: string,
+    tanda: number
+}

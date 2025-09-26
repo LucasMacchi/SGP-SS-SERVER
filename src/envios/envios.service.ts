@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 import { conformidadSql, deleteTandaLogSQL, deleteTandaSQL, gobackRemitoSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
+import rangeReturner from 'src/utils/rangeReturner';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
@@ -16,6 +17,42 @@ const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
 @Injectable()
 export class EnviosService {
 
+    //Traer informe de remitos creados en una fecha
+    async getInformeFecha (fecha: string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select l.lentrega_id,l.completo,e.dependencia,l.localidad,l.direccion,e.nro_remito,e.fecha_created,e.tanda from glpi_sgp_envio e join glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.fecha_created = '${fecha}' order by nro_remito ASC;`
+            const envios: IDateExport[] = (await conn.query(sql)).rows
+            await conn.end()
+            let datos: string[] = []
+            envios.forEach(en => {
+                const parsedDate = new Date(en.fecha_created).toISOString().split("T")[0]
+                datos.push(`${en.lentrega_id} | ${en.nro_remito} -> ${en.completo} -- ${en.dependencia} -- LOC: ${en.localidad} -- DIR: ${en.direccion} -- ${parsedDate} -- T:${en.tanda}\n`)
+            });
+            return datos
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    
+    }
+    //Traer punto de venta actual
+    async getPv () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 2;`
+            const pv = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Crear plan
     async AddPlan (des:string, dias:number) {
         const conn = clientReturner()
@@ -288,9 +325,10 @@ export class EnviosService {
 	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}) RETURNING envio_id;`
                 const envId = (await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
+                    console.log(nro_remito)
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet)
-	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet});`
+	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
+	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
                     await conn.query(sql2)
                     prodCreated++
                 }
@@ -307,7 +345,8 @@ export class EnviosService {
             const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
             await conn.query(sqlLog)
             await conn.end()
-            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update
+            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
+            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos})`
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -316,13 +355,13 @@ export class EnviosService {
     }
 
     //Traer para ruta
-    async getRuta (tanda: number) {
+    async getRuta (start: string, end: string) {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const data1: IDesglosesRuta[] = (await conn.query(rutaSql(tanda))).rows
-            const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemito(tanda))).rows
-            const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(tanda))).rows
+            const data1: IDesglosesRuta[] = (await conn.query(rutaSql(start,end))).rows
+            const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemito(start,end))).rows
+            const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(start,end))).rows
             const totalesParsed: IRutaTotalsParsed[] = []
             totales.forEach(t => {
                 if(parseInt(t.ucaja) > 0) {
@@ -382,12 +421,13 @@ export class EnviosService {
 
     //Trae los envios por una tanda especifica
 
-    async getTandaEnvios (tanda: number) {
+    async getTandaEnvios (start: string, end: string) {
         const conn = clientReturner()
         try {
+            const range = rangeReturner(start, end)
             await conn.connect()
-            const sql = `SELECT * FROM public.glpi_sgp_envio e INNER JOIN public.glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.tanda = ${tanda} ORDER BY e.lentrega_id ASC;`
-            const sql2 = `SELECT * FROM public.glpi_sgp_envio_details WHERE tanda = ${tanda};`
+            const sql = `SELECT * FROM public.glpi_sgp_envio e INNER JOIN public.glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where ${range} ORDER BY e.nro_remito ASC;`
+            const sql2 = `SELECT * FROM public.glpi_sgp_envio_details WHERE ${range};`
             const envios: IrequestEnvio[] = (await conn.query(sql)).rows
             const detalles: IDetalleEnvio[] = (await conn.query(sql2)).rows
             envios.forEach(env => {
@@ -404,11 +444,11 @@ export class EnviosService {
         }
     }
 
-    async getActasConformidad (tanda: number) {
+    async getActasConformidad (start: string, end: string) {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const data: IConformidad[] = (await conn.query(conformidadSql(tanda))).rows
+            const data: IConformidad[] = (await conn.query(conformidadSql(start, end))).rows
             await conn.end()
             return data
             
@@ -420,20 +460,20 @@ export class EnviosService {
     }
 
     //Crea un informe de la tanda
-    async createInformeTandaEnvio (tanda: number, dias: number): Promise<string[]> {
+    async createInformeTandaEnvio (range: string, dias: number): Promise<string[]> {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sqlRm = `select e.nro_remito from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
-            const sqlSumatoria = `select SUM(e.kilos) as kilos, SUM(e.cajas) as cajas, SUM(e.bolsas) as bolsas from glpi_sgp_envio_details e where tanda = ${tanda};`
-            const sqlCountDesgloses = `select COUNT(*) from glpi_sgp_envio e where tanda = ${tanda};`
-            const sqlRatios = `select e.des,e.unit_caja, e.caja_palet from glpi_sgp_envio_details e where tanda = ${tanda} group by e.des,e.unit_caja, e.caja_palet;`
+            const sqlRm = `select e.nro_remito from glpi_sgp_envio e where ${range} group by e.nro_remito order by e.nro_remito;`
+            const sqlSumatoria = `select SUM(e.kilos) as kilos, SUM(e.cajas) as cajas, SUM(e.bolsas) as bolsas from glpi_sgp_envio_details e where ${range};`
+            const sqlCountDesgloses = `select COUNT(*) from glpi_sgp_envio e where ${range};`
+            const sqlRatios = `select e.des,e.unit_caja, e.caja_palet from glpi_sgp_envio_details e where ${range} group by e.des,e.unit_caja, e.caja_palet;`
             const remitos: string[] = (await conn.query(sqlRm)).rows
             const ratios: IinformeEnvioRatios[] = (await conn.query(sqlRatios)).rows
             const count: IinformeEnvioRatios[] = (await conn.query(sqlCountDesgloses)).rows[0]["count"]
             const sum: IinformeSum = (await conn.query(sqlSumatoria)).rows[0]
             let txt: string[] = []
-            txt.push(`INFORME DE TANDA ${tanda} ----------------`)
+            txt.push(`INFORME DE REMITOS ----------------`)
             txt.push(" ")
             txt.push(`Remitos Creado (${remitos.length}): `)
             txt.push(" ")
@@ -466,10 +506,11 @@ export class EnviosService {
     }
 
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
-    async createTxtEnvio (tanda: number, dias: number) {
+    async createTxtEnvio (start: string, end: string, dias: number) {
         const conn = clientReturner()
-        const sqlRemitos = txtSql(tanda)
-        const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where tanda = ${tanda} group by e.nro_remito;`
+        const range = rangeReturner(start, end)
+        const sqlRemitos = txtSql(range)
+        const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
         try {
             await conn.connect()
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
@@ -510,7 +551,7 @@ export class EnviosService {
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
                 items: this.createItemTxt(arrayRemitos,dias),
-                informe: await this.createInformeTandaEnvio(tanda,dias)
+                informe: await this.createInformeTandaEnvio(range,dias)
             }
             return response
 
