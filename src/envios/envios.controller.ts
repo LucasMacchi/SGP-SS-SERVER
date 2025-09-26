@@ -22,6 +22,11 @@ export class EnviosController {
         return this.EnviosService.getEnvios()
     }
     @UseGuards(userGuard)
+    @Get('pv')
+    getCurrentPv() {
+        return this.EnviosService.getPv()
+    }
+    @UseGuards(userGuard)
     @Get('planes')
     getEnviosPlanes() {
         return this.EnviosService.getPlanesEnvios()
@@ -84,28 +89,33 @@ export class EnviosController {
         return this.EnviosService.createEnvios(data)
     }
     @UseGuards(userGuard)
-    @Get('tanda/:id')
-    getAllEnviosTanda(@Param('id') id:number) {
-        return this.EnviosService.getTandaEnvios(id)
+    @Get('tanda/:start/:end')
+    getAllEnviosTanda(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.getTandaEnvios(start,end)
     }
     @UseGuards(userGuard)
-    @Get('txt/:tanda/:dias')
-    getcreateTxt(@Param('tanda') tanda:number,@Param('dias') dias:number) {
-        return this.EnviosService.createTxtEnvio(tanda,dias)
+    @Get('txt/:start/:end/:dias')
+    getcreateTxt(@Param('start') start:string, @Param('end') end:string,@Param('dias') dias:number) {
+        return this.EnviosService.createTxtEnvio(start,end,dias)
     }
     @UseGuards(userGuard)
-    @Get('ruta/:tanda')
-    getcreateRuta(@Param('tanda') tanda:number) {
-        return this.EnviosService.getRuta(tanda)
+    @Get('ruta/:start/:end')
+    getcreateRuta(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.getRuta(start,end)
     }
     @UseGuards(userGuard)
-    @Get('actas/:tanda')
-    getcreateActas(@Param('tanda') tanda:number) {
-        return this.EnviosService.getActasConformidad(tanda)
+    @Get('actas/:start/:end')
+    getcreateActas(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.getActasConformidad(start,end)
     }
     @UseGuards(userGuard)
     @Delete("del/tanda/:tanda/:key")
     deleteTandaController(@Param('tanda') tanda:string,@Param('key') key:string) {
         return this.EnviosService.deleteTanda(parseInt(tanda), key)
+    }
+    @UseGuards(userGuard)
+    @Get('informe/:fecha')
+    getcreateInforme(@Param('fecha') fecha:string) {
+        return this.EnviosService.getInformeFecha(fecha)
     }
 }
