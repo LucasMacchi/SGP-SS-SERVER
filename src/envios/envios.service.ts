@@ -325,7 +325,6 @@ export class EnviosService {
 	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}) RETURNING envio_id;`
                 const envId = (await conn.query(sql)).rows[0]["envio_id"]
                 for (const prod of envio.detalles) {
-                    console.log(nro_remito)
                     const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
 	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
 	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
