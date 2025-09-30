@@ -204,3 +204,11 @@ export interface IDateExport {
     fecha_created: string,
     tanda: number
 }
+
+export interface IOrderTxt {
+    insumo_des: string,
+    amount: number,
+    service_id: number,
+    numero: string,
+    date_delivered: string
+}

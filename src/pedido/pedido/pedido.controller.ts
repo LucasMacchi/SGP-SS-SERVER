@@ -77,14 +77,11 @@ export class PedidoController {
         if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.archive(parseInt(id))
         else throw new UnauthorizedException()
     }
-    /*
-    @UseGuards(userGuard)
-    @Patch ('legajo/:id/:legajo') 
-    async legajo (@Param('id') id: string, @Param('legajo') legajo: string, @Req() rq: Request) {
-        if(rq['user']['rol'] === 4 || rq['user']['rol'] === 1) return await this.pedido.setLegajo(parseInt(id),parseInt(legajo))
-        else throw new UnauthorizedException()
+    //@UseGuards(userGuard)
+    @Get("txt/:month/:year")
+    async getTxt (@Param('month') month: string,@Param('year') year: string) {
+        return this.pedido.getPedidosTxt(parseInt(month),parseInt(year))
     }
-    */
     @UseGuards(userGuard)
     @Patch('ready/:id')
     async readyOrder (@Param('id') id: string, @Req() rq: Request) {
