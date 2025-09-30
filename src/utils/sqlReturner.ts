@@ -1,3 +1,4 @@
+import monthRangeReturner from "./monthRangeReturner"
 import rangeReturner from "./rangeReturner"
 
 export function txtSql (range: string) : string {
@@ -36,4 +37,8 @@ export function deleteTandaLogSQL (tanda: number) {
 
 export function gobackRemitoSQL (tanda: number) {
     return `UPDATE public.glpi_sgp_config SET payload=(SELECT payload FROM public.glpi_sgp_config WHERE config_id= 1 ) - (SELECT remitos FROM public.glpi_sgp_tanda_log WHERE nro_tanda = ${tanda}) WHERE config_id= 1;`
+}
+
+export function txtOrders (month: number, year: number) {
+    return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where ${monthRangeReturner(month,year)};`
 }

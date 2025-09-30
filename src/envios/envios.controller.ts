@@ -27,6 +27,11 @@ export class EnviosController {
         return this.EnviosService.getPv()
     }
     @UseGuards(userGuard)
+    @Get('rt')
+    getCurrentRt() {
+        return this.EnviosService.getLastRt()
+    }
+    @UseGuards(userGuard)
     @Get('planes')
     getEnviosPlanes() {
         return this.EnviosService.getPlanesEnvios()

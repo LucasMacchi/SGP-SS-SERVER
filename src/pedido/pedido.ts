@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import pedidoDto from 'src/dto/pedidoDto';
-import { IDetailChange, IemailMsg } from 'src/utils/interfaces';
+import { IDetailChange, IemailMsg, IOrderTxt } from 'src/utils/interfaces';
 import { MailerService } from '@nestjs-modules/mailer';
 import mailer from 'src/utils/mailer';
 import clientReturner from 'src/utils/clientReturner';
@@ -9,6 +9,8 @@ import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
 import endCode from 'src/utils/endCode';
 import mailerResend from 'src/utils/mailerResend';
+import { txtOrders } from 'src/utils/sqlReturner';
+import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 @Injectable()
 export class Pedido {
     constructor(private readonly mailerServ: MailerService) {}
@@ -320,6 +322,119 @@ export class Pedido {
             await conn.end()
             return 'Pedido no pudo eliminarse'
         }
+    }
+
+    //Funcion para rellenar un espacio vacio con ceros
+    private emptyFill(amount: number, value: number): string {
+        let formatted = ""+value
+        if(value.toString().length < amount) {
+            const diff = amount - formatted.length
+            for (let index = 1; index <= diff; index++) {
+                formatted = "0"+formatted
+            }
+        }
+        return formatted
+    }
+    //devuelve la fecha en el formato adecuado para la exportacion
+    private dateParser (tDate: Date): string {
+        const day = tDate.getUTCDate()
+        let dayStr = day.toString()
+        const month = tDate.getUTCMonth() + 1
+        let mStr = month.toString()
+        const year = tDate.getUTCFullYear()
+        const yStr = year.toString()
+        if(day < 10) dayStr = "0"+dayStr
+        if(month < 10) mStr = "0"+mStr
+        return year+mStr+dayStr
+    }
+
+    async getPedidosTxt (month: number, year: number) {
+        const conn = clientReturner()
+        const sqlPedidos = txtOrders(month,year)
+        const sqlStart = "select payload from glpi_sgp_config where config_id = 3;"
+        try {
+            await conn.connect()
+            const data1: IOrderTxt[] = (await conn.query(sqlPedidos)).rows
+            const start = await (await conn.query(sqlStart)).rows[0]["payload"]
+            const res = this.createTxt(data1, start)
+            await conn.end()
+            return res.lineas
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    private returnProdCods = (prod: string): string => {
+        const desP = prod.split("-")
+        let cods = ""
+        desP.forEach((c,i) => {
+            if(c.length > 0 && i === 0) cods +=c
+            else if(c.length > 0 && i !== desP.length - 1) {
+                cods += "-"+c
+            }
+            else cods += ""
+        });
+        return cods
+    }
+
+    private createTxt (datos: IOrderTxt[], start: number) {
+        let lineas: string [] = []
+        const blank1 = [4,4,4,25,4,1]
+        const blank2 = [26,3,4,25,4,25,6,40,15,15,15,20,50]
+        for (let index = 0; index < datos.length; index++) {
+            let line = ""
+            const p = datos[index]
+            const fecha = p.date_delivered.toString().split("T")[0]
+            const desP = p.insumo_des.split("-")
+            const cod = this.returnProdCods(p.insumo_des)
+            //Comprbante
+            line += fillEmptyTxt("SAL",3,false,true,false)
+            //Letra
+            line += fillEmptyTxt("",1,true,true,false)
+            //PV
+            line += fillEmptyTxt("",5,true,true,false)
+            //Nro comprobante
+            line += fillEmptyTxt(start.toString(),8,false,false,true)
+            //fecha comprobante
+            line += fillEmptyTxt(fecha,8,false,true,false)
+            //7 - 12
+            blank1.forEach((s) => {
+                line += fillEmptyTxt("",s,true,true,false)    
+            });
+            //Codigo de insumo
+            line += fillEmptyTxt(cod,8,false,false,false)
+            //cant unidad 1
+            line += fillEmptyTxt(p.amount.toString(),16,false,false,false)
+            //cant unidad 1
+            line += fillEmptyTxt("",16,true,false,false)
+            //des articulo
+            line += fillEmptyTxt(desP[desP.length-1].trimEnd(),8,false,false,false)
+            //Tipo de articulo
+            line += fillEmptyTxt("8",1,false,false,false)
+            //prc costo total mod local
+            line += fillEmptyTxt("",16,true,true,false)
+            //prc costo total mod ex
+            line += fillEmptyTxt("",16,true,true,false)
+            //deposito
+            line += fillEmptyTxt("CEN",3,false,false,false)
+            //22 - 33
+            blank2.forEach((s) => {
+                line += fillEmptyTxt("",s,true,true,false)    
+            });
+            //Fecha de partida
+            line += fillEmptyTxt(fecha,8,false,true,false)
+            //Obs de la partida
+            line += fillEmptyTxt("",20,false,false,false)
+            //otros datos de la partida
+            line += fillEmptyTxt(p.numero,50,false,false,false)
+            //CCO
+            line += fillEmptyTxt(p.service_id.toString(),8,false,false,false)
+            start++
+            lineas.push(line)
+        }
+        return {lineas, start: start+1}
     }
 
 }

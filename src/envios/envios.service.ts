@@ -38,6 +38,22 @@ export class EnviosService {
         }
     
     }
+
+    //Traer el ultimo remito
+    async getLastRt () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 1;`
+            const pv:number = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv - 1
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Traer punto de venta actual
     async getPv () {
         const conn = clientReturner()
