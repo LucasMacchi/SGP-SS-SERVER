@@ -339,16 +339,19 @@ export class EnviosService {
                 const sql = `INSERT INTO public.glpi_sgp_envio(
 	            lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda)
 	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}) RETURNING envio_id;`
-                console.log(sql)
-                const envId = (await conn.query(sql)).rows[0]["envio_id"]
-                for (const prod of envio.detalles) {
-                    const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-	                envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
-	                VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
-                    await conn.query(sql2)
-                    prodCreated++
+                if(envio.entregaId && envio.desglose) {
+                    const envId = (await conn.query(sql)).rows[0]["envio_id"]
+                    for (const prod of envio.detalles) {
+                        const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
+                        envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
+                        VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
+                        await conn.query(sql2)
+                        prodCreated++
+                    }
+                    created++
                 }
-                created++
+                else console.log(envio)
+
             }
             startRemito++
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
@@ -359,7 +362,6 @@ export class EnviosService {
                 log.remitos = startRemito-startRemitoConst
             }
             const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
-            console.log(sqlLog)
             await conn.query(sqlLog)
             await conn.end()
             const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
