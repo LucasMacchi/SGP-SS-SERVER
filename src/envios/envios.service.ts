@@ -546,7 +546,7 @@ export class EnviosService {
                     const lugar: IRemitoEntrega = await (await conn.query(sqlEntrega)).rows[0]
                     const detallesToAdd: IDetalleEnvioTxt[] = []
                     data1.forEach(de => {
-                        if(de.lentrega_id === data.lentrega_id) {
+                        if(de.nro_remito === data.nro_remito) {
                             const insumoArray = de.descripcion.split("-")
                             const detalle: IDetalleEnvioTxt = {
                                 descripcion: insumoArray[insumoArray.length - 1],
@@ -578,6 +578,7 @@ export class EnviosService {
                 }
                 aux = data.lentrega_id
             }
+            await conn.end()
             const parsedRemitos = arrayRemitos.map(r => this.totalReturnerOwn(r))
             return parsedRemitos
 
@@ -603,7 +604,7 @@ export class EnviosService {
                 if(data.lentrega_id !== aux) {
                     const detallesToAdd: IDetalleEnvioTxt[] = []
                     data1.forEach(de => {
-                        if(de.lentrega_id === data.lentrega_id) {
+                        if(de.nro_remito === data.nro_remito) {
                             const detalle: IDetalleEnvioTxt = {
                                 descripcion: de.descripcion,
                                 total_raciones: parseInt(de.total_raciones),
