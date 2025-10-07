@@ -98,6 +98,11 @@ export class EnviosController {
     getAllEnviosTanda(@Param('start') start:string, @Param('end') end:string) {
         return this.EnviosService.getTandaEnvios(start,end)
     }
+    //@UseGuards(userGuard)
+    @Get('remitos/:start/:end')
+    getcreateRemitoData(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.createRemitosData(start,end)
+    }
     @UseGuards(userGuard)
     @Get('txt/:start/:end/:dias')
     getcreateTxt(@Param('start') start:string, @Param('end') end:string,@Param('dias') dias:number) {
@@ -123,4 +128,5 @@ export class EnviosController {
     getcreateInforme(@Param('fecha') fecha:string) {
         return this.EnviosService.getInformeFecha(fecha)
     }
+
 }
