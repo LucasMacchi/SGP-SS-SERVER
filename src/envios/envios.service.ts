@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 import { conformidadSql, deleteTandaLogSQL, deleteTandaSQL, gobackRemitoSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
@@ -524,6 +524,68 @@ export class EnviosService {
         }
     }
 
+    async createRemitosData (start: string, end: string) {
+        const conn = clientReturner()
+        const range = rangeReturner(start, end)
+        const sqlRemitos = txtSql(range)
+        const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
+        const sqlCai = "select payload from glpi_sgp_config where config_id = 4;"
+        const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
+        try {
+            await conn.connect()
+            const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
+            const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
+            const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
+            const fech_ven = await (await conn.query(sqlRtVenc)).rows[0]["payload"]
+            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            let aux = 0
+            const arrayRemitos: IRemitoEnvio[] = []
+            for(const data of data1) {
+                if(data.lentrega_id !== aux) {
+                    const sqlEntrega = `SELECT localidad, direccion,descripcion FROM public.glpi_sgp_lentrega where lentrega_id = ${data.lentrega_id};`
+                    const lugar: IRemitoEntrega = await (await conn.query(sqlEntrega)).rows[0]
+                    const detallesToAdd: IDetalleEnvioTxt[] = []
+                    data1.forEach(de => {
+                        if(de.lentrega_id === data.lentrega_id) {
+                            const insumoArray = de.descripcion.split("-")
+                            const detalle: IDetalleEnvioTxt = {
+                                descripcion: insumoArray[insumoArray.length - 1],
+                                total_raciones: parseInt(de.total_raciones),
+                                total_kilos: parseFloat(parseFloat(de.total_kilos).toFixed(2)),
+                                total_bolsas: parseInt(de.total_bolsas),
+                                total_cajas: parseInt(de.total_cajas),
+                                total_unidades: parseInt(de.total_unidades),
+                                unit_caja: parseInt(de.unit_caja)
+                            }
+                            detallesToAdd.push(detalle)
+                        }
+                    });
+                    let desglosesCount = 0
+                    desgloses.forEach(desc => {
+                        if(desc.nro_remito === data.nro_remito) desglosesCount = desc.count;
+                    });
+                    const fila: IRemitoEnvio = {
+                        nro_remito: data.nro_remito,
+                        le_des: lugar.descripcion,
+                        le_direccion: lugar.direccion,
+                        le_localidad: lugar.localidad,
+                        detalles: detallesToAdd,
+                        cant_desgloses: desglosesCount,
+                        fcha_venc: fechaParsed,
+                        cai: cai
+                    }
+                    arrayRemitos.push(fila)
+                }
+                aux = data.lentrega_id
+            }
+            return arrayRemitos
+
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
     async createTxtEnvio (start: string, end: string, dias: number) {
         const conn = clientReturner()

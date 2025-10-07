@@ -212,3 +212,21 @@ export interface IOrderTxt {
     numero: string,
     date_delivered: string
 }
+
+export interface IRemitoEnvio {
+    nro_remito: string,
+    le_des: string,
+    le_direccion: string,
+    le_localidad: string,
+    fcha_venc: string,
+    cai: string,
+    detalles: IDetalleEnvioTxt[],
+    cant_desgloses: number
+
+}
+
+export interface IRemitoEntrega {
+    direccion: string,
+    localidad: string,
+    descripcion: string
+}
