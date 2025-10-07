@@ -578,7 +578,8 @@ export class EnviosService {
                 }
                 aux = data.lentrega_id
             }
-            return arrayRemitos
+            const parsedRemitos = arrayRemitos.map(r => this.totalReturnerOwn(r))
+            return parsedRemitos
 
         } catch (error) {
             await conn.end()
@@ -750,6 +751,22 @@ export class EnviosService {
     }
 
     private totalReturner (remito: IRemitoInd): IRemitoInd {
+        const detalles = remito.detalles
+        detalles.forEach(de => {
+            const numberDiv = de.unit_caja
+            if(numberDiv){
+                de.total_cajas = de.total_bolsas >= numberDiv ? Math.floor(de.total_cajas + de.total_bolsas / numberDiv) : de.total_cajas
+                de.total_bolsas = de.total_bolsas % numberDiv
+            }
+            else {
+                de.total_cajas = 0
+                de.total_bolsas = de.total_bolsas 
+            }
+
+        });
+        return remito
+    }
+    private totalReturnerOwn (remito: IRemitoEnvio): IRemitoEnvio {
         const detalles = remito.detalles
         detalles.forEach(de => {
             const numberDiv = de.unit_caja
