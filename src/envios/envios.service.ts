@@ -54,6 +54,36 @@ export class EnviosService {
             return error
         }
     }
+    //Traer el ultimo remito
+    async getCai () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 4;`
+            const pv:number = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Traer el ultimo remito
+    async getFechVenc () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 5;`
+            const pv:number = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //Traer punto de venta actual
     async getPv () {
         const conn = clientReturner()
@@ -63,6 +93,35 @@ export class EnviosService {
             const pv = (await conn.query(sql)).rows[0]["payload"]
             await conn.end()
             return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async getFinTalo () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 6;`
+            const pv = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Traer el ultimo remito
+    async updateData (payload: number,id: number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `UPDATE public.glpi_sgp_config SET payload=${payload} WHERE config_id=${id};`
+            await conn.query(sql)
+            await conn.end()
+            return "Config modificado "+payload+" id "+id
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -324,8 +383,10 @@ export class EnviosService {
             const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
             const sqlPv = "select payload from glpi_sgp_config where config_id = 2;"
             const sqlRemito = "select payload from glpi_sgp_config where config_id = 1;"
+            const sqlRemitoFinTalonario = "select payload from glpi_sgp_config where config_id = 6;"
             let startRemito = await (await conn.query(sqlRemito)).rows[0]["payload"]
             const pv = await (await conn.query(sqlPv)).rows[0]["payload"]
+            const finTalo = await (await conn.query(sqlRemitoFinTalonario)).rows[0]["payload"]
             const startRemitoConst = startRemito
             log.remitos_iniciales = startRemitoConst
             log.pv = pv
@@ -364,8 +425,8 @@ export class EnviosService {
             const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
             await conn.query(sqlLog)
             await conn.end()
-            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
-            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos})`
+            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito-1)
+            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito-1)} remitos.`
         } catch (error) {
             await conn.end()
             console.log(error)

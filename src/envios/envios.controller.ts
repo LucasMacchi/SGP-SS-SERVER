@@ -5,6 +5,7 @@ import { userGuard } from 'src/user/userAuth.guard';
 import { createEnvioDto } from 'src/dto/enviosDto';
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
+import { parse } from 'path';
 
 @Controller('envios')
 export class EnviosController {
@@ -27,9 +28,24 @@ export class EnviosController {
         return this.EnviosService.getPv()
     }
     @UseGuards(userGuard)
+    @Get('fintalo')
+    getFinTalonario() {
+        return this.EnviosService.getFinTalo()
+    }
+    @UseGuards(userGuard)
     @Get('rt')
     getCurrentRt() {
         return this.EnviosService.getLastRt()
+    }
+    @UseGuards(userGuard)
+    @Get('cai')
+    getCurrentCai() {
+        return this.EnviosService.getCai()
+    }
+    @UseGuards(userGuard)
+    @Get('vencimiento')
+    getVencimiento() {
+        return this.EnviosService.getFechVenc()
     }
     @UseGuards(userGuard)
     @Get('planes')
@@ -87,6 +103,11 @@ export class EnviosController {
     @Patch('edit/cant')
     editCantEnv(@Body() data: editCantidadDto) {
         return this.EnviosService.editCantidad(data)
+    }
+    @UseGuards(userGuard)
+    @Patch('edit/data/:id/:payload')
+    editDataEnv(@Param('id') id:string, @Param('payload') payload:string) {
+        return this.EnviosService.updateData(parseInt(payload),parseInt(id))
     }
     
     @Post('create')
