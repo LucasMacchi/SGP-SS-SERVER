@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 import { cabecerasSQL, conformidadSql, conformidadSqlCustom, deglosesSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitosSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
@@ -290,8 +290,20 @@ export class EnviosService {
         try {
             await conn.connect()
             const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
+            const sqlCues = `SELECT cue,fortificado FROM public.glpi_sgp_envio where tanda = ${tanda};`
             const tandaMax: number = await (await conn.query(sqlTanda)).rows[0]["max"]
+            const cues: IDelCues[] = (await conn.query(sqlCues)).rows
             if(key === DELETE_KEY && tanda === tandaMax) {
+                for(const e of cues) {
+                    let sqlC = ``
+                    if(e.fortificado) {
+                        sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_al=false WHERE cue = ${parseInt(e.cue)};`
+                    }
+                    else {
+                        sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_cl=false WHERE cue = ${parseInt(e.cue)};`
+                    }
+                    await conn.query(sqlC)
+                }
                 await conn.query(deleteTandaSQL(tanda))
                 await conn.query(gobackRemitoSQL(tanda))
                 await conn.query(deleteTandaLogSQL(tanda))
@@ -458,8 +470,8 @@ export class EnviosService {
                     }
                     const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
-                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod)
-                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW()) RETURNING envio_id;`
+                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado)
+                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado}) RETURNING envio_id;`
                     const sqlCreated = `UPDATE public.glpi_sgp_desgloses SET ${envio.fortificado ? `sent_al=true` : `sent_cl=true`} WHERE cue = ${envio.cue};`
                     if(envio.entregaId && envio.desglose && envio.cue) {
                         const envId = (await conn.query(sql)).rows[0]["envio_id"]
