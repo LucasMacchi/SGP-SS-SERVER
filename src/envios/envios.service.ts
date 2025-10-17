@@ -2,13 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { conformidadSql, deleteTandaLogSQL, deleteTandaSQL, gobackRemitoSQL, rutaSql, rutaSqlRemito, rutaSqlTotales, txtSql } from 'src/utils/sqlReturner';
+import { cabecerasSQL, conformidadSql, conformidadSqlCustom, deglosesSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitosSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import rangeReturner from 'src/utils/rangeReturner';
+import customRemitosReturner from 'src/utils/customRemitosReturner';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
@@ -245,14 +246,37 @@ export class EnviosService {
         }
     }
     //Trae los lugares de entrega
-    async getLugaresEntrega () {
+    async getLugaresEntrega (departamento: string, fortificado: number) {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = "SELECT * FROM public.glpi_sgp_lentrega ORDER BY lentrega_id ASC;"
-            const rows = (await conn.query(sql)).rows
+            const sql = deglosesSQL(departamento,fortificado)
+            const rows1: IDesglosesReturner[] = (await conn.query(sql)).rows
+            const cabecerasUnfilter: Map<number,string> = new Map(rows1.map(d => [d.lentrega_id,d.completo]))
+            const cabecerasFiltered = Array.from(cabecerasUnfilter.entries()).map(([lentrega_id, completo]) => ({lentrega_id, completo}))
+            const data = {
+                cabeceras: cabecerasFiltered,
+                desgloses: rows1
+            }
             await conn.end()
-            return rows
+            return data
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    //Trae los Departamentos
+    async getDepartamentos() {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = "select departamento from glpi_sgp_lentrega group by departamento order by departamento;"
+            const rows: IDepartamentoRes[] = (await conn.query(sql)).rows
+            const res:string[] = rows.map(d => d.departamento) 
+            await conn.end()
+            return res
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -365,6 +389,35 @@ export class EnviosService {
         return formatted
     }
 
+    async verRemitos () {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            const remitos: IRemitosEnvio[] = (await conn.query(verRemitosSQL())).rows
+            await conn.end()
+            return remitos
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async patchRemitos (state: string, remito: string) {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            await conn.query(estadoRemitosSQL(state,remito))
+            await conn.end()
+            return "Remito modificado "+state
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+
     //Crea envios masivamente para crear remitos
     async createEnvios (data: createEnvioDto) {
         const conn = clientReturner()
@@ -379,7 +432,7 @@ export class EnviosService {
             let created = 0
             let prodCreated = 0
             await conn.connect()
-            let aux = data.enviados[0].entregaId
+            //data previa
             const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
             const sqlPv = "select payload from glpi_sgp_config where config_id = 2;"
             const sqlRemito = "select payload from glpi_sgp_config where config_id = 1;"
@@ -391,41 +444,54 @@ export class EnviosService {
             log.remitos_iniciales = startRemitoConst
             log.pv = pv
             const tanda = await (await conn.query(sqlTanda)).rows[0]["max"] + 1
-            for(const envio of data.enviados) {
-                if(envio.entregaId > aux) {
-                    aux = envio.entregaId
-                    startRemito++
-                }
-                const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
-                const sql = `INSERT INTO public.glpi_sgp_envio(
-	            lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda)
-	            VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}) RETURNING envio_id;`
-                if(envio.entregaId && envio.desglose) {
-                    const envId = (await conn.query(sql)).rows[0]["envio_id"]
-                    for (const prod of envio.detalles) {
-                        const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-                        envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
-                        VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
-                        await conn.query(sql2)
-                        prodCreated++
+            //carga de envios
+            const enviosTotal: IrequestEnvio[][] = []
+            if(data.enviadosAL.length > 0) enviosTotal.push(data.enviadosAL.sort((a,b) => a.entregaId - b.entregaId))
+            if(data.enviadosCL.length > 0) enviosTotal.push(data.enviadosCL.sort((a,b) => a.entregaId - b.entregaId))
+            for(const env of enviosTotal) {
+                let aux = env[0].entregaId
+                startRemito++
+                for(const envio of env) {
+                    if(envio.entregaId !== aux) {
+                        aux = envio.entregaId
+                        startRemito++
                     }
-                    created++
-                }
-                else console.log(envio)
+                    const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
+                    const sql = `INSERT INTO public.glpi_sgp_envio(
+                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod)
+                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW()) RETURNING envio_id;`
+                    const sqlCreated = `UPDATE public.glpi_sgp_desgloses SET ${envio.fortificado ? `sent_al=true` : `sent_cl=true`} WHERE cue = ${envio.cue};`
+                    if(envio.entregaId && envio.desglose && envio.cue) {
+                        const envId = (await conn.query(sql)).rows[0]["envio_id"]
+                        console.log("ID = "+envId  + " -- LUGAR = " + envio.entregaId +" -- REMITO = "+startRemito+ " -- TIPO = "+(envio.fortificado ? "AL" : "CL"))
+                        for (const prod of envio.detalles) {
+                            const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
+                            envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
+                            VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
+                            await conn.query(sql2)
+                            prodCreated++
+                        }
+                        await conn.query(sqlCreated)
+                        created++
+                    }
+                    else console.log(envio)
 
+                }
             }
-            startRemito++
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
             log.desgloses = created
             log.nro_tanda = tanda
+            //Si se updatea los remitos, lo hace
             if(data.update) {
                 await conn.query(updateRemito)
                 log.remitos = startRemito-startRemitoConst
             }
+            //se crea el log
             const sqlLog = `INSERT INTO public.glpi_sgp_tanda_log(nro_tanda, remitos, remitos_iniciales, desgloses, pv) VALUES (${log.nro_tanda}, ${log.remitos}, ${log.remitos_iniciales}, ${log.desgloses}, ${log.pv});`
             await conn.query(sqlLog)
+            //cierre
             await conn.end()
-            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito-1)
+            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
             return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito-1)} remitos.`
         } catch (error) {
             await conn.end()
@@ -442,6 +508,69 @@ export class EnviosService {
             const data1: IDesglosesRuta[] = (await conn.query(rutaSql(start,end))).rows
             const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemito(start,end))).rows
             const totales: ITotalRutas[] = (await conn.query(rutaSqlTotales(start,end))).rows
+            const totalesParsed: IRutaTotalsParsed[] = []
+            totales.forEach(t => {
+                if(parseInt(t.ucaja) > 0) {
+                    const numberDiv = parseInt(t.ucaja)
+                    const cajaN = parseInt(t.cajas)
+                    const bolsasN = parseInt(t.bolsas)
+                    const kilosN = parseFloat(t.kilos).toFixed(2)
+                    const paletDiv = parseInt(t.palet)
+                    let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
+                    let bolsasF = bolsasN % numberDiv
+                    const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
+                    cajasF = cajasF - (palet * paletDiv)
+                    const data: IRutaTotalsParsed = {
+                        des: t.des,
+                        cajas: cajasF,
+                        bolsas: bolsasF,
+                        ucaja: numberDiv,
+                        kilos: parseFloat(kilosN),
+                        palet: palet,
+                        caja_palet: paletDiv
+                    }
+                    totalesParsed.push(data)
+                }
+                else {
+                    const bolsasN = parseInt(t.bolsas)
+                    const kilosN = parseFloat(t.kilos).toFixed(2)
+                    const paletDiv = parseInt(t.palet)
+                    const palet = bolsasN >= paletDiv ? Math.floor(bolsasN / paletDiv) : 0
+                    let bolsasF = bolsasN - (palet * paletDiv)
+                    const data: IRutaTotalsParsed = {
+                        des: t.des,
+                        cajas: 0,
+                        bolsas: bolsasF,
+                        ucaja: 0,
+                        kilos: parseFloat(kilosN),
+                        palet: palet,
+                        caja_palet: paletDiv
+                    }
+                    totalesParsed.push(data)
+                }
+
+            });
+            const response = {
+                desgloses: data1,
+                remitos: data2,
+                totales: totalesParsed
+            }
+            await conn.end()
+            return response
+
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async getRutaCustom (remitos: string[]) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const data1: IDesglosesRuta[] = (await conn.query(rutaSqlCustom(remitos))).rows
+            const data2: IRemitoRuta[] = (await conn.query(rutaSqlRemitoCustom(remitos))).rows
+            const totales: ITotalRutas[] = (await conn.query(rutaSqlTotalesCustom(remitos))).rows
             const totalesParsed: IRutaTotalsParsed[] = []
             totales.forEach(t => {
                 if(parseInt(t.ucaja) > 0) {
@@ -524,11 +653,49 @@ export class EnviosService {
         }
     }
 
+    async getTandaEnviosCustom (remitos: string[]) {
+        const conn = clientReturner()
+        try {
+            const range = customRemitosReturner(remitos)
+            await conn.connect()
+            const sql = `SELECT * FROM public.glpi_sgp_envio e INNER JOIN public.glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where ${range} ORDER BY e.nro_remito ASC;`
+            const sql2 = `SELECT * FROM public.glpi_sgp_envio_details WHERE ${range};`
+            const envios: IrequestEnvio[] = (await conn.query(sql)).rows
+            const detalles: IDetalleEnvio[] = (await conn.query(sql2)).rows
+            envios.forEach(env => {
+                env.detalles = detalles.filter((d) => d.envio_id === env.envio_id)
+                
+            });
+            await conn.end()
+            return envios
+            
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
     async getActasConformidad (start: string, end: string) {
         const conn = clientReturner()
         try {
             await conn.connect()
             const data: IConformidad[] = (await conn.query(conformidadSql(start, end))).rows
+            await conn.end()
+            return data
+            
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async getActasConformidadCustom (remitos: string[]) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const data: IConformidad[] = (await conn.query(conformidadSqlCustom(remitos))).rows
             await conn.end()
             return data
             
@@ -589,6 +756,7 @@ export class EnviosService {
         const conn = clientReturner()
         const range = rangeReturner(start, end)
         const sqlRemitos = txtSql(range)
+        
         const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
         const sqlCai = "select payload from glpi_sgp_config where config_id = 4;"
         const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
@@ -599,10 +767,10 @@ export class EnviosService {
             const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
             const fech_ven = await (await conn.query(sqlRtVenc)).rows[0]["payload"]
             const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
-            let aux = 0
+            let aux = ""
             const arrayRemitos: IRemitoEnvio[] = []
             for(const data of data1) {
-                if(data.lentrega_id !== aux) {
+                if(data.nro_remito !== aux) {
                     const sqlEntrega = `SELECT localidad, direccion,descripcion FROM public.glpi_sgp_lentrega where lentrega_id = ${data.lentrega_id};`
                     const lugar: IRemitoEntrega = await (await conn.query(sqlEntrega)).rows[0]
                     const detallesToAdd: IDetalleEnvioTxt[] = []
@@ -637,7 +805,71 @@ export class EnviosService {
                     }
                     arrayRemitos.push(fila)
                 }
-                aux = data.lentrega_id
+                aux = data.nro_remito
+            }
+            await conn.end()
+            const parsedRemitos = arrayRemitos.map(r => this.totalReturnerOwn(r))
+            return parsedRemitos
+
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async createRemitosDataCustom (remitos: string[]) {
+        const conn = clientReturner()
+        const range = customRemitosReturner(remitos)
+        const sqlRemitos = txtSql(range)
+        const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
+        const sqlCai = "select payload from glpi_sgp_config where config_id = 4;"
+        const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
+        try {
+            await conn.connect()
+            const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
+            const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
+            const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
+            const fech_ven = await (await conn.query(sqlRtVenc)).rows[0]["payload"]
+            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            let aux = ""
+            const arrayRemitos: IRemitoEnvio[] = []
+            for(const data of data1) {
+                if(data.nro_remito !== aux) {
+                    const sqlEntrega = `SELECT localidad, direccion,descripcion FROM public.glpi_sgp_lentrega where lentrega_id = ${data.lentrega_id};`
+                    const lugar: IRemitoEntrega = await (await conn.query(sqlEntrega)).rows[0]
+                    const detallesToAdd: IDetalleEnvioTxt[] = []
+                    data1.forEach(de => {
+                        if(de.nro_remito === data.nro_remito) {
+                            const insumoArray = de.descripcion.split("-")
+                            const detalle: IDetalleEnvioTxt = {
+                                descripcion: insumoArray[insumoArray.length - 1],
+                                total_raciones: parseInt(de.total_raciones),
+                                total_kilos: parseFloat(parseFloat(de.total_kilos).toFixed(2)),
+                                total_bolsas: parseInt(de.total_bolsas),
+                                total_cajas: parseInt(de.total_cajas),
+                                total_unidades: parseInt(de.total_unidades),
+                                unit_caja: parseInt(de.unit_caja)
+                            }
+                            detallesToAdd.push(detalle)
+                        }
+                    });
+                    let desglosesCount = 0
+                    desgloses.forEach(desc => {
+                        if(desc.nro_remito === data.nro_remito) desglosesCount = desc.count;
+                    });
+                    const fila: IRemitoEnvio = {
+                        nro_remito: data.nro_remito,
+                        le_des: lugar.descripcion,
+                        le_direccion: lugar.direccion,
+                        le_localidad: lugar.localidad,
+                        detalles: detallesToAdd,
+                        cant_desgloses: desglosesCount,
+                        fcha_venc: fechaParsed,
+                        cai: cai
+                    }
+                    arrayRemitos.push(fila)
+                }
+                aux = data.nro_remito
             }
             await conn.end()
             const parsedRemitos = arrayRemitos.map(r => this.totalReturnerOwn(r))
@@ -659,10 +891,10 @@ export class EnviosService {
             await conn.connect()
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
             const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
-            let aux = 0
+            let aux = ""
             const arrayRemitos: IRemitoInd[] = []
             data1.forEach(data => {
-                if(data.lentrega_id !== aux) {
+                if(data.nro_remito !== aux) {
                     const detallesToAdd: IDetalleEnvioTxt[] = []
                     data1.forEach(de => {
                         if(de.nro_remito === data.nro_remito) {
@@ -690,7 +922,7 @@ export class EnviosService {
                     }
                     arrayRemitos.push(fila)
                 }
-                aux = data.lentrega_id
+                aux = data.nro_remito
             });
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),

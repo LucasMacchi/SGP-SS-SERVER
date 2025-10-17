@@ -6,6 +6,7 @@ import { createEnvioDto } from 'src/dto/enviosDto';
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import { parse } from 'path';
+import customRemitosDto from 'src/dto/customRemitosDto';
 
 @Controller('envios')
 export class EnviosController {
@@ -52,6 +53,16 @@ export class EnviosController {
     getEnviosPlanes() {
         return this.EnviosService.getPlanesEnvios()
     }
+    //@UseGuards(userGuard)
+    @Get('remitos')
+    getRemitos() {
+        return this.EnviosService.verRemitos()
+    }
+    
+    @Patch('remitos/estado/:estado/:remito')
+    patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string) {
+        return this.EnviosService.patchRemitos(estado,remito)
+    }
     @UseGuards(userGuard)
     @Post('add/plan/:des/:dias')
     addPlanes(@Param('des') des:string,@Param('dias') dias:number) {
@@ -73,9 +84,14 @@ export class EnviosController {
         return this.EnviosService.delInsumosPlan(id)
     }
     @UseGuards(userGuard)
-    @Get('entregas')
-    getLentregas() {
-        return this.EnviosService.getLugaresEntrega()
+    @Get('entregas/:departamento/:plan')
+    getLentregas(@Param('departamento') departamento:string,@Param('plan') plan:string) {
+        return this.EnviosService.getLugaresEntrega(departamento,parseInt(plan))
+    }
+    @UseGuards(userGuard)
+    @Get('departamentos')
+    getDeps() {
+        return this.EnviosService.getDepartamentos()
     }
     @UseGuards(userGuard)
     @Get('insumos')
@@ -120,9 +136,19 @@ export class EnviosController {
         return this.EnviosService.getTandaEnvios(start,end)
     }
     @UseGuards(userGuard)
+    @Post('/custom/tanda')
+    getAllEnviosTandaCustom(@Body() remitos: customRemitosDto) {
+        return this.EnviosService.getTandaEnviosCustom(remitos.remitos)
+    }
+    @UseGuards(userGuard)
     @Get('remitos/:start/:end')
     getcreateRemitoData(@Param('start') start:string, @Param('end') end:string) {
         return this.EnviosService.createRemitosData(start,end)
+    }
+    @UseGuards(userGuard)
+    @Post('custom/remitos')
+    getcreateRemitoDataCustom(@Body() remitos: customRemitosDto) {
+        return this.EnviosService.createRemitosDataCustom(remitos.remitos)
     }
     @UseGuards(userGuard)
     @Get('txt/:start/:end/:dias')
@@ -135,9 +161,19 @@ export class EnviosController {
         return this.EnviosService.getRuta(start,end)
     }
     @UseGuards(userGuard)
+    @Post('custom/ruta')
+    getcreateRutaCustom(@Body() remitos: customRemitosDto) {
+        return this.EnviosService.getRutaCustom(remitos.remitos)
+    }
+    @UseGuards(userGuard)
     @Get('actas/:start/:end')
     getcreateActas(@Param('start') start:string, @Param('end') end:string) {
         return this.EnviosService.getActasConformidad(start,end)
+    }
+    @UseGuards(userGuard)
+    @Post('custom/actas')
+    getcreateActasCustom(@Body() remitos: customRemitosDto) {
+        return this.EnviosService.getActasConformidadCustom(remitos.remitos)
     }
     @UseGuards(userGuard)
     @Delete("del/tanda/:tanda/:key")

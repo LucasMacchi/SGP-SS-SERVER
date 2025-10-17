@@ -5,7 +5,11 @@ import { IrequestEnvio } from "src/utils/interfaces";
 export class createEnvioDto {
     @IsArray()
     @IsNotEmpty()
-    enviados: IrequestEnvio[]
+    enviadosCL: IrequestEnvio[]
+
+    @IsArray()
+    @IsNotEmpty()
+    enviadosAL: IrequestEnvio[]
 
     @IsBoolean()
     @IsNotEmpty()

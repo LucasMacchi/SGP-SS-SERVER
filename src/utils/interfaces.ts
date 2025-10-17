@@ -64,9 +64,11 @@ export interface IDetalleEnvio {
 export interface IrequestEnvio {
   entregaId: number,
   desglose: string,
+  cue: number,
   detalles: IDetalleEnvio[],
   completo?: string,
-  envio_id?: number
+  envio_id?: number,
+  fortificado: boolean
 }
 
 export interface IEntregaDetalleTxt {
@@ -229,4 +231,32 @@ export interface IRemitoEntrega {
     direccion: string,
     localidad: string,
     descripcion: string
+}
+
+export interface IDepartamentoRes {
+    departamento: string
+}
+
+export interface IDesglosesReturner {
+    cue: string,
+    lentrega_id: number,
+    localidad: string,
+    completo: string,
+    des: string,
+    rac_cl: number | null,
+    rac_al: number | null
+}
+
+export interface ICabecera {
+    lentrega_id: number,
+    completo: string
+}
+
+export interface IRemitosEnvio {
+    nro_remito:string,
+    estado: string,
+    departamento: string,
+    localidad: string,
+    completo: string,
+    ultima_mod: string
 }
