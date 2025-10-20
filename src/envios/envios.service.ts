@@ -246,6 +246,21 @@ export class EnviosService {
         }
     }
     //Trae los lugares de entrega
+    async getLugaresDeEntrega () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = "SELECT * FROM public.glpi_sgp_lentrega ORDER BY lentrega_id ASC;"
+            const rows = (await conn.query(sql)).rows
+            await conn.end()
+            return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Trae los lugares de entrega
     async getLugaresEntrega (departamento: string, fortificado: number) {
         const conn = clientReturner()
         try {
