@@ -53,12 +53,16 @@ export class EnviosController {
     getEnviosPlanes() {
         return this.EnviosService.getPlanesEnvios()
     }
-    //@UseGuards(userGuard)
+    @UseGuards(userGuard)
     @Get('remitos')
     getRemitos() {
         return this.EnviosService.verRemitos()
     }
-    
+    @UseGuards(userGuard)
+    @Get('lentrega')
+    getLentregasRaw() {
+        return this.EnviosService.getLugaresDeEntrega()
+    }
     @Patch('remitos/estado/:estado/:remito')
     patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string) {
         return this.EnviosService.patchRemitos(estado,remito)
