@@ -4,7 +4,7 @@ import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
 import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { cabecerasSQL, conformidadSql, conformidadSqlCustom, deglosesSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitosSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import { cabecerasSQL, conformidadSql, conformidadSqlCustom, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
@@ -309,16 +309,20 @@ export class EnviosService {
             const tandaMax: number = await (await conn.query(sqlTanda)).rows[0]["max"]
             const cues: IDelCues[] = (await conn.query(sqlCues)).rows
             if(key === DELETE_KEY && tanda === tandaMax) {
-                for(const e of cues) {
-                    let sqlC = ``
-                    if(e.fortificado) {
-                        sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_al=false WHERE cue = ${parseInt(e.cue)};`
+                if(cues[0].cue) {
+                    for(const e of cues) {
+                        let sqlC = ``
+                        if(e.fortificado) {
+                            sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_al=false WHERE cue = ${parseInt(e.cue)};`
+                        }
+                        else {
+                            sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_cl=false WHERE cue = ${parseInt(e.cue)};`
+                        }
+                        await conn.query(sqlC)
                     }
-                    else {
-                        sqlC = `UPDATE public.glpi_sgp_desgloses SET sent_cl=false WHERE cue = ${parseInt(e.cue)};`
-                    }
-                    await conn.query(sqlC)
                 }
+
+                await conn.query(deleteRemitoLogSQL(tanda))
                 await conn.query(deleteTandaSQL(tanda))
                 await conn.query(gobackRemitoSQL(tanda))
                 await conn.query(deleteTandaLogSQL(tanda))
@@ -326,6 +330,7 @@ export class EnviosService {
                 return "Tanda eliminada: "+tanda+" | Se volvio remitos para atras."
             }
             else if(key === DELETE_KEY) {
+                await conn.query(deleteRemitoLogSQL(tanda))
                 await conn.query(deleteTandaSQL(tanda))
                 await conn.query(deleteTandaLogSQL(tanda))
                 await conn.end()
@@ -434,7 +439,8 @@ export class EnviosService {
         const conn = clientReturner() 
         try {
             await conn.connect()
-            await conn.query(estadoRemitosSQL(state,remito))
+            const tanda:number = (await conn.query(estadoRemitosSQL(state,remito))).rows[0]["tanda"]
+            await conn.query(estadoRemitoLogSQL(tanda, state, remito))
             await conn.end()
             return "Remito modificado "+state
         } catch (error) {
