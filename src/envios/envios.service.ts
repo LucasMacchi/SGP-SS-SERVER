@@ -230,7 +230,7 @@ export class EnviosService {
             return error
         }
     }
-    //Trae los insumos de copa de leche y alimento fortificado
+    //Trae los insumos de copa de leche y alimento fortificadoo
     async getInsumosEnvios () {
         const conn = clientReturner()
         try {
