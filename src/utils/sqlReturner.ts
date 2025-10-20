@@ -88,7 +88,7 @@ export function estadoRemitosSQL (estado: string, remito:string) {
 }
 
 export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string) {
-    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda) VALUES ('${remito}', '${estado}', NOW(), ${tanda});`
+    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted) VALUES ('${remito}', '${estado}', NOW(), ${tanda},false);`
 }
 
 export function deleteRemitoLogSQL (tanda: number) {
