@@ -48,14 +48,17 @@ export function conformidadSqlCustom (remitos: string[]) {
 }
 
 export function deleteTandaSQL (tanda: number) {
+    console.log("Eliminando Tanda")
     return `DELETE FROM public.glpi_sgp_envio WHERE tanda = ${tanda};`
 }
 
 export function deleteTandaLogSQL (tanda: number) {
+    console.log("Eliminando log de tanda")
     return `DELETE FROM public.glpi_sgp_tanda_log WHERE nro_tanda = ${tanda};`
 }
 
 export function gobackRemitoSQL (tanda: number) {
+    console.log("Volviendo atras Remito")
     return `UPDATE public.glpi_sgp_config SET payload=(SELECT payload FROM public.glpi_sgp_config WHERE config_id= 1 ) - (SELECT remitos FROM public.glpi_sgp_tanda_log WHERE nro_tanda = ${tanda}) WHERE config_id= 1;`
 }
 
@@ -81,7 +84,15 @@ export function verRemitosSQL () {
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {
-    return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}';`
+    return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}' RETURNING tanda;`
+}
+
+export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string) {
+    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda) VALUES ('${remito}', '${estado}', NOW(), ${tanda});`
+}
+
+export function deleteRemitoLogSQL (tanda: number) {
+    return `UPDATE public.glpi_sgp_remito_log SET deleted=true WHERE tanda = ${tanda};`
 }
 
 export function logRemitosSQL (estado: string, remito:string) {
