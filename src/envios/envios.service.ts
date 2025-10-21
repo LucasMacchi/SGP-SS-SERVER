@@ -581,7 +581,8 @@ export class EnviosService {
                     const paletDiv = parseInt(t.palet)
                     //Nuevo
                         const palet = Math.floor(cajaN / paletDiv)
-                        const cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                        let cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                        cajasTotales = Math.floor(cajasTotales + (bolsasN / numberDiv))
                         const totalUnCjP = palet * paletDiv * numberDiv + cajasTotales * numberDiv
                         const totalBolsas = (cajaN * numberDiv + bolsasN) - totalUnCjP
                         const data: IRutaTotalsParsed = {
@@ -644,9 +645,10 @@ export class EnviosService {
                     const bolsasN = parseInt(t.bolsas)
                     const kilosN = parseFloat(t.kilos).toFixed(2)
                     const paletDiv = parseInt(t.palet)
-                    //Nuevo
+                    //Nuevo 
                     const palet = Math.floor(cajaN / paletDiv)
-                    const cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                    let cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                    cajasTotales = Math.floor(cajasTotales + (bolsasN / numberDiv))
                     const totalUnCjP = palet * paletDiv * numberDiv + cajasTotales * numberDiv
                     const totalBolsas = (cajaN * numberDiv + bolsasN) - totalUnCjP
                     const data: IRutaTotalsParsed = {
