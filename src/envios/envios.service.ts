@@ -511,6 +511,7 @@ export class EnviosService {
             const enviosTotal: IrequestEnvio[][] = []
             if(data.enviadosAL.length > 0) enviosTotal.push(data.enviadosAL.sort((a,b) => a.entregaId - b.entregaId))
             if(data.enviadosCL.length > 0) enviosTotal.push(data.enviadosCL.sort((a,b) => a.entregaId - b.entregaId))
+            startRemito++
             for(const env of enviosTotal) {
                 let aux = env[0].entregaId
                 for(const envio of env) {
@@ -518,7 +519,6 @@ export class EnviosService {
                         aux = envio.entregaId
                         startRemito++
                     }
-                    console.log(startRemito)
                     const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
                     lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado)
