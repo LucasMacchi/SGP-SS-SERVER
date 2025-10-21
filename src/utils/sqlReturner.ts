@@ -98,3 +98,11 @@ export function deleteRemitoLogSQL (tanda: number) {
 export function logRemitosSQL (estado: string, remito:string) {
     return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}';`
 }
+
+export function createReporteSQL (titulo: string, des: string,remito: string) {
+    return `INSERT INTO public.glpi_sgp_remito_reporte(remito, titulo, des, fecha) VALUES ('${remito}', '${titulo}', '${des}', NOW());`
+}
+
+export function getRemitoSQL (remito: string) {
+    return `SELECT * FROM public.glpi_sgp_remito_reporte where remito = '${remito}' order by fecha ASC;`
+}

@@ -264,3 +264,11 @@ export interface IRemitosEnvio {
     completo: string,
     ultima_mod: string
 }
+
+export interface IReporteEnvio {
+    reporte_id: number,
+    remito: string,
+    titulo: string,
+    des: string,
+    fecha: string
+}

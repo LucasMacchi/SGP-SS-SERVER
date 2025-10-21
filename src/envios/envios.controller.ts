@@ -7,6 +7,7 @@ import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import { parse } from 'path';
 import customRemitosDto from 'src/dto/customRemitosDto';
+import addReporteEnvio from 'src/dto/addReporteEnvio';
 
 @Controller('envios')
 export class EnviosController {
@@ -57,6 +58,16 @@ export class EnviosController {
     @Get('remitos')
     getRemitos() {
         return this.EnviosService.verRemitos()
+    }
+    @UseGuards(userGuard)
+    @Get('reportes/:remito')
+    getReportes(@Param('remito') remito:string) {
+        return this.EnviosService.verRemitoReportes(remito)
+    }
+    @UseGuards(userGuard)
+    @Post('reportes/create')
+    postReportes(@Body() data: addReporteEnvio) {
+        return this.EnviosService.createReporte(data)
     }
     @UseGuards(userGuard)
     @Get('lentrega')
