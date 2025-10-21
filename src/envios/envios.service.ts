@@ -503,6 +503,7 @@ export class EnviosService {
             const pv = await (await conn.query(sqlPv)).rows[0]["payload"]
             const finTalo = await (await conn.query(sqlRemitoFinTalonario)).rows[0]["payload"]
             const startRemitoConst = startRemito
+            console.log("TRAIDO = "+startRemitoConst)
             log.remitos_iniciales = startRemitoConst
             log.pv = pv
             const tanda = await (await conn.query(sqlTanda)).rows[0]["max"] + 1
@@ -512,12 +513,12 @@ export class EnviosService {
             if(data.enviadosCL.length > 0) enviosTotal.push(data.enviadosCL.sort((a,b) => a.entregaId - b.entregaId))
             for(const env of enviosTotal) {
                 let aux = env[0].entregaId
-                startRemito++
                 for(const envio of env) {
                     if(envio.entregaId !== aux) {
                         aux = envio.entregaId
                         startRemito++
                     }
+                    console.log(startRemito)
                     const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
                     lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado)
@@ -543,7 +544,6 @@ export class EnviosService {
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
             log.desgloses = created
             log.nro_tanda = tanda
-            startRemito++
             //Si se updatea los remitos, lo hace
             if(data.update) {
                 await conn.query(updateRemito)
@@ -555,7 +555,7 @@ export class EnviosService {
             //cierre
             await conn.end()
             const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
-            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito-1)} remitos.`
+            return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito)} remitos.`
         } catch (error) {
             await conn.end()
             console.log(error)
