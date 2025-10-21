@@ -2,14 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { cabecerasSQL, conformidadSql, conformidadSqlCustom, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import rangeReturner from 'src/utils/rangeReturner';
 import customRemitosReturner from 'src/utils/customRemitosReturner';
+import addReporteEnvio from 'src/dto/addReporteEnvio';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
@@ -450,6 +451,34 @@ export class EnviosService {
         }
     }
 
+    async createReporte (data: addReporteEnvio) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            await conn.query(createReporteSQL(data.titulo,data.des,data.remito))
+            await conn.end()
+            return "Reporte creado"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async verRemitoReportes (remito: string) {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            const remitos: IReporteEnvio[] = (await conn.query(getRemitoSQL(remito))).rows
+            await conn.end()
+            return remitos
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
 
     //Crea envios masivamente para crear remitos
     async createEnvios (data: createEnvioDto) {
@@ -514,6 +543,7 @@ export class EnviosService {
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
             log.desgloses = created
             log.nro_tanda = tanda
+            startRemito++
             //Si se updatea los remitos, lo hace
             if(data.update) {
                 await conn.query(updateRemito)
@@ -549,14 +579,15 @@ export class EnviosService {
                     const bolsasN = parseInt(t.bolsas)
                     const kilosN = parseFloat(t.kilos).toFixed(2)
                     const paletDiv = parseInt(t.palet)
-                    let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
-                    let bolsasF = bolsasN % numberDiv
-                    const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
-                    cajasF = cajasF - (palet * paletDiv)
-                    const data: IRutaTotalsParsed = {
+                    //Nuevo
+                        const palet = Math.floor(cajaN / paletDiv)
+                        const cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                        const totalUnCjP = palet * paletDiv * numberDiv + cajasTotales * numberDiv
+                        const totalBolsas = (cajaN * numberDiv + bolsasN) - totalUnCjP
+                        const data: IRutaTotalsParsed = {
                         des: t.des,
-                        cajas: cajasF,
-                        bolsas: bolsasF,
+                        cajas: cajasTotales,
+                        bolsas: totalBolsas,
                         ucaja: numberDiv,
                         kilos: parseFloat(kilosN),
                         palet: palet,
@@ -568,12 +599,13 @@ export class EnviosService {
                     const bolsasN = parseInt(t.bolsas)
                     const kilosN = parseFloat(t.kilos).toFixed(2)
                     const paletDiv = parseInt(t.palet)
-                    const palet = bolsasN >= paletDiv ? Math.floor(bolsasN / paletDiv) : 0
-                    let bolsasF = bolsasN - (palet * paletDiv)
+                    const palet = Math.floor(bolsasN / paletDiv)
+                    const totalUnCjP = palet * paletDiv
+                    const totalBolsas = bolsasN - totalUnCjP
                     const data: IRutaTotalsParsed = {
                         des: t.des,
                         cajas: 0,
-                        bolsas: bolsasF,
+                        bolsas: totalBolsas,
                         ucaja: 0,
                         kilos: parseFloat(kilosN),
                         palet: palet,
@@ -612,14 +644,15 @@ export class EnviosService {
                     const bolsasN = parseInt(t.bolsas)
                     const kilosN = parseFloat(t.kilos).toFixed(2)
                     const paletDiv = parseInt(t.palet)
-                    let cajasF = bolsasN >= numberDiv ? Math.floor(cajaN + bolsasN / numberDiv) : cajaN
-                    let bolsasF = bolsasN % numberDiv
-                    const palet = cajasF >= paletDiv ? Math.floor(cajasF / paletDiv) : 0
-                    cajasF = cajasF - (palet * paletDiv)
+                    //Nuevo
+                    const palet = Math.floor(cajaN / paletDiv)
+                    const cajasTotales = Math.floor(cajaN - (palet * paletDiv))
+                    const totalUnCjP = palet * paletDiv * numberDiv + cajasTotales * numberDiv
+                    const totalBolsas = (cajaN * numberDiv + bolsasN) - totalUnCjP
                     const data: IRutaTotalsParsed = {
                         des: t.des,
-                        cajas: cajasF,
-                        bolsas: bolsasF,
+                        cajas: cajasTotales,
+                        bolsas: totalBolsas,
                         ucaja: numberDiv,
                         kilos: parseFloat(kilosN),
                         palet: palet,
@@ -631,12 +664,13 @@ export class EnviosService {
                     const bolsasN = parseInt(t.bolsas)
                     const kilosN = parseFloat(t.kilos).toFixed(2)
                     const paletDiv = parseInt(t.palet)
-                    const palet = bolsasN >= paletDiv ? Math.floor(bolsasN / paletDiv) : 0
-                    let bolsasF = bolsasN - (palet * paletDiv)
+                    const palet = Math.floor(bolsasN / paletDiv)
+                    const totalUnCjP = palet * paletDiv
+                    const totalBolsas = bolsasN - totalUnCjP
                     const data: IRutaTotalsParsed = {
                         des: t.des,
                         cajas: 0,
-                        bolsas: bolsasF,
+                        bolsas: totalBolsas,
                         ucaja: 0,
                         kilos: parseFloat(kilosN),
                         palet: palet,
