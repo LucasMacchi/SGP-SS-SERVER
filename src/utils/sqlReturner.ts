@@ -87,8 +87,8 @@ export function estadoRemitosSQL (estado: string, remito:string) {
     return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}' RETURNING tanda;`
 }
 
-export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string) {
-    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted) VALUES ('${remito}', '${estado}', NOW(), ${tanda},false);`
+export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string, user: number) {
+    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted,user_id) VALUES ('${remito}', '${estado}', NOW(), ${tanda},false,${user});`
 }
 
 export function deleteRemitoLogSQL (tanda: number) {
@@ -99,8 +99,8 @@ export function logRemitosSQL (estado: string, remito:string) {
     return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}';`
 }
 
-export function createReporteSQL (titulo: string, des: string,remito: string) {
-    return `INSERT INTO public.glpi_sgp_remito_reporte(remito, titulo, des, fecha) VALUES ('${remito}', '${titulo}', '${des}', NOW());`
+export function createReporteSQL (titulo: string, des: string,remito: string, userId: number) {
+    return `INSERT INTO public.glpi_sgp_remito_reporte(remito, titulo, des, fecha, user_id) VALUES ('${remito}', '${titulo}', '${des}', NOW(), ${userId});`
 }
 
 export function getRemitoSQL (remito: string) {

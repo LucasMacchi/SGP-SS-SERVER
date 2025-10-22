@@ -436,12 +436,12 @@ export class EnviosService {
         }
     }
 
-    async patchRemitos (state: string, remito: string) {
+    async patchRemitos (state: string, remito: string, userid:number) {
         const conn = clientReturner() 
         try {
             await conn.connect()
             const tanda:number = (await conn.query(estadoRemitosSQL(state,remito))).rows[0]["tanda"]
-            await conn.query(estadoRemitoLogSQL(tanda, state, remito))
+            await conn.query(estadoRemitoLogSQL(tanda, state, remito,userid))
             await conn.end()
             return "Remito modificado "+state
         } catch (error) {
@@ -451,11 +451,11 @@ export class EnviosService {
         }
     }
 
-    async createReporte (data: addReporteEnvio) {
+    async createReporte (data: addReporteEnvio, userid: number) {
         const conn = clientReturner()
         try {
             await conn.connect()
-            await conn.query(createReporteSQL(data.titulo,data.des,data.remito))
+            await conn.query(createReporteSQL(data.titulo,data.des,data.remito,userid))
             await conn.end()
             return "Reporte creado"
         } catch (error) {

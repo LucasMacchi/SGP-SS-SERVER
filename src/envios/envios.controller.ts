@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Body, Patch, UseGuards, Post, Delete } from '@nestjs/common';
+import { Controller, Get, Param, Body, Patch, UseGuards, Post, Delete, Req } from '@nestjs/common';
 import { EnviosService } from './envios.service';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import { userGuard } from 'src/user/userAuth.guard';
@@ -66,17 +66,20 @@ export class EnviosController {
     }
     @UseGuards(userGuard)
     @Post('reportes/create')
-    postReportes(@Body() data: addReporteEnvio) {
-        return this.EnviosService.createReporte(data)
+    postReportes(@Body() data: addReporteEnvio,@Req() rq: Request) {
+        const userId: number = rq['user']['usuario_id']
+        return this.EnviosService.createReporte(data,userId)
     }
     @UseGuards(userGuard)
     @Get('lentrega')
     getLentregasRaw() {
         return this.EnviosService.getLugaresDeEntrega()
     }
+    @UseGuards(userGuard)
     @Patch('remitos/estado/:estado/:remito')
-    patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string) {
-        return this.EnviosService.patchRemitos(estado,remito)
+    patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string,@Req() rq: Request) {
+        const userId: number = rq['user']['usuario_id']
+        return this.EnviosService.patchRemitos(estado,remito,userId)
     }
     @UseGuards(userGuard)
     @Post('add/plan/:des/:dias')
