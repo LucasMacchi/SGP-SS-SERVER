@@ -24,7 +24,7 @@ export class UserService {
                 msg: `Creacion de usuario '${username}' a nombre de ${last_name} ${first_name} en el dia de la fecha.
                 En breve se le activara la cuenta.`
             }
-            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+            await mailerResend(email,mail.subject,mail.msg)
         } catch (error) {
             return 'Email fail'
         }
@@ -44,7 +44,7 @@ export class UserService {
                 subject: `Usuario ${usr} Alta - SGP`,
                 msg: `Alta de usuario '${usr}' en el dia de la fecha.\nLink: https://sistemagestorpedidos.solucionesyservicios.online/`
             }
-            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+            await mailerResend(email,mail.subject,mail.msg)
         } catch (error) {
             return 'Email fail'
         }
@@ -53,20 +53,13 @@ export class UserService {
     //Desactivar un Usuario con sql
     async deactivateUser (usr: string) {
         const conn = clientReturner()
-        await conn.connect()
-        const slq = `UPDATE glpi_sgp_users gsu set activated = false , date_deactivation = NOW() where username = '${usr}';`
-        const sql_data = `select * from glpi_sgp_users where username = '${usr}'`
-        const rows = (await conn.query(sql_data)).rows
-        await conn.query(slq)
-        await conn.end()
         try {
-            const email = rows[0]['email']
-            const mail: IemailMsg = {
-                subject: `Baja de Usuario ${usr} - SGP`,
-                msg: `Baja de usuario '${usr}' en el dia de la fecha.`
-            }
-            await this.mailerServ.sendMail(mailer('Sistema Gestion de Pedidos', email,mail.subject, mail.msg))
+            await conn.connect()
+            const slq = `UPDATE glpi_sgp_users gsu set activated = false , date_deactivation = NOW() where username = '${usr}';`
+            await conn.query(slq)
+            await conn.end()
         } catch (error) {
+            await conn.end()
             return 'Email fail'
         }
 
