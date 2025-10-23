@@ -87,8 +87,13 @@ export function estadoRemitosSQL (estado: string, remito:string) {
     return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}' RETURNING tanda;`
 }
 
-export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string, user: number) {
-    return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted,user_id) VALUES ('${remito}', '${estado}', NOW(), ${tanda},false,${user});`
+export function estadoRemitoLogSQL (tanda: number,estado: string,remito: string, user: number,date?:string) {
+    if(date) {
+        return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted,user_id) VALUES ('${remito}', '${estado}', '${date}', ${tanda},false,${user});`
+    }
+    else {
+        return `INSERT INTO public.glpi_sgp_remito_log(remito, estado, fecha, tanda,deleted,user_id) VALUES ('${remito}', '${estado}',NOW() , ${tanda},false,${user});`
+    }
 }
 
 export function deleteRemitoLogSQL (tanda: number) {

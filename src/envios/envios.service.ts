@@ -436,12 +436,12 @@ export class EnviosService {
         }
     }
 
-    async patchRemitos (state: string, remito: string, userid:number) {
+    async patchRemitos (state: string, remito: string, userid:number,date?:string) {
         const conn = clientReturner() 
         try {
             await conn.connect()
             const tanda:number = (await conn.query(estadoRemitosSQL(state,remito))).rows[0]["tanda"]
-            await conn.query(estadoRemitoLogSQL(tanda, state, remito,userid))
+            await conn.query(estadoRemitoLogSQL(tanda, state, remito,userid,date && date))
             await conn.end()
             return "Remito modificado "+state
         } catch (error) {
