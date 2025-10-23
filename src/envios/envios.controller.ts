@@ -76,10 +76,10 @@ export class EnviosController {
         return this.EnviosService.getLugaresDeEntrega()
     }
     @UseGuards(userGuard)
-    @Patch('remitos/estado/:estado/:remito')
-    patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string,@Req() rq: Request) {
+    @Patch('remitos/estado/:estado/:remito/:date')
+    patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string,@Param('date') date:string,@Req() rq: Request) {
         const userId: number = rq['user']['usuario_id']
-        return this.EnviosService.patchRemitos(estado,remito,userId)
+        return date.length > 4 ? this.EnviosService.patchRemitos(estado,remito,userId,date) : this.EnviosService.patchRemitos(estado,remito,userId)
     }
     @UseGuards(userGuard)
     @Post('add/plan/:des/:dias')
