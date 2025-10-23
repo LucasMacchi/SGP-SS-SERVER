@@ -511,7 +511,6 @@ export class EnviosService {
             const enviosTotal: IrequestEnvio[][] = []
             if(data.enviadosAL.length > 0) enviosTotal.push(data.enviadosAL.sort((a,b) => a.entregaId - b.entregaId))
             if(data.enviadosCL.length > 0) enviosTotal.push(data.enviadosCL.sort((a,b) => a.entregaId - b.entregaId))
-            startRemito++
             for(const env of enviosTotal) {
                 let aux = env[0].entregaId
                 for(const envio of env) {
