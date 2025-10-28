@@ -14,6 +14,7 @@ import addReporteEnvio from 'src/dto/addReporteEnvio';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
+const ADD_LINES = process.env.REMITO_ENVIO_ADD_LINES ? true : false
 
 
 @Injectable()
@@ -520,8 +521,8 @@ export class EnviosService {
                     }
                     const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
-                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado)
-                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado}) RETURNING envio_id;`
+                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado,dias)
+                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado},${envio.dias}) RETURNING envio_id;`
                     const sqlCreated = `UPDATE public.glpi_sgp_desgloses SET ${envio.fortificado ? `sent_al=true` : `sent_cl=true`} WHERE cue = ${envio.cue};`
                     if(envio.entregaId && envio.desglose && envio.cue) {
                         const envId = (await conn.query(sql)).rows[0]["envio_id"]
@@ -540,6 +541,7 @@ export class EnviosService {
 
                 }
             }
+            startRemito++
             const updateRemito = `UPDATE public.glpi_sgp_config SET payload=${startRemito} WHERE config_id = 1;`
             log.desgloses = created
             log.nro_tanda = tanda
@@ -553,7 +555,7 @@ export class EnviosService {
             await conn.query(sqlLog)
             //cierre
             await conn.end()
-            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
+            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito-1)
             return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito)} remitos.`
         } catch (error) {
             await conn.end()
@@ -1234,75 +1236,78 @@ export class EnviosService {
                 blank3.forEach((s) => {
                     line += fillEmptyTxt("",s,true,true,false)    
                 });
-                // Leyenda ------------------------------------
-                itemLin++
-                //Comprobante
-                line2 += fillEmptyTxt("NP",3,false,true,false)
-                //Letra
-                line2 += fillEmptyTxt("R",1,false,false,false)
-                //Punto de venta
-                line2 += fillEmptyTxt(r.remito.split("-")[0],5,false,false,true)
-                //Nro comprobante
-                line2 += fillEmptyTxt(r.remito.split("-")[1],8,false,false,true)
-                //nro hasta
-                line2 += fillEmptyTxt("",8,true,false,false)
-                //fecha comprobante
-                line2 += fillEmptyTxt(fecha,8,false,true,false)
-                //cod cliente
-                line2 += fillEmptyTxt("1",6,false,false,true)
-                //tip item
-                line2 += fillEmptyTxt("L",1,false,false,true)
-                //tip item
-                line2 += fillEmptyTxt("",23,true,false,false)
-                //cant unidad 1
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //cant unidad 2
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //tip item
-                line2 += fillEmptyTxt(`Contiene: Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
-                //prec unitario
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //tasa iva ins
-                line2 += fillEmptyTxt("21.00",8,false,false,false)
-                //tasa iva no ins
-                line2 += fillEmptyTxt("",8,true,false,false)
-                //imp iva ins
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //imp iva no ins
-                line2 += fillEmptyTxt("",16,true,false,false)
-                //imp total
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //19 - 23
-                blank1.forEach((s) => {
-                    line2 += fillEmptyTxt("",s,true,true,false)    
-                });
-                //tip iva
-                line2 += fillEmptyTxt("",1,true,false,false)
-                //cod desc
-                line2 += fillEmptyTxt("",2,true,false,false)
-                //imp desc
-                line2 += fillEmptyTxt("",16,true,false,false)
-                //deposito
-                line2 += fillEmptyTxt("",3,true,false,false)
-                //partida
-                line2 += fillEmptyTxt("",26,true,false,false)
-                //tasa desc
-                line2 += fillEmptyTxt("",8,true,false,false)
-                //imp renglon
-                line2 += fillEmptyTxt("0.00",16,false,false,false)
-                //31 - 46
-                blank2.forEach((s) => {
-                    line2 += fillEmptyTxt("",s,true,true,false)    
-                });
-                // nro renglon
-                line2 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
-                blank3.forEach((s) => {
-                    line2 += fillEmptyTxt("",s,true,true,false)    
-                });
-                itemLin++
+                if(ADD_LINES) {
+                    // Leyenda ------------------------------------
+                    itemLin++
+                    //Comprobante
+                    line2 += fillEmptyTxt("NP",3,false,true,false)
+                    //Letra
+                    line2 += fillEmptyTxt("R",1,false,false,false)
+                    //Punto de venta
+                    line2 += fillEmptyTxt(r.remito.split("-")[0],5,false,false,true)
+                    //Nro comprobante
+                    line2 += fillEmptyTxt(r.remito.split("-")[1],8,false,false,true)
+                    //nro hasta
+                    line2 += fillEmptyTxt("",8,true,false,false)
+                    //fecha comprobante
+                    line2 += fillEmptyTxt(fecha,8,false,true,false)
+                    //cod cliente
+                    line2 += fillEmptyTxt("1",6,false,false,true)
+                    //tip item
+                    line2 += fillEmptyTxt("L",1,false,false,true)
+                    //tip item
+                    line2 += fillEmptyTxt("",23,true,false,false)
+                    //cant unidad 1
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //cant unidad 2
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tip item
+                    line2 += fillEmptyTxt(`Contiene: Cajas ${de.total_cajas}-Bolsas ${de.total_bolsas}-Rac ${de.total_raciones}`,50,false,true,false)
+                    //prec unitario
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //tasa iva ins
+                    line2 += fillEmptyTxt("21.00",8,false,false,false)
+                    //tasa iva no ins
+                    line2 += fillEmptyTxt("",8,true,false,false)
+                    //imp iva ins
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //imp iva no ins
+                    line2 += fillEmptyTxt("",16,true,false,false)
+                    //imp total
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //19 - 23
+                    blank1.forEach((s) => {
+                        line2 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    //tip iva
+                    line2 += fillEmptyTxt("",1,true,false,false)
+                    //cod desc
+                    line2 += fillEmptyTxt("",2,true,false,false)
+                    //imp desc
+                    line2 += fillEmptyTxt("",16,true,false,false)
+                    //deposito
+                    line2 += fillEmptyTxt("",3,true,false,false)
+                    //partida
+                    line2 += fillEmptyTxt("",26,true,false,false)
+                    //tasa desc
+                    line2 += fillEmptyTxt("",8,true,false,false)
+                    //imp renglon
+                    line2 += fillEmptyTxt("0.00",16,false,false,false)
+                    //31 - 46
+                    blank2.forEach((s) => {
+                        line2 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    // nro renglon
+                    line2 += fillEmptyTxt(itemLin.toString(),3,false,false,false)
+                    blank3.forEach((s) => {
+                        line2 += fillEmptyTxt("",s,true,true,false)    
+                    });
+                    itemLin++
+                    line2.length > 0 && cabeceraLines.push(line2)
+                }
+
                 cabeceraLines.push(line)
-                cabeceraLines.push(line2)
-                if(i === r.detalles.length - 1) {
+                if(i === r.detalles.length - 1 && ADD_LINES) {
                     // Leyenda ------------------------------------
                     //Comprobante
                     line3 += fillEmptyTxt("NP",3,false,true,false)
