@@ -80,7 +80,7 @@ export function cabecerasSQL (departamento: string) {
 }
 
 export function verRemitosSQL () {
-    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo FROM public.glpi_sgp_envio e JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo, e.ultima_mod ORDER BY nro_remito DESC;`
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias FROM public.glpi_sgp_envio e JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {
