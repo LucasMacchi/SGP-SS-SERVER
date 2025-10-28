@@ -72,7 +72,8 @@ export interface IrequestEnvio {
   detalles: IDetalleEnvio[],
   completo?: string,
   envio_id?: number,
-  fortificado: boolean
+  fortificado: boolean,
+  dias: number
 }
 
 export interface IEntregaDetalleTxt {
