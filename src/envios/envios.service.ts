@@ -839,7 +839,7 @@ export class EnviosService {
             const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
             const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
             const fech_ven = REMITO_ENVIO_F_VENC//await (await conn.query(sqlRtVenc)).rows[0]["payload"]
-            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            const fechaParsed = fech_ven//`${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
             let aux = ""
             const arrayRemitos: IRemitoEnvio[] = []
             for(const data of data1) {
@@ -903,7 +903,7 @@ export class EnviosService {
             const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
             const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
             const fech_ven = REMITO_ENVIO_F_VENC//await (await conn.query(sqlRtVenc)).rows[0]["payload"]
-            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            const fechaParsed = fech_ven//`${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
             let aux = ""
             const arrayRemitos: IRemitoEnvio[] = []
             for(const data of data1) {
