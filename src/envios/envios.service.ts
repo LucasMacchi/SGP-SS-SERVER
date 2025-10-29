@@ -14,6 +14,7 @@ import addReporteEnvio from 'src/dto/addReporteEnvio';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
+const REMITO_ENVIO_F_VENC = process.env.REMITO_ENVIO_F_VENC ? "01/10/2026" : 'NaN'
 const ADD_LINES = process.env.REMITO_ENVIO_ADD_LINES ? true : false
 
 
@@ -837,8 +838,8 @@ export class EnviosService {
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
             const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
             const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
-            const fech_ven = await (await conn.query(sqlRtVenc)).rows[0]["payload"]
-            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            const fech_ven = REMITO_ENVIO_F_VENC//await (await conn.query(sqlRtVenc)).rows[0]["payload"]
+            const fechaParsed = fech_ven//`${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
             let aux = ""
             const arrayRemitos: IRemitoEnvio[] = []
             for(const data of data1) {
@@ -901,8 +902,8 @@ export class EnviosService {
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
             const desgloses: desgloseCount[] = (await conn.query(sqlDes)).rows
             const cai = await (await conn.query(sqlCai)).rows[0]["payload"]
-            const fech_ven = await (await conn.query(sqlRtVenc)).rows[0]["payload"]
-            const fechaParsed = `${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
+            const fech_ven = REMITO_ENVIO_F_VENC//await (await conn.query(sqlRtVenc)).rows[0]["payload"]
+            const fechaParsed = fech_ven//`${fech_ven.slice(0, 2)}/${fech_ven.slice(2, 4)}/${fech_ven.slice(4, 8)}`
             let aux = ""
             const arrayRemitos: IRemitoEnvio[] = []
             for(const data of data1) {
