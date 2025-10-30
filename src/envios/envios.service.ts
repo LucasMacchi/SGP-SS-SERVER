@@ -832,7 +832,7 @@ export class EnviosService {
         
         const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
         const sqlCai = "select payload from glpi_sgp_config where config_id = 4;"
-        const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
+        //const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
         try {
             await conn.connect()
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows
@@ -874,7 +874,8 @@ export class EnviosService {
                         detalles: detallesToAdd,
                         cant_desgloses: desglosesCount,
                         fcha_venc: fechaParsed,
-                        cai: cai
+                        cai: cai,
+                        dias: data.dias
                     }
                     arrayRemitos.push(fila)
                 }
@@ -938,7 +939,8 @@ export class EnviosService {
                         detalles: detallesToAdd,
                         cant_desgloses: desglosesCount,
                         fcha_venc: fechaParsed,
-                        cai: cai
+                        cai: cai,
+                        dias: data.dias
                     }
                     arrayRemitos.push(fila)
                 }
