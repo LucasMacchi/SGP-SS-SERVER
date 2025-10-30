@@ -86,6 +86,7 @@ export interface IEntregaDetalleTxt {
     total_cajas: string,
     total_unidades: string,
     unit_caja: string,
+    dias: number
 
 }
 
@@ -228,7 +229,8 @@ export interface IRemitoEnvio {
     fcha_venc: string,
     cai: string,
     detalles: IDetalleEnvioTxt[],
-    cant_desgloses: number
+    cant_desgloses: number,
+    dias: number
 
 }
 
@@ -272,5 +274,6 @@ export interface IReporteEnvio {
     remito: string,
     titulo: string,
     des: string,
-    fecha: string
+    fecha: string,
+    reportes: number
 }

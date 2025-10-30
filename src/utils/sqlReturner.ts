@@ -3,8 +3,8 @@ import monthRangeReturner from "./monthRangeReturner"
 import rangeReturner from "./rangeReturner"
 
 export function txtSql (range: string) : string {
-    const sql = `SELECT e.lentrega_id, e.nro_remito,d.des AS descripcion,d.unit_caja,SUM(d.raciones) AS total_raciones,SUM(d.kilos) AS total_kilos,SUM(d.bolsas) AS total_bolsas,SUM(d.cajas) AS total_cajas,SUM(d.unidades) AS total_unidades
-    FROM glpi_sgp_envio e JOIN glpi_sgp_envio_details d ON e.envio_id = d.envio_id WHERE e.${range} GROUP BY e.lentrega_id,e.nro_remito,d.des,d.unit_caja ORDER BY e.nro_remito;`
+    const sql = `SELECT e.lentrega_id,e.dias, e.nro_remito,d.des AS descripcion,d.unit_caja,SUM(d.raciones) AS total_raciones,SUM(d.kilos) AS total_kilos,SUM(d.bolsas) AS total_bolsas,SUM(d.cajas) AS total_cajas,SUM(d.unidades) AS total_unidades
+    FROM glpi_sgp_envio e JOIN glpi_sgp_envio_details d ON e.envio_id = d.envio_id WHERE e.${range} GROUP BY e.lentrega_id,e.nro_remito,d.des,d.unit_caja,e.dias ORDER BY e.nro_remito;`
     return sql
 }
 export function rutaSql (start: string, end: string) : string {
@@ -80,7 +80,7 @@ export function cabecerasSQL (departamento: string) {
 }
 
 export function verRemitosSQL () {
-    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias FROM public.glpi_sgp_envio e JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {
