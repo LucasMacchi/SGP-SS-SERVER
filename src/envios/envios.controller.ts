@@ -169,9 +169,9 @@ export class EnviosController {
         return this.EnviosService.createRemitosDataCustom(remitos.remitos)
     }
     @UseGuards(userGuard)
-    @Get('txt/:start/:end/:dias')
-    getcreateTxt(@Param('start') start:string, @Param('end') end:string,@Param('dias') dias:number) {
-        return this.EnviosService.createTxtEnvio(start,end,dias)
+    @Get('txt/:start/:end')
+    getcreateTxt(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.createTxtEnvio(start,end)
     }
     @UseGuards(userGuard)
     @Get('ruta/:start/:end')

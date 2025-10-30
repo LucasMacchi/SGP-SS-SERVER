@@ -957,7 +957,7 @@ export class EnviosService {
         }
     }
     //Crea las lineas de texto para los dos TXTs necesarios para la importacion
-    async createTxtEnvio (start: string, end: string, dias: number) {
+    async createTxtEnvio (start: string, end: string) {
         const conn = clientReturner()
         const range = rangeReturner(start, end)
         const sqlRemitos = txtSql(range)
@@ -1001,8 +1001,8 @@ export class EnviosService {
             });
             const response = {
                 cabecera: this.createCabeceraTxt(arrayRemitos),
-                items: this.createItemTxt(arrayRemitos,dias),
-                informe: await this.createInformeTandaEnvio(range,dias)
+                items: this.createItemTxt(arrayRemitos,0),
+                informe: await this.createInformeTandaEnvio(range,0)
             }
             return response
 
