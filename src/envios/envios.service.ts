@@ -2,15 +2,17 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import rangeReturner from 'src/utils/rangeReturner';
 import customRemitosReturner from 'src/utils/customRemitosReturner';
 import addReporteEnvio from 'src/dto/addReporteEnvio';
+import createEnvioInsumoDto from 'src/dto/createEnvioInsumo';
+import createFacturacionDto from 'src/dto/createFacturaDto';
 dotenv.config();
 
 const DELETE_KEY = process.env.TANDA_DELETE_KEY ?? 'NaN'
@@ -772,6 +774,55 @@ export class EnviosService {
             await conn.end()
             return data
             
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async checkFacturacionRemito (remito: string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `SELECT * FROM public.glpi_sgp_remito_facturacion where remito = '${remito}';`
+            const resp = (await conn.query(sql)).rowCount ? false : true
+            await conn.end()
+            return resp
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async createFacturacion (data: createFacturacionDto) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            for(const remito of data.remitos) {
+                const raciones: IRemitoFacturacionResponse[] = (await conn.query(getRemitoRatiosFacSQL(remito))).rows
+                const racTotal = parseInt(raciones[0].sum)+parseInt(raciones[1].sum)
+                await conn.query(createFacturaSQL(remito,racTotal,data.fechaF,data.factura))
+            }
+            await conn.end()
+            return "FACTURACION CREADA: "+data.factura
+            
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async createNewInsumo (data: createEnvioInsumoDto) {
+        const conn = clientReturner()
+        try {
+            const sql = `INSERT INTO public.glpi_sgp_envio_insumo(des, caja_palet, unidades_caja, gr_racion, gr_total, racbolsa, raccaja) VALUES ('${data.cod1+"-"+data.cod2+"-"+data.des}', ${data.caja_palet}, ${data.unidades_caja}, ${data.gr_racion}, ${data.gr_total}, ${data.racbolsa}, ${data.raccaja});`
+            await conn.connect()
+            await conn.query(sql)
+            await conn.end()
+            return "Insumo creado"
         } catch (error) {
             await conn.end()
             console.log(error)
