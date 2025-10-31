@@ -8,6 +8,8 @@ import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
 import { parse } from 'path';
 import customRemitosDto from 'src/dto/customRemitosDto';
 import addReporteEnvio from 'src/dto/addReporteEnvio';
+import createEnvioInsumoDto from 'src/dto/createEnvioInsumo';
+import createFacturacionDto from 'src/dto/createFacturaDto';
 
 @Controller('envios')
 export class EnviosController {
@@ -120,6 +122,21 @@ export class EnviosController {
     @Patch('insumos')
     patchInsumos(@Body() data: editInsumoEnvioDto) {
         return this.EnviosService.patchInsumosEnvios(data)
+    }
+    @UseGuards(userGuard)
+    @Post('insumos')
+    postInsumos(@Body() data: createEnvioInsumoDto) {
+        return this.EnviosService.createNewInsumo(data)
+    }
+    @UseGuards(userGuard)
+    @Post('facturacion')
+    postFacturas(@Body() data: createFacturacionDto) {
+        return this.EnviosService.createFacturacion(data)
+    }
+    @UseGuards(userGuard)
+    @Get('facturacion/check/:remito')
+    checkRtFacturacion(@Param('remito') remito:string) {
+        return this.EnviosService.checkFacturacionRemito(remito)
     }
     @UseGuards(userGuard)
     @Get('desgloses')

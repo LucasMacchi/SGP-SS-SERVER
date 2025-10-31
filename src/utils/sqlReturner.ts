@@ -80,7 +80,7 @@ export function cabecerasSQL (departamento: string) {
 }
 
 export function verRemitosSQL () {
-    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito) FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {
@@ -110,4 +110,12 @@ export function createReporteSQL (titulo: string, des: string,remito: string, us
 
 export function getRemitoSQL (remito: string) {
     return `SELECT * FROM public.glpi_sgp_remito_reporte where remito = '${remito}' order by fecha ASC;`
+}
+
+export function getRemitoRatiosFacSQL (remito: string) {
+    return `select des, SUM(raciones) from glpi_sgp_envio_details where nro_remito = '${remito}' and des like '%9000%' or nro_remito = '${remito}' and des like '%9001%' group by des;`
+}
+
+export function createFacturaSQL (remito: string, raciones: number, fecha: string,factura:string) {
+    return `INSERT INTO public.glpi_sgp_remito_facturacion(remito, raciones, fecha, fecha_created,factura) VALUES ('${remito}', ${raciones}, '${fecha}', NOW(),'${factura}');`
 }

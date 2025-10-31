@@ -266,7 +266,8 @@ export interface IRemitosEnvio {
     localidad: string,
     completo: string,
     ultima_mod: string,
-    dias: number
+    dias: number,
+    factura: string | null
 }
 
 export interface IReporteEnvio {
@@ -276,4 +277,9 @@ export interface IReporteEnvio {
     des: string,
     fecha: string,
     reportes: number
+}
+
+export interface IRemitoFacturacionResponse {
+    des: string,
+    sum: string
 }
