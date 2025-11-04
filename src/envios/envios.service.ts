@@ -802,7 +802,11 @@ export class EnviosService {
             await conn.connect()
             for(const remito of data.remitos) {
                 const raciones: IRemitoFacturacionResponse[] = (await conn.query(getRemitoRatiosFacSQL(remito))).rows
-                const racTotal = parseInt(raciones[0].sum)+parseInt(raciones[1].sum)
+                let racTotal = 0
+                for(const item of raciones) {
+                    console.log(item)
+                    racTotal += parseInt(item.sum)
+                }
                 await conn.query(createFacturaSQL(remito,racTotal,data.fechaF,data.factura))
             }
             await conn.end()

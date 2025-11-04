@@ -113,7 +113,7 @@ export function getRemitoSQL (remito: string) {
 }
 
 export function getRemitoRatiosFacSQL (remito: string) {
-    return `select des, SUM(raciones) from glpi_sgp_envio_details where nro_remito = '${remito}' and des like '%9000%' or nro_remito = '${remito}' and des like '%9001%' group by des;`
+    return `select des, SUM(raciones) from glpi_sgp_envio_details where nro_remito = '${remito}' and des like '%9000%'  or nro_remito = '${remito}' and des like '%9001%'  or nro_remito = '${remito}' and des like '%9021%'  or nro_remito = '${remito}' and des like '%9013%' or nro_remito = '${remito}' and des like '%9016%' group by des;`
 }
 
 export function createFacturaSQL (remito: string, raciones: number, fecha: string,factura:string) {
