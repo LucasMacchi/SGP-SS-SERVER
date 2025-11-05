@@ -522,7 +522,7 @@ export class EnviosService {
                         aux = envio.entregaId
                         startRemito++
                     }
-                    const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito)
+                    const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(8,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
                     lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado,dias)
                     VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado},${envio.dias}) RETURNING envio_id;`
@@ -558,7 +558,7 @@ export class EnviosService {
             await conn.query(sqlLog)
             //cierre
             await conn.end()
-            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemito-1)
+            const parsedRemitos = this.emptyFill(5,pv)+"-"+this.emptyFill(6,startRemitoConst) + " <-> "+this.emptyFill(5,pv)+"-"+this.emptyFill(8,startRemito-1)
             return "Tanda: "+tanda+" - Envios creados: "+created+ " - Productos agregados: "+ prodCreated+" - Remitos Creados: "+(startRemito-startRemitoConst)+" - Actualizo remitos: "+data.update+` - (${parsedRemitos}) Fin de talonario en: ${finTalo - (startRemito)} remitos.`
         } catch (error) {
             await conn.end()
