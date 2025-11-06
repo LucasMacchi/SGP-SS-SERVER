@@ -440,6 +440,21 @@ export class EnviosService {
         }
     }
 
+    async getCountFactura (factura: string) {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            const sql = `SELECT COUNT(*) FROM glpi_sgp_remito_facturacion where factura = '${factura}';`
+            const cantidad: number = (await conn.query(sql)).rows[0]["count"]
+            await conn.end()
+            return cantidad
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
     async patchRemitos (state: string, remito: string, userid:number,date?:string) {
         const conn = clientReturner() 
         try {

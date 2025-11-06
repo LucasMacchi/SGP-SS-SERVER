@@ -160,7 +160,7 @@ export class EnviosController {
     editDataEnv(@Param('id') id:string, @Param('payload') payload:string) {
         return this.EnviosService.updateData(parseInt(payload),parseInt(id))
     }
-    
+    @UseGuards(userGuard)
     @Post('create')
     createEnvio(@Body() data: createEnvioDto) {
         return this.EnviosService.createEnvios(data)
@@ -169,6 +169,11 @@ export class EnviosController {
     @Get('tanda/:start/:end')
     getAllEnviosTanda(@Param('start') start:string, @Param('end') end:string) {
         return this.EnviosService.getTandaEnvios(start,end)
+    }
+    @UseGuards(userGuard)
+    @Get('facturacion/count/:factura')
+    getCountFactura(@Param('factura') factura:string) {
+        return this.EnviosService.getCountFactura(factura)
     }
     @UseGuards(userGuard)
     @Post('/custom/tanda')
