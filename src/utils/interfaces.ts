@@ -283,3 +283,26 @@ export interface IRemitoFacturacionResponse {
     des: string,
     sum: string
 }
+
+export interface IFacturacionData {
+    count: number,
+    raciones: number
+}
+
+export interface IFacturacionDataInforme {
+    remito: string,
+    raciones: number,
+    fecha: string,
+    localidad?:string,
+    departamento?:string,
+    cabecera?:string,
+    amount?: number,
+    fortificado?: boolean
+}
+
+export interface IRemitoDataFacInf {
+    completo: string,
+    localidad: string,
+    departamento: string,
+    fortificado: boolean
+}

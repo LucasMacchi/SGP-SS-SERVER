@@ -139,6 +139,11 @@ export class EnviosController {
         return this.EnviosService.checkFacturacionRemito(remito)
     }
     @UseGuards(userGuard)
+    @Get('facturacion/inf/:factura')
+    informeFacturacion(@Param('factura') factura:string) {
+        return this.EnviosService.getFacturaInforme(factura)
+    }
+    @UseGuards(userGuard)
     @Get('desgloses')
     getAllDesgloses() {
         return this.EnviosService.getDesgloses()
