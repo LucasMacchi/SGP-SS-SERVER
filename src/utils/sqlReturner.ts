@@ -119,3 +119,7 @@ export function getRemitoRatiosFacSQL (remito: string) {
 export function createFacturaSQL (remito: string, raciones: number, fecha: string,factura:string) {
     return `INSERT INTO public.glpi_sgp_remito_facturacion(remito, raciones, fecha, fecha_created,factura) VALUES ('${remito}', ${raciones}, '${fecha}', NOW(),'${factura}');`
 }
+
+export function remitoDataFactSQL (remito: string) {
+    return `select e.nro_remito,l.completo,l.localidad,l.departamento,e.fortificado from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.nro_remito = '${remito}' group by e.nro_remito,l.completo,l.localidad,l.departamento,e.fortificado;`
+}

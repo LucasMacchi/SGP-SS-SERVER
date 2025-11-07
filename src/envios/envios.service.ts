@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse, IFacturacionData, IFacturacionDataInforme, IRemitoDataFacInf } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
@@ -444,10 +444,34 @@ export class EnviosService {
         const conn = clientReturner() 
         try {
             await conn.connect()
-            const sql = `SELECT COUNT(*) FROM glpi_sgp_remito_facturacion where factura = '${factura}';`
-            const cantidad: number = (await conn.query(sql)).rows[0]["count"]
+            const sql = `SELECT COUNT(*), SUM(raciones) as raciones FROM glpi_sgp_remito_facturacion where factura = '${factura}';`
+            const cantidad: IFacturacionData = (await conn.query(sql)).rows[0]
             await conn.end()
             return cantidad
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async getFacturaInforme (factura: string) {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            const ratio: number = await (await conn.query("select payload from glpi_sgp_config where config_id = 7;")).rows[0]["payload"]
+            const sql = `SELECT f.remito,f.raciones,f.fecha FROM glpi_sgp_remito_facturacion f  where factura = '${factura}' order by f.remito asc;`
+            const facturaciones: IFacturacionDataInforme[] = (await conn.query(sql)).rows
+            for(const fac of facturaciones) {
+                const rt: IRemitoDataFacInf = await (await conn.query(remitoDataFactSQL(fac.remito))).rows[0]
+                fac.cabecera = rt.completo
+                fac.departamento = rt.departamento
+                fac.localidad = rt.localidad
+                fac.amount = fac.raciones * ratio
+                fac.fortificado = rt.fortificado
+            }
+            await conn.end()
+            return facturaciones
         } catch (error) {
             await conn.end()
             console.log(error)
