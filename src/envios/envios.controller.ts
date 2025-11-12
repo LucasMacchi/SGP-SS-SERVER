@@ -10,6 +10,7 @@ import customRemitosDto from 'src/dto/customRemitosDto';
 import addReporteEnvio from 'src/dto/addReporteEnvio';
 import createEnvioInsumoDto from 'src/dto/createEnvioInsumo';
 import createFacturacionDto from 'src/dto/createFacturaDto';
+import { patchEstadosRemitosDto } from 'src/dto/patchEstadosRemitoDTO';
 
 @Controller('envios')
 export class EnviosController {
@@ -82,6 +83,12 @@ export class EnviosController {
     patchRemitos(@Param('estado') estado:string,@Param('remito') remito:string,@Param('date') date:string,@Req() rq: Request) {
         const userId: number = rq['user']['usuario_id']
         return date.length > 4 ? this.EnviosService.patchRemitos(estado,remito,userId,date) : this.EnviosService.patchRemitos(estado,remito,userId)
+    }
+    @UseGuards(userGuard)
+    @Patch('remitos/multiple/estado')
+    patchMulRemitos(@Body() data: patchEstadosRemitosDto,@Req() rq: Request) {
+        const userId: number = rq['user']['usuario_id']
+        return this.EnviosService.patchMultipleRemitos(data.estado,data.remitos,userId)
     }
     @UseGuards(userGuard)
     @Post('add/plan/:des/:dias')
