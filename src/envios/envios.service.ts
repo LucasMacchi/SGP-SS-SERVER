@@ -494,6 +494,23 @@ export class EnviosService {
         }
     }
 
+    async patchMultipleRemitos (state: string, remitos: string[],userid:number) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            for(const rt of remitos){
+                const tanda:number = (await conn.query(estadoRemitosSQL(state,rt))).rows[0]["tanda"]
+                await conn.query(estadoRemitoLogSQL(tanda, state, rt,userid))
+            }
+            await conn.end()
+            await conn.connect()
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
     async createReporte (data: addReporteEnvio, userid: number) {
         const conn = clientReturner()
         try {
