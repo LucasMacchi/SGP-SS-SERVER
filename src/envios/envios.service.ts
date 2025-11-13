@@ -557,10 +557,12 @@ export class EnviosService {
             //data previa
             const sqlTanda = `select MAX(tanda) from glpi_sgp_envio;`
             const sqlPv = "select payload from glpi_sgp_config where config_id = 2;"
+            const sqlPlan = "select payload from glpi_sgp_config where config_id = 8;"
             const sqlRemito = "select payload from glpi_sgp_config where config_id = 1;"
             const sqlRemitoFinTalonario = "select payload from glpi_sgp_config where config_id = 6;"
             let startRemito = await (await conn.query(sqlRemito)).rows[0]["payload"]
             const pv = await (await conn.query(sqlPv)).rows[0]["payload"]
+            const plan = await (await conn.query(sqlPlan)).rows[0]["payload"]
             const finTalo = await (await conn.query(sqlRemitoFinTalonario)).rows[0]["payload"]
             const startRemitoConst = startRemito
             console.log("TRAIDO = "+startRemitoConst)
@@ -588,8 +590,8 @@ export class EnviosService {
                         console.log("ID = "+envId  + " -- LUGAR = " + envio.entregaId +" -- REMITO = "+startRemito+ " -- TIPO = "+(envio.fortificado ? "AL" : "CL"))
                         for (const prod of envio.detalles) {
                             const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-                            envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
-                            VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
+                            envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito,plan)
+                            VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}',${plan});`
                             await conn.query(sql2)
                             prodCreated++
                         }
