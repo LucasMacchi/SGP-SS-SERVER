@@ -77,10 +77,15 @@ export class PedidoController {
         if(rq['user']['rol'] === 2 || rq['user']['rol'] === 1) return await this.pedido.archive(parseInt(id))
         else throw new UnauthorizedException()
     }
-    //@UseGuards(userGuard)
+    @UseGuards(userGuard)
     @Get("txt/:month/:year")
     async getTxt (@Param('month') month: string,@Param('year') year: string) {
         return this.pedido.getPedidosTxt(parseInt(month),parseInt(year))
+    }
+    @UseGuards(userGuard)
+    @Get("range/txt/:date1/:date2")
+    async getTxtRanges (@Param('date1') date1: string,@Param('date2') date2: string) {
+        return this.pedido.getPedidosTxtRange(date1,date2)
     }
     @UseGuards(userGuard)
     @Patch('ready/:id')

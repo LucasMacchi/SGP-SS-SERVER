@@ -218,7 +218,7 @@ export interface IOrderTxt {
     amount: number,
     service_id: number,
     numero: string,
-    date_delivered: string
+    date_delivered: Date
 }
 
 export interface IRemitoEnvio {
@@ -266,7 +266,9 @@ export interface IRemitosEnvio {
     localidad: string,
     completo: string,
     ultima_mod: string,
+    fecha: string | null,
     dias: number,
+    fortificado: boolean,
     factura: string | null
 }
 
