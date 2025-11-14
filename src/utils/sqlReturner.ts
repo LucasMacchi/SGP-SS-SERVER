@@ -65,6 +65,9 @@ export function gobackRemitoSQL (tanda: number) {
 export function txtOrders (month: number, year: number) {
     return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where ${monthRangeReturner(month,year)};`
 }
+export function txtOrdersRange (date1: string, date2: string) {
+    return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.date_delivered BETWEEN '${date1}' and '${date2}';`
+}
 
 export function deglosesSQL (departamento: string, fortificado: number) {
     if(fortificado > 0) {
@@ -80,7 +83,7 @@ export function cabecerasSQL (departamento: string) {
 }
 
 export function verRemitosSQL () {
-    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito) FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,e.fortificado,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito),(SELECT fecha FROM glpi_sgp_remito_log where remito = e.nro_remito and estado = 'ENTREGADO') FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.fortificado,e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {

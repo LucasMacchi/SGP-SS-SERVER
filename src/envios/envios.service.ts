@@ -4,7 +4,7 @@ import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
 import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse, IFacturacionData, IFacturacionDataInforme, IRemitoDataFacInf } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import { cabecerasSQL, conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import {conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';

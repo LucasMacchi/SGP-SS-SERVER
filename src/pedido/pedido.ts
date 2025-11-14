@@ -9,7 +9,7 @@ import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
 import endCode from 'src/utils/endCode';
 import mailerResend from 'src/utils/mailerResend';
-import { txtOrders } from 'src/utils/sqlReturner';
+import { txtOrders, txtOrdersRange } from 'src/utils/sqlReturner';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 @Injectable()
 export class Pedido {
@@ -365,6 +365,23 @@ export class Pedido {
             return error
         }
     }
+    async getPedidosTxtRange (date1: string,date2:string) {
+        const conn = clientReturner()
+        const sqlPedidos = txtOrdersRange(date1,date2)
+        const sqlStart = "select payload from glpi_sgp_config where config_id = 3;"
+        try {
+            await conn.connect()
+            const data1: IOrderTxt[] = (await conn.query(sqlPedidos)).rows
+            const start = await (await conn.query(sqlStart)).rows[0]["payload"]
+            const res = this.createTxt(data1, start)
+            await conn.end()
+            return res.lineas
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
 
     private returnProdCods = (prod: string): string => {
         const desP = prod.split("-")
@@ -386,7 +403,7 @@ export class Pedido {
         for (let index = 0; index < datos.length; index++) {
             let line = ""
             const p = datos[index]
-            const fecha = p.date_delivered.toString().split("T")[0]
+            const fecha = p.date_delivered.toISOString().split("T")[0]
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
             //Comprbante
