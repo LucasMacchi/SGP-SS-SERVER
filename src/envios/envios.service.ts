@@ -4,7 +4,7 @@ import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
 import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse, IFacturacionData, IFacturacionDataInforme, IRemitoDataFacInf, IMovimientos, ITotalEnviosInforme } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import {conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, movimientoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, totalInformeEnviosSQL, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import {conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, movimientoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, totalInformeEnviosSQL, txtSql, verRemitosSQL, verRemitoUniqSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
@@ -479,6 +479,19 @@ export class EnviosService {
                 }
                 rt.raciones = racTotal
             }
+            await conn.end()
+            return remitos
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async verRemitoUniq (limit: string) {
+        const conn = clientReturner() 
+        try {
+            await conn.connect()
+            const remitos: IRemitosEnvio = (await conn.query(verRemitoUniqSQL(limit))).rows[0]
             await conn.end()
             return remitos
         } catch (error) {

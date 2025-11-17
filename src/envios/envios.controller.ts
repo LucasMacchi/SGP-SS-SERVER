@@ -67,6 +67,11 @@ export class EnviosController {
         return this.EnviosService.verRemitos(limit)
     }
     @UseGuards(userGuard)
+    @Get('uniq/remito/:remito')
+    getUniqRemito(@Param('remito') remito:string) {
+        return this.EnviosService.verRemitoUniq(remito)
+    }
+    @UseGuards(userGuard)
     @Get('reportes/:remito')
     getReportes(@Param('remito') remito:string) {
         return this.EnviosService.verRemitoReportes(remito)
