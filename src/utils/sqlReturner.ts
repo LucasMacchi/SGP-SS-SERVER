@@ -82,8 +82,8 @@ export function cabecerasSQL (departamento: string) {
     return `select l.lentrega_id, l.completo from glpi_sgp_lentrega l where l.departamento = '${departamento}';`
 }
 
-export function verRemitosSQL () {
-    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,e.fortificado,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito),(SELECT fecha FROM glpi_sgp_remito_log where remito = e.nro_remito and estado = 'ENTREGADO') FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.fortificado,e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC;`
+export function verRemitosSQL (limit: string) {
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,e.fortificado,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito),(SELECT fecha FROM glpi_sgp_remito_log where remito = e.nro_remito and estado = 'ENTREGADO') FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.fortificado,e.nro_remito, e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias ORDER BY nro_remito DESC LIMIT ${limit};`
 }
 
 export function estadoRemitosSQL (estado: string, remito:string) {

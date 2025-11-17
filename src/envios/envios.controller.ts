@@ -42,6 +42,11 @@ export class EnviosController {
         return this.EnviosService.getLastRt()
     }
     @UseGuards(userGuard)
+    @Get('plan')
+    getCurrentPlan() {
+        return this.EnviosService.getCurrentPlan()
+    }
+    @UseGuards(userGuard)
     @Get('cai')
     getCurrentCai() {
         return this.EnviosService.getCai()
@@ -57,9 +62,9 @@ export class EnviosController {
         return this.EnviosService.getPlanesEnvios()
     }
     @UseGuards(userGuard)
-    @Get('remitos')
-    getRemitos() {
-        return this.EnviosService.verRemitos()
+    @Get('remitos/:limit')
+    getRemitos(@Param('limit') limit:string) {
+        return this.EnviosService.verRemitos(limit)
     }
     @UseGuards(userGuard)
     @Get('reportes/:remito')
