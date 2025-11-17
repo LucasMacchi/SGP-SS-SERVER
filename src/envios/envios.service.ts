@@ -31,12 +31,7 @@ export class EnviosService {
             const sql = `select l.lentrega_id,l.completo,e.dependencia,l.localidad,l.direccion,e.nro_remito,e.fecha_created,e.tanda from glpi_sgp_envio e join glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.fecha_created = '${fecha}' order by nro_remito ASC;`
             const envios: IDateExport[] = (await conn.query(sql)).rows
             await conn.end()
-            let datos: string[] = []
-            envios.forEach(en => {
-                const parsedDate = new Date(en.fecha_created).toISOString().split("T")[0]
-                datos.push(`${en.lentrega_id} | ${en.nro_remito} -> ${en.completo} -- ${en.dependencia} -- LOC: ${en.localidad} -- DIR: ${en.direccion} -- ${parsedDate} -- T:${en.tanda}\n`)
-            });
-            return datos
+            return envios
         } catch (error) {
             await conn.end()
             console.log(error)
@@ -105,11 +100,27 @@ export class EnviosService {
             return error
         }
     }
+    //Trae el ultimo numero de remito del talonario
     async getFinTalo () {
         const conn = clientReturner()
         try {
             await conn.connect()
             const sql = `select * from glpi_sgp_config where config_id = 6;`
+            const pv = (await conn.query(sql)).rows[0]["payload"]
+            await conn.end()
+            return pv
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    //Traer punto de venta actual
+    async getCurrentPlan () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sql = `select * from glpi_sgp_config where config_id = 8;`
             const pv = (await conn.query(sql)).rows[0]["payload"]
             await conn.end()
             return pv
@@ -379,6 +390,7 @@ export class EnviosService {
             return error
         }
     }
+
     //Trae todos los envios
     async getEnviosInfome () {
         const conn = clientReturner()
@@ -454,11 +466,11 @@ export class EnviosService {
         return formatted
     }
 
-    async verRemitos () {
+    async verRemitos (limit: string) {
         const conn = clientReturner() 
         try {
             await conn.connect()
-            const remitos: IRemitosEnvio[] = (await conn.query(verRemitosSQL())).rows
+            const remitos: IRemitosEnvio[] = (await conn.query(verRemitosSQL(limit))).rows
             for(const rt of remitos) {
                 const raciones: IRemitoFacturacionResponse[] = (await conn.query(getRemitoRatiosFacSQL(rt.nro_remito))).rows
                 let racTotal = 0
