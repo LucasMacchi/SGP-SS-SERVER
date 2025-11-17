@@ -85,6 +85,9 @@ export function cabecerasSQL (departamento: string) {
 export function verRemitosSQL (limit: string) {
     return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,e.fortificado,e.fecha_created as fecha,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito),(SELECT fecha FROM glpi_sgp_remito_log where remito = e.nro_remito and estado = 'ENTREGADO') as fecha_entrega FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id  GROUP BY e.fortificado,e.nro_remito,e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias,e.fecha_created ORDER BY nro_remito DESC LIMIT ${limit};`
 }
+export function verRemitoUniqSQL (remito: string) {
+    return `SELECT e.nro_remito, e.ultima_mod, e.estado,l.departamento,l.localidad,l.completo,e.dias,e.fortificado,e.fecha_created as fecha,(SELECT count(*) FROM public.glpi_sgp_remito_reporte where remito = e.nro_remito) as reportes, (SELECT factura FROM glpi_sgp_remito_facturacion where remito = e.nro_remito),(SELECT fecha FROM glpi_sgp_remito_log where remito = e.nro_remito and estado = 'ENTREGADO') as fecha_entrega FROM public.glpi_sgp_envio e  JOIN public.glpi_sgp_lentrega l ON l.lentrega_id = e.lentrega_id WHERE e.nro_remito = '${remito}' GROUP BY e.fortificado,e.nro_remito,e.estado,e.lentrega_id,l.departamento,l.localidad,l.completo,e.ultima_mod,e.dias,e.fecha_created;`
+}
 
 export function estadoRemitosSQL (estado: string, remito:string) {
     return `UPDATE public.glpi_sgp_envio SET estado='${estado}',ultima_mod=NOW() WHERE nro_remito='${remito}' RETURNING tanda;`
