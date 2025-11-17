@@ -471,8 +471,10 @@ export class EnviosService {
         try {
             await conn.connect()
             const remitos: IRemitosEnvio[] = (await conn.query(verRemitosSQL(limit))).rows
+            console.log("ac")
             for(const rt of remitos) {
                 const raciones: IRemitoFacturacionResponse[] = (await conn.query(getRemitoRatiosFacSQL(rt.nro_remito))).rows
+                console.log("ins")
                 let racTotal = 0
                 for(const item of raciones) {
                     racTotal += parseInt(item.sum)
