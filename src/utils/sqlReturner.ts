@@ -126,3 +126,11 @@ export function createFacturaSQL (remito: string, raciones: number, fecha: strin
 export function remitoDataFactSQL (remito: string) {
     return `select e.nro_remito,l.completo,l.localidad,l.departamento,e.fortificado from glpi_sgp_envio e JOIN glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id where e.nro_remito = '${remito}' group by e.nro_remito,l.completo,l.localidad,l.departamento,e.fortificado;`
 }
+
+export function movimientoSQL (date1: string, date2: string) {
+    return `SELECT des as insumo, sum(raciones) as raciones, sum(unidades) as unidades FROM glpi_sgp_envio_details d JOIN glpi_sgp_envio e ON d.envio_id = e.envio_id where e.fecha_created BETWEEN '${date1}' and '${date2}' group by des order by des asc;`
+}
+
+export function totalInformeEnviosSQL () {
+    return `select e.nro_remito,e.lentrega_id,l.completo,e.dependencia,e.fecha_created,e.estado,e.tanda,e.fortificado from glpi_sgp_envio e join glpi_sgp_lentrega l on e.lentrega_id = l.lentrega_id order by nro_remito asc;`
+}

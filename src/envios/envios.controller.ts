@@ -154,7 +154,7 @@ export class EnviosController {
     getAllDesgloses() {
         return this.EnviosService.getDesgloses()
     }
-    
+
     @UseGuards(userGuard)
     @Get('uniq/envio/:id')
     getUniqEnv(@Param('id') id:string) {
@@ -207,6 +207,11 @@ export class EnviosController {
         return this.EnviosService.createTxtEnvio(start,end)
     }
     @UseGuards(userGuard)
+    @Get('movimientos/:start/:end')
+    getMovimientos(@Param('start') start:string, @Param('end') end:string) {
+        return this.EnviosService.getMovimientos(start,end)
+    }
+    @UseGuards(userGuard)
     @Get('ruta/:start/:end')
     getcreateRuta(@Param('start') start:string, @Param('end') end:string) {
         return this.EnviosService.getRuta(start,end)
@@ -236,5 +241,9 @@ export class EnviosController {
     getcreateInforme(@Param('fecha') fecha:string) {
         return this.EnviosService.getInformeFecha(fecha)
     }
-
+    @UseGuards(userGuard)
+    @Get('total/informe')
+    getcreateInformeEnviosTotal() {
+        return this.EnviosService.getEnviosInfome()
+    }
 }
