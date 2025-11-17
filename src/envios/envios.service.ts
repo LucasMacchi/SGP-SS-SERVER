@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { editCantidadDto } from 'src/dto/editEnvio';
 import clientReturner from 'src/utils/clientReturner';
 import { createEnvioDto } from 'src/dto/enviosDto';
-import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse, IFacturacionData, IFacturacionDataInforme, IRemitoDataFacInf } from 'src/utils/interfaces';
+import { IConformidad,desgloseCount, IDetalleEnvio, IDetalleEnvioTxt, IEntregaDetalleTxt, IDesglosesRuta, ITotalRutas, IRemitoInd, IrequestEnvio, IRutaTotalsParsed, IRemitoRuta, IinformeEnvioRatios, IinformeSum, ITandaLog, IPlan, IDetailPlan, IPlanComplete, IChangeEnvioInsumo, IDateExport, IRemitoEnvio, IRemitoEntrega, IDepartamentoRes, IDesglosesReturner, ICabecera, IRemitosEnvio, IDelCues, IReporteEnvio, IRemitoFacturacionResponse, IFacturacionData, IFacturacionDataInforme, IRemitoDataFacInf, IMovimientos, ITotalEnviosInforme } from 'src/utils/interfaces';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
-import {conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
+import {conformidadSql, conformidadSqlCustom, createFacturaSQL, createReporteSQL, deglosesSQL, deleteRemitoLogSQL, deleteTandaLogSQL, deleteTandaSQL, estadoRemitoLogSQL, estadoRemitosSQL, getRemitoRatiosFacSQL, getRemitoSQL, gobackRemitoSQL, movimientoSQL, remitoDataFactSQL, rutaSql, rutaSqlCustom, rutaSqlRemito, rutaSqlRemitoCustom, rutaSqlTotales, rutaSqlTotalesCustom, totalInformeEnviosSQL, txtSql, verRemitosSQL } from 'src/utils/sqlReturner';
 import dotenv from 'dotenv'; 
 import editInsumoEnvioDto from 'src/dto/editInsumoEnvioDto';
 import editInsumoEnvioPlanDto from 'src/dto/editInsumoEnvioPlanDto';
@@ -184,7 +184,6 @@ export class EnviosService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            console.log(data.newVal)
             const sql = `UPDATE public.glpi_sgp_envio_plan_detail SET dias=${data.newVal} WHERE detail_id=${data.detail_id};`
             await conn.query(sql)
             await conn.end()
@@ -380,6 +379,20 @@ export class EnviosService {
             return error
         }
     }
+    //Trae todos los envios
+    async getEnviosInfome () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const rows: ITotalEnviosInforme[] = (await conn.query(totalInformeEnviosSQL())).rows
+            await conn.end()
+            return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
     //trae un envio por id
     async getEnviosUniq (id:number) {
         const conn = clientReturner()
@@ -398,6 +411,21 @@ export class EnviosService {
             return error
         }
     }
+
+    async getMovimientos (date1: string, date2: string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const rows: IMovimientos[] = (await conn.query(movimientoSQL(date1,date2))).rows
+            await conn.end()
+            return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
     //Edita la cantidad de una insuno en una compra
     async editCantidad (data: editCantidadDto) {
         const conn = clientReturner()
@@ -431,6 +459,14 @@ export class EnviosService {
         try {
             await conn.connect()
             const remitos: IRemitosEnvio[] = (await conn.query(verRemitosSQL())).rows
+            for(const rt of remitos) {
+                const raciones: IRemitoFacturacionResponse[] = (await conn.query(getRemitoRatiosFacSQL(rt.nro_remito))).rows
+                let racTotal = 0
+                for(const item of raciones) {
+                    racTotal += parseInt(item.sum)
+                }
+                rt.raciones = racTotal
+            }
             await conn.end()
             return remitos
         } catch (error) {
@@ -1010,7 +1046,7 @@ export class EnviosService {
         const sqlRemitos = txtSql(range)
         const sqlDes = `select e.nro_remito, count(*) from glpi_sgp_envio e where e.${range} group by e.nro_remito;`
         const sqlCai = "select payload from glpi_sgp_config where config_id = 4;"
-        const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
+        //const sqlRtVenc = "select payload from glpi_sgp_config where config_id = 5;"
         try {
             await conn.connect()
             const data1: IEntregaDetalleTxt[] = (await conn.query(sqlRemitos)).rows

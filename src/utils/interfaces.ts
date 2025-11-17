@@ -269,7 +269,8 @@ export interface IRemitosEnvio {
     fecha: string | null,
     dias: number,
     fortificado: boolean,
-    factura: string | null
+    factura: string | null,
+    raciones: number
 }
 
 export interface IReporteEnvio {
@@ -279,6 +280,12 @@ export interface IReporteEnvio {
     des: string,
     fecha: string,
     reportes: number
+}
+
+export interface IMovimientos {
+    insumo: string,
+    raciones: string,
+    unidades: string
 }
 
 export interface IRemitoFacturacionResponse {
@@ -307,4 +314,15 @@ export interface IRemitoDataFacInf {
     localidad: string,
     departamento: string,
     fortificado: boolean
+}
+
+export interface ITotalEnviosInforme {
+    nro_remito: string,
+    lentrega_id: number,
+    completo: string,
+    dependencia: string,
+    fecha_created: string,
+    estado: string,
+    tanda: number,
+    fortificado: boolean | null
 }
