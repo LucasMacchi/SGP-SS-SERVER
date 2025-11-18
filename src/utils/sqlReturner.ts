@@ -66,7 +66,7 @@ export function txtOrders (month: number, year: number) {
     return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where ${monthRangeReturner(month,year)};`
 }
 export function txtOrdersRange (date1: string, date2: string) {
-    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where d.exported = false and o.date_delivered BETWEEN '${date1}' and '${date2}';`
+    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.state = 'Entregado' d.exported = false and o.date_delivered BETWEEN '${date1}' and '${date2}';`
 }
 
 export function deglosesSQL (departamento: string, fortificado: number) {
@@ -132,6 +132,10 @@ export function remitoDataFactSQL (remito: string) {
 
 export function movimientoSQL (date1: string, date2: string) {
     return `SELECT des as insumo, sum(raciones) as raciones, sum(unidades) as unidades FROM glpi_sgp_envio_details d JOIN glpi_sgp_envio e ON d.envio_id = e.envio_id where e.fecha_created BETWEEN '${date1}' and '${date2}' group by des order by des asc;`
+}
+
+export function movimientoFilteredSQL (date1: string, date2: string,estado: string) {
+    return `SELECT des as insumo, sum(raciones) as raciones, sum(unidades) as unidades FROM glpi_sgp_envio_details d JOIN glpi_sgp_envio e ON d.envio_id = e.envio_id where e.estado = '${estado}' e.fecha_created BETWEEN '${date1}' and '${date2}' group by des order by des asc;`
 }
 
 export function totalInformeEnviosSQL () {
