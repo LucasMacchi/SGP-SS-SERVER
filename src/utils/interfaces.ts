@@ -218,7 +218,8 @@ export interface IOrderTxt {
     amount: number,
     service_id: number,
     numero: string,
-    date_delivered: Date
+    date_delivered: Date,
+    detail_id: number
 }
 
 export interface IRemitoEnvio {
