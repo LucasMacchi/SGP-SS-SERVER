@@ -101,7 +101,7 @@ export class Pedido {
             const order_id = (await conn.query(sql_pedido)).rows[0]['order_id']
             const rows1 = (await conn.query(sql_emails)).rows
             for(const i of pedido.insumos) {
-              await conn.query(`insert into glpi_sgp_order_detail (amount, order_id, insumo_des) values (${i.amount}, ${order_id}, '${i.insumo_des}');`)
+              await conn.query(`insert into glpi_sgp_order_detail (amount, order_id, insumo_des,exported) values (${i.amount}, ${order_id}, '${i.insumo_des}',false);`)
             }
             if(rows1.constructor === Array) {
                 try {
@@ -372,6 +372,9 @@ export class Pedido {
         try {
             await conn.connect()
             const data1: IOrderTxt[] = (await conn.query(sqlPedidos)).rows
+            for(const detail of data1) {
+                await conn.query(`update public.glpi_sgp_order_detail set exported = true where detail_id = ${detail.detail_id};`)
+            }
             const start = await (await conn.query(sqlStart)).rows[0]["payload"]
             const res = this.createTxt(data1, start)
             await conn.end()
@@ -389,7 +392,8 @@ export class Pedido {
         desP.forEach((c,i) => {
             if(c.length > 0 && i === 0) cods +=c
             else if(c.length > 0 && i !== desP.length - 1) {
-                cods += "-"+c
+                const fill = fillEmptyTxt(c,6,false,false,true)
+                cods += "-"+fill
             }
             else cods += ""
         });
@@ -403,7 +407,7 @@ export class Pedido {
         for (let index = 0; index < datos.length; index++) {
             let line = ""
             const p = datos[index]
-            const fecha = p.date_delivered.toISOString().split("T")[0]
+            const fecha = this.dateParser(p.date_delivered)
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
             //Comprbante
@@ -421,19 +425,19 @@ export class Pedido {
                 line += fillEmptyTxt("",s,true,true,false)    
             });
             //Codigo de insumo
-            line += fillEmptyTxt(cod,8,false,false,false)
+            line += fillEmptyTxt(cod,23,false,true,false)
             //cant unidad 1
-            line += fillEmptyTxt(p.amount.toString(),16,false,false,false)
-            //cant unidad 1
-            line += fillEmptyTxt("",16,true,false,false)
+            line += fillEmptyTxt(p.amount.toString(),16,false,true,false)
+            //cant unidad 2
+            line += fillEmptyTxt("0.00",16,false,true,false)
             //des articulo
-            line += fillEmptyTxt(desP[desP.length-1].trimEnd(),8,false,false,false)
+            line += fillEmptyTxt(desP[desP.length-1].trimEnd(),50,false,true,false)
             //Tipo de articulo
             line += fillEmptyTxt("8",1,false,false,false)
             //prc costo total mod local
-            line += fillEmptyTxt("",16,true,true,false)
+            line += fillEmptyTxt("0.00",16,false,true,false)
             //prc costo total mod ex
-            line += fillEmptyTxt("",16,true,true,false)
+            line += fillEmptyTxt("0.00",16,false,true,false)
             //deposito
             line += fillEmptyTxt("CEN",3,false,false,false)
             //22 - 33
@@ -445,9 +449,9 @@ export class Pedido {
             //Obs de la partida
             line += fillEmptyTxt("",20,false,false,false)
             //otros datos de la partida
-            line += fillEmptyTxt(p.numero,50,false,false,false)
+            line += fillEmptyTxt(p.numero,50,false,true,false)
             //CCO
-            line += fillEmptyTxt(p.service_id.toString(),8,false,false,false)
+            line += fillEmptyTxt(p.service_id.toString(),7,false,false,true)
             start++
             lineas.push(line)
         }
