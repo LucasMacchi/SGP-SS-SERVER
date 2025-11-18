@@ -389,14 +389,11 @@ export class Pedido {
     private returnProdCods = (prod: string): string => {
         const desP = prod.split("-")
         let cods = ""
-        desP.forEach((c,i) => {
-            if(c.length > 0 && i === 0) cods +=c
-            else if(c.length > 0 && i !== desP.length - 1) {
-                const fill = fillEmptyTxt(c,6,false,false,true)
-                cods += "-"+fill
-            }
-            else cods += ""
-        });
+        console.log(desP)
+        if(desP[0].length > 0) cods +=desP[0]
+        if(desP[1].length > 0) cods +="-"+fillEmptyTxt(desP[1],6,false,false,true)
+        if(desP[2].length > 0) cods +="-"+fillEmptyTxt(desP[2],6,false,false,true)
+        if(desP[3].length > 0) cods +="-"+fillEmptyTxt(desP[3],4,false,false,true)
         return cods
     }
 
