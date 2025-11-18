@@ -217,9 +217,9 @@ export class EnviosController {
         return this.EnviosService.createTxtEnvio(start,end)
     }
     @UseGuards(userGuard)
-    @Get('movimientos/:start/:end')
-    getMovimientos(@Param('start') start:string, @Param('end') end:string) {
-        return this.EnviosService.getMovimientos(start,end)
+    @Get('movimientos/:start/:end/:estado')
+    getMovimientos(@Param('start') start:string, @Param('end') end:string,@Param('estado') estado:string) {
+        return this.EnviosService.getMovimientos(start,end,estado)
     }
     @UseGuards(userGuard)
     @Get('ruta/:start/:end')
