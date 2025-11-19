@@ -428,7 +428,7 @@ export class Pedido {
             //cant unidad 2
             line += fillEmptyTxt("0.00",16,false,true,false)
             //des articulo
-            line += fillEmptyTxt(desP[desP.length-1].trimEnd(),50,false,true,false)
+            line += fillEmptyTxt("",50,true,true,false)
             //Tipo de articulo
             line += fillEmptyTxt("8",1,false,false,false)
             //prc costo total mod local
