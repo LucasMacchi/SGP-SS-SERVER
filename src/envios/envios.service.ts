@@ -643,16 +643,16 @@ export class EnviosService {
                     }
                     const nro_remito = this.emptyFill(5,pv)+"-"+this.emptyFill(8,startRemito)
                     const sql = `INSERT INTO public.glpi_sgp_envio(
-                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado,dias)
-                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado},${envio.dias}) RETURNING envio_id;`
+                    lentrega_id, dependencia, exported,fecha_created, nro_remito, tanda, estado,ultima_mod,cue,fortificado,dias,plan)
+                    VALUES (${envio.entregaId}, '${envio.desglose}', false, NOW(),'${nro_remito}', ${tanda}, 'PENDIENTE', NOW(),${envio.cue},${envio.fortificado},${envio.dias},${plan}) RETURNING envio_id;`
                     const sqlCreated = `UPDATE public.glpi_sgp_desgloses SET ${envio.fortificado ? `sent_al=true` : `sent_cl=true`} WHERE cue = ${envio.cue};`
                     if(envio.entregaId && envio.desglose && envio.cue) {
                         const envId = (await conn.query(sql)).rows[0]["envio_id"]
                         console.log("ID = "+envId  + " -- LUGAR = " + envio.entregaId +" -- REMITO = "+startRemito+ " -- TIPO = "+(envio.fortificado ? "AL" : "CL"))
                         for (const prod of envio.detalles) {
                             const sql2 = `INSERT INTO public.glpi_sgp_envio_details(
-                            envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito,plan)
-                            VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}',${plan});`
+                            envio_id, kilos, cajas, bolsas, raciones, des, tanda, unidades, unit_caja, caja_palet,nro_remito)
+                            VALUES (${envId}, ${prod.kilos}, ${prod.cajas}, ${prod.bolsas}, ${prod.raciones},'${prod.des}', ${tanda}, ${prod.unidades}, ${prod.unit_caja},${prod.caja_palet},'${nro_remito}');`
                             await conn.query(sql2)
                             prodCreated++
                         }
