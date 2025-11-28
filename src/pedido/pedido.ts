@@ -392,7 +392,7 @@ export class Pedido {
             if(i === 0) orders += `'${c}'`
             else orders += `,'${c}'`
         });
-
+        console.log(orders)
         const sqlPedidos = txtOrdersEnt(orders)
         const sqlStart = "select payload from glpi_sgp_config where config_id = 3;"
         try {
