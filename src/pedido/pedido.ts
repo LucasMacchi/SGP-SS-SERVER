@@ -427,7 +427,7 @@ export class Pedido {
         for (let index = 0; index < datos.length; index++) {
             let line = ""
             const p = datos[index]
-            const fecha = this.dateParser(p.date_delivered)
+            const fecha = entrada ? this.dateParser(new Date()) : this.dateParser(p.date_delivered)
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
             //Comprbante
