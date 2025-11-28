@@ -9,6 +9,7 @@ import commentDto from 'src/dto/commentDto';
 import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
 import addInsumo from 'src/dto/addInsumo';
+import { entradaDto } from 'src/dto/entradaOrdersDto';
 
 @Controller('pedido')
 export class PedidoController {
@@ -102,6 +103,10 @@ export class PedidoController {
     @Post('report')
     async postReport (@Body() body: reportDto) {
         return await this.pedido.addReport(body)
+    }
+    @Post('entrada/txt')
+    async entradaTxt (@Body() body: entradaDto) {
+        return await this.pedido.getPedidosTxtEnt(body.orders)
     }
     @UseGuards(userGuard)
     @Delete('eliminar/:id')
