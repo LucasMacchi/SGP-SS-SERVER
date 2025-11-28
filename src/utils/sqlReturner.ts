@@ -69,6 +69,10 @@ export function txtOrdersRange (date1: string, date2: string) {
     return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.state = 'Entregado' and d.exported = false and o.date_delivered BETWEEN '${date1}' and '${date2}';`
 }
 
+export function txtOrdersEnt (orders: string) {
+    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.numero IN (${orders});`
+}
+
 export function deglosesSQL (departamento: string, fortificado: number) {
     if(fortificado > 0) {
         return `select d.cue,d.lentrega_id,l.localidad,l.completo,d.des,rac_cl,rac_al from glpi_sgp_desgloses d join glpi_sgp_lentrega l on d.lentrega_id = l.lentrega_id where l.departamento = '${departamento}' and sent_al = false and rac_al IS NOT NULL and rac_al > 0;`

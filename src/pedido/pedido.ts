@@ -9,7 +9,7 @@ import changeProvDto from 'src/dto/changeProvDto';
 import filterDto from 'src/dto/filterDto';
 import endCode from 'src/utils/endCode';
 import mailerResend from 'src/utils/mailerResend';
-import { txtOrders, txtOrdersRange } from 'src/utils/sqlReturner';
+import { txtOrders, txtOrdersEnt, txtOrdersRange } from 'src/utils/sqlReturner';
 import fillEmptyTxt from 'src/utils/fillEmptyTxt';
 @Injectable()
 export class Pedido {
@@ -356,7 +356,7 @@ export class Pedido {
             await conn.connect()
             const data1: IOrderTxt[] = (await conn.query(sqlPedidos)).rows
             const start = await (await conn.query(sqlStart)).rows[0]["payload"]
-            const res = this.createTxt(data1, start)
+            const res = this.createTxt(data1, start,false)
             await conn.end()
             return res.lineas
         } catch (error) {
@@ -376,7 +376,30 @@ export class Pedido {
                 await conn.query(`update public.glpi_sgp_order_detail set exported = true where detail_id = ${detail.detail_id};`)
             }
             const start = await (await conn.query(sqlStart)).rows[0]["payload"]
-            const res = this.createTxt(data1, start)
+            const res = this.createTxt(data1, start,false)
+            await conn.end()
+            return res.lineas
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async getPedidosTxtEnt (cods:string[]) {
+        const conn = clientReturner()
+        let orders = ""
+        cods.forEach((c,i) => {
+            if(i === 0) orders += `'${c}'`
+            else orders += `,'${c}'`
+        });
+
+        const sqlPedidos = txtOrdersEnt(orders)
+        const sqlStart = "select payload from glpi_sgp_config where config_id = 3;"
+        try {
+            await conn.connect()
+            const data1: IOrderTxt[] = (await conn.query(sqlPedidos)).rows
+            const start = await (await conn.query(sqlStart)).rows[0]["payload"]
+            const res = this.createTxt(data1, start,true)
             await conn.end()
             return res.lineas
         } catch (error) {
@@ -397,7 +420,7 @@ export class Pedido {
         return cods
     }
 
-    private createTxt (datos: IOrderTxt[], start: number) {
+    private createTxt (datos: IOrderTxt[], start: number,entrada: boolean) {
         let lineas: string [] = []
         const blank1 = [4,4,4,25,4,1]
         const blank2 = [26,3,4,25,4,25,6,40,15,15,15,20,50]
@@ -408,7 +431,7 @@ export class Pedido {
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
             //Comprbante
-            line += fillEmptyTxt("SAL",3,false,true,false)
+            line += fillEmptyTxt(entrada ? "ENT" : "SAL",3,false,true,false)
             //Letra
             line += fillEmptyTxt("",1,true,true,false)
             //PV
