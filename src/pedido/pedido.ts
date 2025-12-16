@@ -40,8 +40,8 @@ export class Pedido {
     async postNewInsumo (id: number, insumo: string, amount: number) {
         const conn = clientReturner()
         const sql =`INSERT INTO public.glpi_sgp_order_detail
-        (amount, order_id, insumo_des)
-        VALUES( ${amount}, ${id}, '${insumo}');`
+        (amount, order_id, insumo_des,exported)
+        VALUES( ${amount}, ${id}, '${insumo}',false);`
         await conn.connect()
         await conn.query(sql)
         await conn.end()
