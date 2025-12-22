@@ -375,8 +375,9 @@ export class Pedido {
             for(const detail of data1) {
                 await conn.query(`update public.glpi_sgp_order_detail set exported = true where detail_id = ${detail.detail_id};`)
             }
-            const start = await (await conn.query(sqlStart)).rows[0]["payload"]
+            const start:number = await (await conn.query(sqlStart)).rows[0]["payload"]
             const res = this.createTxt(data1, start,false)
+            await conn.query(`update public.glpi_sgp_config set payload = ${res.start} where config_id = 3;`)
             await conn.end()
             return res.lineas
         } catch (error) {
@@ -424,9 +425,16 @@ export class Pedido {
         let lineas: string [] = []
         const blank1 = [4,4,4,25,4,1]
         const blank2 = [26,3,4,25,4,25,6,40,15,15,15,20,50]
+        start++
+        let aux = datos[0].service_id
         for (let index = 0; index < datos.length; index++) {
+            
             let line = ""
             const p = datos[index]
+            if(aux !== p.service_id){
+                aux = p.service_id
+                start++
+            }
             const fecha = entrada ? this.dateParser(new Date()) : this.dateParser(p.date_delivered)
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
@@ -472,10 +480,9 @@ export class Pedido {
             line += fillEmptyTxt(p.numero,50,false,true,false)
             //CCO
             line += fillEmptyTxt(p.service_id.toString(),7,false,false,true)
-            start++
             lineas.push(line)
         }
-        return {lineas, start: start+1}
+        return {lineas, start: start}
     }
 
 }
