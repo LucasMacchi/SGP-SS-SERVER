@@ -63,14 +63,14 @@ export function gobackRemitoSQL (tanda: number) {
 }
 
 export function txtOrders (month: number, year: number) {
-    return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where ${monthRangeReturner(month,year)} ORDER BY o.service_id;`
+    return `select d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where ${monthRangeReturner(month,year)} and o.client_id > 0 ORDER BY o.service_id;`
 }
 export function txtOrdersRange (date1: string, date2: string) {
-    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.state = 'Entregado' and d.exported = false and o.date_delivered BETWEEN '${date1}' and '${date2}' ORDER BY o.service_id;`
+    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.state = 'Entregado' and d.exported = false and o.date_delivered BETWEEN '${date1}' and '${date2}' and o.client_id > 0 ORDER BY o.service_id;`
 }
 
 export function txtOrdersEnt (orders: string) {
-    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.numero IN (${orders}) ORDER BY o.service_id;`
+    return `select d.detail_id,d.insumo_des,d.amount,o.service_id,o.numero,o.date_delivered from glpi_sgp_order_detail d join glpi_sgp_orders o on d.order_id = o.order_id where o.numero IN (${orders}) and o.client_id > 0 ORDER BY o.service_id;`
 }
 
 export function deglosesSQL (departamento: string, fortificado: number) {
