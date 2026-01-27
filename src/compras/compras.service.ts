@@ -11,6 +11,7 @@ import mailer from 'src/utils/mailer';
 import { Resend } from 'resend';
 import dotenv from 'dotenv'; 
 import mailerResend from 'src/utils/mailerResend';
+import clientReturnerViaje from 'src/utils/clientReturnerViaje';
 dotenv.config();
 
 const glpiEmail = process.env.EMAIL_GLPI ?? 'NaN'
@@ -51,6 +52,20 @@ export class ComprasService {
             await mailerResend(emails,mail.subject, mail.msg)
             //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", emails, mail.subject, mail.msg))
             return "Creado compra"
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+    async getViajesLogistica () {
+        const conn = clientReturnerViaje()
+        try {
+            await conn.connect()
+            const sql = 'SELECT viaje_id,des FROM public.viaje WHERE compra = false ORDER BY viaje_id ASC;'
+            const rows = (await conn.query(sql)).rows
+            await conn.end()
+            return rows
         } catch (error) {
             await conn.end()
             console.log(error)
