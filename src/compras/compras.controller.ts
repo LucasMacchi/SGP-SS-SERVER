@@ -20,6 +20,13 @@ export class ComprasController {
         return this.ComprasService.getAreas()
     }
 
+
+    @UseGuards(userGuard)
+    @Get('viajes')
+    getViajes() {
+        return this.ComprasService.getViajesLogistica()
+    }
+
     @UseGuards(userGuard)
     @Post('registrar')
     createCompra (@Body() data: compraDto) {

@@ -428,7 +428,6 @@ export class Pedido {
         start++
         let aux = datos[0].service_id
         for (let index = 0; index < datos.length; index++) {
-            
             let line = ""
             const p = datos[index]
             if(aux !== p.service_id){
