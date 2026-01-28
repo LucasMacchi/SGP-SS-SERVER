@@ -85,7 +85,7 @@ export class ComprasService {
             const parsedFec = new Date(rows['fecha']).toISOString().split("T")[0]
             const mail: IemailMsg = {
                 subject: `Solicitud de Compras - ${rows["nro"]} - ${rows["fullname"]}`,
-                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], parsedFec, rows['area'], rows['lugar'])
+                msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], parsedFec, rows['area'], rows['lugar'],id)
             }
             await mailerResend(glpiEmail,mail.subject, mail.msg)
             //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
