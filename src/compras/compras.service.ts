@@ -5,7 +5,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import clientReturner from 'src/utils/clientReturner';
 import { addDetailDto, editCompraCant, editCompraDes } from 'src/dto/editCompraDto';
 import endCode from 'src/utils/endCode';
-import { IemailMsg } from 'src/utils/interfaces';
+import { IemailMsg, IRepartoSfor, IViajeLogistica } from 'src/utils/interfaces';
 import emailCompra from 'src/utils/emailCompra';
 import mailer from 'src/utils/mailer';
 import { Resend } from 'resend';
@@ -62,8 +62,12 @@ export class ComprasService {
         const conn = clientReturnerViaje()
         try {
             await conn.connect()
-            const sql = 'SELECT viaje_id,des FROM public.viaje WHERE compra = false ORDER BY viaje_id ASC;'
-            const rows = (await conn.query(sql)).rows
+            const sqlRepartos = 'SELECT r.reparto_id,r.numero,r.periodo FROM public.viaje v JOIN public.reparto r ON r.reparto_id = v.reparto_id GROUP BY r.reparto_id,r.numero,r.periodo ORDER BY r.reparto_id ASC;'
+            const sqlViaje = 'SELECT v.viaje_id,v.des,v.compra FROM public.viaje v JOIN public.reparto r ON r.reparto_id = v.reparto_id WHERE r.reparto_id = $1 ORDER BY v.viaje_id ASC'
+            const rows:IRepartoSfor[] = (await conn.query(sqlRepartos)).rows
+            for(const rep of rows) {
+                rep.viajes = (await conn.query(sqlViaje,[rep.reparto_id])).rows
+            }
             await conn.end()
             return rows
         } catch (error) {
@@ -75,12 +79,20 @@ export class ComprasService {
     //Aprueva la compra y manda el correo al sistema de tickets, que lo carga automaticamente
     async aproveCompra (id: number,comentario: string) {
         const conn = clientReturner()
+        const conn2 = clientReturnerViaje()
         try {
             await conn.connect()
             const sql = `UPDATE public.glpi_sgp_compras SET fecha_aprobado=NOW(), aprobado=true,anulado=false,comentario='${comentario}' WHERE compra_id=${id} RETURNING compra_id, nro, fullname, proveedor, descripcion, fecha, area, lugar;`
             const sql_insumos = `select * from glpi_sgp_compras_details g where g.compra_id = ${id};`
             const rows = (await conn.query(sql)).rows[0]
             const rowsInsumos: IinsumoCompra[] = (await conn.query(sql_insumos)).rows
+            const viajesToMod:number[] = []
+            if(rows['area'] === 'Logistica/Deposito') {
+                for(const viaje of rowsInsumos) {
+                    const id = parseInt(viaje.descripcion.split("-")[0])
+                    if(id !== 0) viajesToMod.push(id)
+                }
+            }
             await conn.end()
             const parsedFec = new Date(rows['fecha']).toISOString().split("T")[0]
             const mail: IemailMsg = {
@@ -88,6 +100,16 @@ export class ComprasService {
                 msg:emailCompra(rowsInsumos, comentario, rows["descripcion"], rows["proveedor"], parsedFec, rows['area'], rows['lugar'],id)
             }
             await mailerResend(glpiEmail,mail.subject, mail.msg)
+            if(viajesToMod.length > 0) {
+                const sqlCompra = 'UPDATE public.viaje SET compra = true WHERE viaje_id = $1 AND compra = false;'
+                await conn2.connect()
+                for(const viajes of viajesToMod) {
+                    if(viajes) await conn2.query(sqlCompra,[viajes])
+                }
+                await conn2.end()
+            }
+
+
             //await this.mailerServ.sendMail(mailer("Sistema Gestion de Pedidos", glpiEmail, mail.subject, mail.msg))
             return "Compra Aprobado"
         } catch (error) {

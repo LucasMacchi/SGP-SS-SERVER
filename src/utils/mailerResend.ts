@@ -11,7 +11,7 @@ export default async function (to: string | string[], subject: string, msg: stri
             from: `Sistema Gestion de Pedidos <${mail_user}>`,
             to,
             subject,
-            text: msg
+            html: msg
         })
         if(error) {
             console.log(error)

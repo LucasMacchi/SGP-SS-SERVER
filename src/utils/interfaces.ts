@@ -90,6 +90,26 @@ export interface IEntregaDetalleTxt {
 
 }
 
+export interface IViajeLogistica {
+    viaje_id: number,
+    des:string,
+    numero:number,
+    periodo:number
+}
+
+export interface IRepartoSfor {
+    reparto_id:number,
+    numero:number,
+    periodo:number,
+    viajes: IViajeRes[]
+}
+
+export interface IViajeRes {
+    viaje_id:number,
+    compra:boolean,
+    des:string
+}
+
 export interface IDesglosesRuta {
     nro_remito: string,
     dependencia: string,
