@@ -6,8 +6,8 @@ export default function (insumos: IinsumoCompra[], comentario: string, descripci
     const compraId = compra_id
     const completeUrl = url+"compras/"+compraId
     let message = `Proveedor sugerido: ${proveedor}\n\nArea: ${area}\n\Lugar: ${lugar}\n\nFecha a requerir: ${fechaSol}\n\nDescripcion proporcionada por el solicitante: \n${descripcion}\n\nProductos solicitados:\n`
-    message += '\n'+completeUrl+'\n'
     insumos.map((i) => message += i.descripcion+" - "+i.cantidad+"\n")
     message += "\nComentarios:\n"+comentario
+    message += '\n'+completeUrl+'\n'
     return message
 }
