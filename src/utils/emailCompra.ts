@@ -35,6 +35,7 @@ export default function (insumos: IinsumoCompra[], comentario: string, descripci
         <h3>Comentarios: </h3>
         <p>${comentario}</p>
         <a href="${completeUrl}">Link a la solicitud de compra</a>
+        <a href="${completeUrl}">${completeUrl}</a>
     </html>
     `
 
