@@ -121,7 +121,7 @@ export class Pedido {
             }
         } catch (error) {
             await conn.end()
-            throw new Error(error)
+            throw new Error("Error")
         }
     }
     
@@ -454,7 +454,7 @@ export class Pedido {
             //Codigo de insumo
             line += fillEmptyTxt(cod,23,false,true,false)
             //cant unidad 1
-            line += fillEmptyTxt(p.amount.toString(),16,false,true,false)
+            line += fillEmptyTxt("-"+p.amount.toString(),16,false,true,false)
             //cant unidad 2
             line += fillEmptyTxt("0.00",16,false,true,false)
             //des articulo
