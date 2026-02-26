@@ -438,7 +438,7 @@ export class Pedido {
             const desP = p.insumo_des.split("-")
             const cod = this.returnProdCods(p.insumo_des)
             //Comprbante
-            line += fillEmptyTxt(entrada ? "ENT" : "SAL",3,false,true,false)
+            line += fillEmptyTxt(entrada ? "ENT" : "AJ",3,false,true,false)
             //Letra
             line += fillEmptyTxt("",1,true,true,false)
             //PV
@@ -454,7 +454,7 @@ export class Pedido {
             //Codigo de insumo
             line += fillEmptyTxt(cod,23,false,true,false)
             //cant unidad 1
-            line += fillEmptyTxt("-"+p.amount.toString(),16,false,true,false)
+            line += fillEmptyTxt(""+p.amount.toString(),16,false,true,false)
             //cant unidad 2
             line += fillEmptyTxt("0.00",16,false,true,false)
             //des articulo
