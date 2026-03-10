@@ -8,6 +8,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ComprasModule } from './compras/compras.module';
 import { EnviosModule } from './envios/envios.module';
+import { FumigacionModule } from './fumigacion/fumigacion.module';
 import dotenv from 'dotenv'; 
 dotenv.config();
 
@@ -33,7 +34,8 @@ dotenv.config();
         limit: 5
       }
     ]
-  })
+  }),
+  FumigacionModule
 ],
   controllers: [AppController],
   providers: [AppService],

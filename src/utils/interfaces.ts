@@ -348,3 +348,47 @@ export interface ITotalEnviosInforme {
     tanda: number,
     fortificado: boolean | null
 }
+
+export interface IFCliente {
+    cliente_id: number,
+    razon_soc:string,
+    cotizacion:number,
+    servicio:string,
+    ultimo_serv:Date,
+    prox_serv:Date,
+    forma_pago:string,
+    contacto:string,
+    rubro:string,
+    empresa:boolean,
+    oficial: boolean,
+    direccion: string
+}
+
+export interface IFVeh {
+    veh_id: number,
+    patente: string
+}
+
+export interface IFServicio {
+    servicio:string
+}
+
+export interface IFRubro {
+    rubro_id: number,
+    rubro: string
+}
+
+export interface IFDroga {
+    droga_id: number,
+    d1: string,
+    d2: string
+}
+
+export interface ITalonario {
+    numero: string,
+    cliente_id: number,
+    patente: string | null,
+    oficial: boolean,
+    fecha: string,
+    talonario_id: number
+}
