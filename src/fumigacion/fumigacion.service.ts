@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import clientReturner from 'src/utils/clientReturner';
-import { IFCliente, IFDroga, IFRubro, IFVeh, ITalonario } from 'src/utils/interfaces';
+import { IFCliente, IFDroga, IFRubro, IFServicio, IFVeh, ITalonario } from 'src/utils/interfaces';
 import rubros from './rubro.json'
 @Injectable()
 export class FumigacionService {
@@ -42,6 +42,22 @@ export class FumigacionService {
             const rows:IFVeh[] = (await conn.query(sqlVeh)).rows
             await conn.end()
             return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async getServicios () {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sqlVeh = 'SELECT DISTINCT servicio FROM public.glpi_fum_cliente;'
+            const rows:IFServicio[] = (await conn.query(sqlVeh)).rows
+            const serviciosp = rows.map(s => s.servicio)
+            await conn.end()
+            return serviciosp
         } catch (error) {
             await conn.end()
             console.log(error)

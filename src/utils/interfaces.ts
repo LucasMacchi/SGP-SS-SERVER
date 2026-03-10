@@ -360,12 +360,17 @@ export interface IFCliente {
     contacto:string,
     rubro:string,
     empresa:boolean,
-    oficial: boolean
+    oficial: boolean,
+    direccion: string
 }
 
 export interface IFVeh {
     veh_id: number,
     patente: string
+}
+
+export interface IFServicio {
+    servicio:string
 }
 
 export interface IFRubro {
