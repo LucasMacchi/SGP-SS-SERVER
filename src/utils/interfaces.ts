@@ -390,5 +390,6 @@ export interface ITalonario {
     patente: string | null,
     oficial: boolean,
     fecha: string,
-    talonario_id: number
+    talonario_id: number,
+    fac:string
 }

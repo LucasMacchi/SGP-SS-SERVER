@@ -49,6 +49,12 @@ export class FumigacionController {
     }
 
     @UseGuards(userGuard)
+    @Patch("facturar/:id/:fac")
+    facturarTalo (@Param('id') id:string,@Param('fac') fac:string) {
+        return this.FumigacionService.facturarTalonario(id,fac)
+    }
+
+    @UseGuards(userGuard)
     @Patch("serviciofumi/:id/:user/:veh/:talo/:droga")
     realizarServicio (@Param('id') id:string,@Param('user') user:string,@Param('veh') veh:string,@Param('talo') talo:string,@Param('droga') droga:string) {
         return this.FumigacionService.realizarServicio(id,user,veh,talo,false,droga)
