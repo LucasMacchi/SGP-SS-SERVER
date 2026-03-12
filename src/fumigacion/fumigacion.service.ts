@@ -24,7 +24,7 @@ export class FumigacionService {
         const conn = clientReturner()
         try {
             await conn.connect()
-            const sql = `SELECT t.droga,t.talonario_id,t.fecha,t.oficial,t.numero,t.cliente_id,v.patente FROM public.glpi_fum_talonario t LEFT JOIN glpi_fum_veh v ON t.veh_id = v.veh_id WHERE t.cliente_id = $1 ORDER BY numero ASC`
+            const sql = `SELECT t.fac,t.droga,t.talonario_id,t.fecha,t.oficial,t.numero,t.cliente_id,v.patente FROM public.glpi_fum_talonario t LEFT JOIN glpi_fum_veh v ON t.veh_id = v.veh_id WHERE t.cliente_id = $1 ORDER BY numero ASC`
             const rows:ITalonario[] = (await conn.query(sql,[id])).rows
             await conn.end()
             return rows
@@ -88,6 +88,21 @@ export class FumigacionService {
             const rows:IFDroga[] = (await conn.query(sqlVeh)).rows
             await conn.end()
             return rows
+        } catch (error) {
+            await conn.end()
+            console.log(error)
+            return error
+        }
+    }
+
+    async facturarTalonario (id:string,fac:string) {
+        const conn = clientReturner()
+        try {
+            await conn.connect()
+            const sqlVeh = 'UPDATE public.glpi_fum_talonario SET fac=$1 WHERE talonario_id = $2;'
+            await conn.query(sqlVeh,[fac,id])
+            await conn.end()
+            return "Talonario facturado"
         } catch (error) {
             await conn.end()
             console.log(error)
