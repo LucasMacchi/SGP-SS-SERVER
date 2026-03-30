@@ -110,7 +110,7 @@ export class FumigacionService {
         }
     }
 
-    async realizarServicio (id:string,user:string,veh:string,talo:string,of:boolean,droga:string) {
+    async realizarServicio (id:string,user:string,veh:string,talo:string,of:boolean,droga:string,fecha:string) {
         const conn = clientReturner()
         try {
             await conn.connect()
@@ -119,7 +119,7 @@ export class FumigacionService {
             const sqlTalo = `INSERT INTO public.glpi_fum_talonario(numero, cliente_id, veh_id,usuario_id,oficial,droga) VALUES ($1, $2, $3, $4, $5,$6);`
             const sqlTaloNull = `INSERT INTO public.glpi_fum_talonario(numero, cliente_id,usuario_id,oficial,droga) VALUES ($1, $2, $3, $4,$5);`
             const currentDate = new Date()
-            const nextDate = new Date(new Date().setDate(currentDate.getDate() + 30))
+            const nextDate = fecha//new Date(new Date().setDate(currentDate.getDate() + 30))
             const logDes = `SERVICIO REALIZADO ${currentDate.toISOString()} A ${nextDate} - TALONARIO REALCIONADO: `+talo
             await conn.query(sqlServicio,[currentDate,nextDate,id])
             if(parseInt(veh)) await conn.query(sqlTalo,[talo,id,veh,user,of,droga])

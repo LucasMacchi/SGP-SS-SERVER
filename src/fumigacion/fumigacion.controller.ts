@@ -55,14 +55,14 @@ export class FumigacionController {
     }
 
     @UseGuards(userGuard)
-    @Patch("serviciofumi/:id/:user/:veh/:talo/:droga")
-    realizarServicio (@Param('id') id:string,@Param('user') user:string,@Param('veh') veh:string,@Param('talo') talo:string,@Param('droga') droga:string) {
-        return this.FumigacionService.realizarServicio(id,user,veh,talo,false,droga)
+    @Patch("serviciofumi/:id/:user/:veh/:talo/:droga/:fecha")
+    realizarServicio (@Param('id') id:string,@Param('user') user:string,@Param('veh') veh:string,@Param('talo') talo:string,@Param('droga') droga:string,@Param('fecha') fecha:string) {
+        return this.FumigacionService.realizarServicio(id,user,veh,talo,false,droga,fecha)
     }
 
     @UseGuards(userGuard)
-    @Patch("serviciotq/:id/:user/:veh/:talo/:droga")
-    realizarServicioTq (@Param('id') id:string,@Param('user') user:string,@Param('veh') veh:string,@Param('talo') talo:string,@Param('droga') droga:string) {
-        return this.FumigacionService.realizarServicio(id,user,veh,talo,true,droga)
+    @Patch("serviciotq/:id/:user/:veh/:talo/:droga/:fecha")
+    realizarServicioTq (@Param('id') id:string,@Param('user') user:string,@Param('veh') veh:string,@Param('talo') talo:string,@Param('droga') droga:string,@Param('fecha') fecha:string) {
+        return this.FumigacionService.realizarServicio(id,user,veh,talo,true,droga,fecha)
     }
 }
