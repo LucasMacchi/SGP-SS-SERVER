@@ -137,7 +137,7 @@ export class Pedido {
         const user = filter.user_id ? ` and user_id = ${filter.user_id}` : ''
         const conn = clientReturner()
         await conn.connect()
-        const sql_pedidos = `select * from glpi_sgp_orders sgor where archive = false ${client}${service}${numero}${state}${dateStart}${dateEnd}${user} order by sgor.order_id asc ${limit};`
+        const sql_pedidos = `select * from glpi_sgp_orders sgor where archive = false ${client}${service}${numero}${state}${dateStart}${dateEnd}${user} order by sgor.order_id desc ${limit};`
         const rows = (await conn.query(sql_pedidos)).rows
         const sql_order_details = `select * from glpi_sgp_order_detail;`
         const rows1 = (await conn.query(sql_order_details)).rows
