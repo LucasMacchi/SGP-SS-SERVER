@@ -71,6 +71,11 @@ export class DataController {
     async collectionOrder(@Body() body: collectionOrderDto) {
         return this.DataProvider.collectionOrders(body)
     }
+    @UseGuards(userGuard)
+    @Get('sumatoria/:fecha1/:fecha2')
+    async sumatoriaInsumos(@Param('fecha1') date1: string, @Param('fecha2') date2: string) {
+        return this.DataProvider.insumosEnviadosTotales(date1, date2)
+    }
     @Post('collection/remito')
     async collectionRemitoOrder(@Body() body: collectionOrderDto) {
         return this.DataProvider.collectionRemito(body)
