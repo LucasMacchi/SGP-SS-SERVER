@@ -72,9 +72,24 @@ export class DataController {
         return this.DataProvider.collectionOrders(body)
     }
     @UseGuards(userGuard)
-    @Get('sumatoria/:fecha1/:fecha2')
+    @Get('sumatoria/entregados/:fecha1/:fecha2')
     async sumatoriaInsumos(@Param('fecha1') date1: string, @Param('fecha2') date2: string) {
-        return this.DataProvider.insumosEnviadosTotales(date1, date2)
+        return this.DataProvider.insumosEnviadosTotales(date1, date2,false)
+    }
+    @UseGuards(userGuard)
+    @Get('sumatoria/aprobados/:fecha1/:fecha2')
+    async sumatoriaInsumosAprobados(@Param('fecha1') date1: string, @Param('fecha2') date2: string) {
+        return this.DataProvider.insumosEnviadosTotales(date1, date2,true)
+    }
+    @UseGuards(userGuard)
+    @Get('sumatoriacco/entregados/:fecha1/:fecha2')
+    async sumatoriaInsumosCCO(@Param('fecha1') date1: string, @Param('fecha2') date2: string) {
+        return this.DataProvider.insumosEnviadosCco(date1, date2,false)
+    }
+    @UseGuards(userGuard)
+    @Get('sumatoriacco/aprobados/:fecha1/:fecha2')
+    async sumatoriaInsumosAprobadosCCO(@Param('fecha1') date1: string, @Param('fecha2') date2: string) {
+        return this.DataProvider.insumosEnviadosCco(date1, date2,true)
     }
     @Post('collection/remito')
     async collectionRemitoOrder(@Body() body: collectionOrderDto) {
