@@ -53,6 +53,11 @@ export interface IOrderRemito {
     insumos: IInsumo[]
 }
 
+export interface ISumatoriaInsumos {
+    insumo: string,
+    cantidad: number
+}
+
 export interface IDetalleEnvio {
   kilos: number,
   cajas: number,

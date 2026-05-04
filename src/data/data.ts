@@ -5,7 +5,7 @@ import categoriesJSON from './categories.json'
 import reportsErrorsJSON from './reports.json'
 import reportDto from 'src/dto/reportDto';
 import mailer from 'src/utils/mailer';
-import { IemailMsg, IInsumorRes, IOrderRemito } from 'src/utils/interfaces';
+import { IemailMsg, IInsumorRes, IOrderRemito, ISumatoriaInsumos } from 'src/utils/interfaces';
 import emailError from 'src/utils/emailError';
 //import personalDto from 'src/dto/personalDto';
 //import collectionOrder from 'src/dto/collectionOrder';
@@ -169,6 +169,18 @@ export class DataProvider {
         }
         return response
     }
+
+    //Devuelve los insumos que salieron en un rango de fechas
+    async insumosEnviadosTotales (date1:string,date2:string) {
+        const sql = `SELECT d.insumo_des as insumo, SUM(amount) as cantidad FROM public.glpi_sgp_orders o JOIN public.glpi_sgp_order_detail d ON d.order_id = o.order_id 
+        WHERE o.date_delivered >= $1 AND o.date_delivered <= $2 GROUP BY d.insumo_des;`
+        const conn = clientReturner()
+        await conn.connect()
+        const rows: ISumatoriaInsumos[] = (await conn.query(sql, [date1, date2])).rows
+        await conn.end()
+        return rows
+    }
+
     //Devuelve los pedidos de la coleccion proporcionada para despues imprimirlos en un remito
     async collectionRemito (collection: collectionOrderDto) {
         let orders = ``
