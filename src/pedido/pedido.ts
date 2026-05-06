@@ -411,7 +411,7 @@ export class Pedido {
     private returnProdCods = (prod: string): string => {
         const desP = prod.split("-")
         let cods = ""
-        console.log(desP.length)
+        if(desP.length < 5) console.log(desP)
         if(desP[0].length > 0) cods +=desP[0]
         if(desP[1].length > 0) cods +="-"+fillEmptyTxt(desP[1],6,false,false,true)
         if(desP[2].length > 0) cods +="-"+fillEmptyTxt(desP[2],6,false,false,true)
@@ -423,6 +423,7 @@ export class Pedido {
         let lineas: string [] = []
         const blank1 = [4,4,4,25,4,1]
         const blank2 = [26,3,4,25,4,25,6,40,15,15,15,20,50]
+        console.log(datos)
         start++
         let aux = datos[0].service_id
         for (let index = 0; index < datos.length; index++) {
