@@ -411,6 +411,7 @@ export class Pedido {
     private returnProdCods = (prod: string): string => {
         const desP = prod.split("-")
         let cods = ""
+        console.log(desP.length)
         if(desP[0].length > 0) cods +=desP[0]
         if(desP[1].length > 0) cods +="-"+fillEmptyTxt(desP[1],6,false,false,true)
         if(desP[2].length > 0) cods +="-"+fillEmptyTxt(desP[2],6,false,false,true)
