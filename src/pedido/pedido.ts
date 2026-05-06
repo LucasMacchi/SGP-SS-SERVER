@@ -60,7 +60,6 @@ export class Pedido {
     async postPedido (pedido: pedidoDto) {
         const conn = clientReturner()
         try {
-          console.log(pedido)
             await conn.connect()
             const endC = endCode()
             const clientIdCheck = pedido.client_id >= 1 ? pedido.client_id : 0
@@ -393,7 +392,6 @@ export class Pedido {
             if(i === 0) orders += `'${c}'`
             else orders += `,'${c}'`
         });
-        console.log(orders)
         const sqlPedidos = txtOrdersEnt(orders)
         const sqlStart = "select payload from glpi_sgp_config where config_id = 3;"
         try {
@@ -413,7 +411,6 @@ export class Pedido {
     private returnProdCods = (prod: string): string => {
         const desP = prod.split("-")
         let cods = ""
-        console.log(desP)
         if(desP[0].length > 0) cods +=desP[0]
         if(desP[1].length > 0) cods +="-"+fillEmptyTxt(desP[1],6,false,false,true)
         if(desP[2].length > 0) cods +="-"+fillEmptyTxt(desP[2],6,false,false,true)
